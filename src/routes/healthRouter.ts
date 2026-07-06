@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { HealthController } from "../controllers/healthController";
-import { HealthService } from "../services/healthService";
+import { HealthController } from "../controllers/healthController.js";
+import { HealthService } from "../services/healthService.js";
 
 const router = Router();
 const service = new HealthService();

@@ -1,4 +1,4 @@
-import type { HealthCheckResponse } from "../dto/healthdto";
+import type { HealthCheckResponse } from "../dto/healthDto.js";
 
 export class HealthService {
     async healthCheck(): Promise<HealthCheckResponse> {

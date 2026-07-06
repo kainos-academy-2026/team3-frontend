@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import type { HealthService } from "../services/healthService";
+import type { HealthService } from "../services/healthService.js";
 
 export class HealthController {
     constructor(private healthService: HealthService) { }
