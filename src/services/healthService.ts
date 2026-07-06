@@ -1,9 +1,6 @@
-export interface HealthCheckResponse {
-    status: string;
-    time: string;
-}
+import type { HealthCheckResponse } from "../dto/healthdto";
 
-export class JobApplicationService {
+export class HealthService {
     async healthCheck(): Promise<HealthCheckResponse> {
         return {
             status: "UP",

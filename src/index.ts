@@ -3,7 +3,7 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
  
-import jobApplicationRouter from "./routes/jobApplicationRouter";
+import jobApplicationRouter from "./routes/healthRouter";
  
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +22,7 @@ app.listen(PORT, () => {
 app.use(
   "/assets",
   express.static(
-    path.join(__dirname, "..", "node_modules", "govuk-frontend", "dist", "govuk", "assets")
+    path.join(__dirname, "..", "node_modules", "dist", "assets")
   )
 );
  
