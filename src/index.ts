@@ -18,3 +18,5 @@ app.get('/health', (req: express.Request, res: express.Response) => {
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
+
+export default app;
