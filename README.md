@@ -7,6 +7,7 @@ Before you start, make sure you have:
 
 - Node.js (recommended: version 20)
 - npm (comes with Node.js)
+
 You can check your versions with:
 
 ```bash
