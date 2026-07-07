@@ -89,4 +89,5 @@ The CI pipeline should use these core checks:
 - npm run build
 - npm run lint:ci
 - npm test
+
 These are the same checks used to validate pull requests before merge.
