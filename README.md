@@ -32,13 +32,12 @@ This starts the app in watch mode for local development.
 
 ### Production mode
 1. Build the project:
-```bash
-npm run build
-```
+
+        npm run build
+
 2. Start the built output:
-```bash
-npm run start
-```
+
+        npm run start
 ## Build
 To compile TypeScript into the dist folder:
 ```bash
