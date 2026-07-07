@@ -61,10 +61,8 @@ Run lint checks
 ```bash
 npm run lint
 ```
-Auto-fix lint/format issues
-```bash
-npm run lint:fix
-```
+Auto-fix lint/format issues (safe command)
+    npx biome check --write .
 CI lint check (no file changes)
 ```bash
 npm run lint:ci
