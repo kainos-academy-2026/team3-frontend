@@ -11,5 +11,10 @@ export interface JobRole {
 		bandName: string;
 	};
 	closingDate: string;
-	status: "Open" | "Closed";
+	status: JobRoleStatus;
+}
+
+export enum JobRoleStatus {
+    Open = "Open",
+    Closed = "Closed",
 }

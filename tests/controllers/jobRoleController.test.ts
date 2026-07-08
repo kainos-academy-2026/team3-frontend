@@ -10,6 +10,7 @@ const mockJobRoles = [
 		location: "Belfast",
 		capability: { capabilityId: 1, capabilityName: "Engineering" },
 		band: { bandId: 1, bandName: "Associate" },
+		status: "Open",
 	},
 ];
 

@@ -1,33 +1,27 @@
-import path from "node:path";
+import path from "path";
 import express from "express";
 import nunjucks from "nunjucks";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
 import jobRoleRoutes from "./routes/jobRoleRoutes.js";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-app.use("/", jobRoleRoutes);
 
 app.use(
 	"/assets",
 	express.static(
-		path.join(process.cwd(), "node_modules/govuk-frontend/dist/govuk/assets"),
-	),
-);
-
-app.use(
-	"/govuk",
-	express.static(
-		path.join(process.cwd(), "node_modules/govuk-frontend/dist/govuk"),
+		path.join(__dirname, "node_modules/govuk-frontend/dist/govuk/assets"),
 	),
 );
 
 nunjucks.configure(
 	[
-		path.join(process.cwd(), "src/views"),
-		path.join(process.cwd(), "node_modules/govuk-frontend/dist"),
+		path.join(__dirname, "views"),
+		path.join(__dirname, "node_modules/govuk-frontend/dist"),
 	],
 	{
 		autoescape: true,
@@ -44,5 +38,8 @@ app.get("/health", (_req: express.Request, res: express.Response) => {
 		time: new Date().toISOString(),
 	});
 });
+
+app.use(express.json());
+app.use("/", jobRoleRoutes);
 
 export default app;

@@ -3,7 +3,7 @@ import type { JobRole } from "../models/jobRole.js";
 
 export class JobRoleService {
 	async getAllJobRoles(): Promise<JobRole[]> {
-		const apiURL = process.env.BACKEND_API;
+		const apiURL = process.env.BACKEND_API + "/job-roles";
 
 		if (!apiURL) {
 			throw new Error("BACKEND_API environment variable is not defined");
