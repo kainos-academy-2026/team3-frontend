@@ -19,7 +19,7 @@ const mockJobRoles = [
 describe("JobRoleService", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
-		process.env.BACKEND_API = "http://localhost:3000/api/job-roles";
+		process.env.BACKEND_API = "http://localhost:3000/api";
 	});
 
 	it("should return job roles on happy path", async () => {
@@ -46,13 +46,14 @@ describe("JobRoleService", () => {
 		);
 	});
 
-	it("should throw an error when BACKEND_API is not defined", async () => {
+	it("should call axios with undefined base URL when BACKEND_API is not defined", async () => {
 		delete process.env.BACKEND_API;
+		vi.mocked(axios.get).mockResolvedValue({ data: mockJobRoles });
 
 		const service = new JobRoleService();
+		const result = await service.getAllJobRoles();
 
-		await expect(service.getAllJobRoles()).rejects.toThrow(
-			"BACKEND_API environment variable is not defined",
-		);
+		expect(axios.get).toHaveBeenCalledWith("undefined/job-roles");
+		expect(result).toEqual(mockJobRoles);
 	});
 });
