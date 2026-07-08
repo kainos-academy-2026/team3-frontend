@@ -2,10 +2,8 @@ import axios from "axios";
 import type { JobRole } from "../models/jobRole.js";
 
 export class JobRoleService {
-
 	async getAllJobRoles(): Promise<JobRole[]> {
-        
-        const apiURL = process.env.BACKEND_API;
+		const apiURL = process.env.BACKEND_API;
 
 		if (!apiURL) {
 			throw new Error("BACKEND_API environment variable is not defined");
