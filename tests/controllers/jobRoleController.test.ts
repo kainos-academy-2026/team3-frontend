@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { describe, expect, it, vi } from "vitest";
-import { JobRoleController } from "../../src/controllers/jobRoleController";
-import type { JobRoleService } from "../../src/services/jobRoleService";
+import { JobRoleController } from "../../src/controllers/jobRoleController.ts";
+import type { JobRoleService } from "../../src/services/jobRoleService.ts";
 
 const mockJobRoles = [
 	{

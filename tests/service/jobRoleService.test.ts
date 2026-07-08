@@ -1,6 +1,6 @@
 import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { JobRoleService } from "../../src/services/jobRoleService";
+import { JobRoleService } from "../../src/services/jobRoleService.ts";
 
 vi.mock("axios");
 
