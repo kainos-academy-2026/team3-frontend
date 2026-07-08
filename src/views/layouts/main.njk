@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" class="govuk-template">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}My Service{% endblock %} </title>
+<link rel="stylesheet" href="/govuk/govuk-frontend.min.css" >
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+</style>
+</head>
+<body class="govuk-template__body" style="margin: 0; padding: 0;">
+{% include "partials/header.njk" %}
+<main class="govuk-main-wrapper">
+{% block content %}{% endblock %}
+</main>
+{% include "partials/footer.njk" %}
+</body>
+</html>
