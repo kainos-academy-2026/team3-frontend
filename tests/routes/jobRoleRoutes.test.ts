@@ -21,7 +21,7 @@ describe("GET /job-roles route", () => {
 				band: { bandId: 1, bandName: "Associate" },
 				closingDate: "2026-12-31",
 				status: "Open",
-            }
+			},
 		]);
 
 		const response = await request(app).get("/job-roles");
