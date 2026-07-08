@@ -1,8 +1,8 @@
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../../src/app.ts";
-import * as jobRoleServiceModule from "../../src/services/jobRoleService.ts";
 import type { JobRoleStatus } from "../../src/models/jobRole.ts";
+import * as jobRoleServiceModule from "../../src/services/jobRoleService.ts";
 
 describe("GET /job-roles route", () => {
 	beforeEach(() => {

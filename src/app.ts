@@ -1,8 +1,7 @@
-import path from "path";
+import path, { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import express from "express";
 import nunjucks from "nunjucks";
-import { dirname } from "path";
-import { fileURLToPath } from "url";
 import jobRoleRoutes from "./routes/jobRoleRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
