@@ -1,6 +1,6 @@
 import axios from "axios";
 import dotenv from "dotenv";
-import type { JobRole } from "../models/jobRole";
+import type { JobRole } from "../models/jobRole.js";
 
 dotenv.config();
 

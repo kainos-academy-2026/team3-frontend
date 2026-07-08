@@ -1,7 +1,7 @@
 import path from "node:path";
 import express from "express";
 import nunjucks from "nunjucks";
-import jobRoleRoutes from "./routes/jobRoleRoutes";
+import jobRoleRoutes from "./routes/jobRoleRoutes.js";
 
 const app = express();
 
@@ -32,7 +32,7 @@ nunjucks.configure(
 	{
 		autoescape: true,
 		express: app,
-		noCache: true,
+		noCache: process.env.NODE_ENV !== "production",
 	},
 );
 

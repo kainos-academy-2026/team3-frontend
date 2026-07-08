@@ -20,8 +20,8 @@ describe("GET /job-roles route", () => {
 				capability: { capabilityId: 1, capabilityName: "Engineering" },
 				band: { bandId: 1, bandName: "Associate" },
 				closingDate: "2026-12-31",
-				openPositions: 2,
-			} as never,
+				status: "Open",
+            }
 		]);
 
 		const response = await request(app).get("/job-roles");
