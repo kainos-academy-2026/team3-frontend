@@ -3,6 +3,13 @@ import { describe, expect, it } from "vitest";
 import app from "../src/app.ts";
 
 describe("Express App", () => {
+	it("should render the home page on GET /", async () => {
+		const response = await request(app).get("/");
+
+		expect(response.status).toBe(200);
+		expect(response.headers["content-type"]).toContain("text/html");
+	});
+
 	it("should return 200 and UP status on happy path", async () => {
 		const response = await request(app).get("/health");
 
