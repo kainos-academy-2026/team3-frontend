@@ -1,0 +1,32 @@
+{% extends "layouts/main.njk" %}
+
+{% block content %}
+  <h1>Open Job Roles</h1>
+
+  {% if jobRoles and jobRoles.length > 0 %}
+    {% for role in jobRoles %}
+      <h2>{{ role.roleName }}</h2>
+
+      <dl>
+        <div>
+          <dt>Location:</dt>
+          <dd>{{ role.location }}</dd>
+        </div>
+        <div>
+          <dt>Capability:</dt>
+          <dd>{{ role.capability.capabilityName }}</dd>
+        </div>
+        <div>
+          <dt>Band:</dt>
+          <dd>{{ role.band.bandName }}</dd>
+        </div>
+        <div>
+          <dt>Closing date:</dt>
+          <dd>{{ role.closingDate }}</dd>
+        </div>
+      </dl>
+    {% endfor %}
+  {% else %}
+    <p>No open job roles found.</p>
+  {% endif %}
+{% endblock %}
