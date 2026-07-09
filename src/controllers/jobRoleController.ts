@@ -18,7 +18,7 @@ export class JobRoleController {
 	async getJobRoleById(req: Request, res: Response): Promise<void> {
 		const jobRoleId = Number(req.params.id);
 
-		if (Number.isNaN(jobRoleId)) {
+		if (!Number.isInteger(jobRoleId) || jobRoleId <= 0) {
 			res.status(400).send("Invalid job role ID");
 			return;
 		}
