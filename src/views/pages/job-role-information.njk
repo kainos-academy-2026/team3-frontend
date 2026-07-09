@@ -1,46 +1,55 @@
 {% extends "layouts/main.njk" %}
 
+{% block title %}Kainos Careers | {{ jobRole.roleName }}{% endblock %}
+
 {% block content %}
-  <h1>Job Role Information</h1>
+  <section class="roles-section role-details-section" aria-labelledby="job-role-heading">
+    <a class="role-details__back" href="/job-roles">Back to all job roles</a>
 
-  <h2>{{ jobRole.roleName }}</h2>
+    <article class="role-card role-details-card" aria-label="{{ jobRole.roleName }} role details">
+      <div class="role-card__header">
+        <p class="role-card__capability">{{ jobRole.capability.capabilityName }}</p>
+        <h1 id="job-role-heading">{{ jobRole.roleName }}</h1>
+      </div>
 
-  <dl>
-    <div>
-      <dt>Location:</dt>
-      <dd>{{ jobRole.location }}</dd>
-    </div>
-    <div>
-      <dt>Capability:</dt>
-      <dd>{{ jobRole.capability.capabilityName }}</dd>
-    </div>
-    <div>
-      <dt>Band:</dt>
-      <dd>{{ jobRole.band.bandName }}</dd>
-    </div>
-    <div>
-      <dt>Closing date:</dt>
-      <dd>{{ jobRole.closingDate }}</dd>
-    </div>
-    <div>
-      <dt>Status:</dt>
-      <dd>{{ jobRole.status }}</dd>
-    </div>
-    <div>
-      <dt>Description:</dt>
-      <dd>{{ jobRole.description }}</dd>
-    </div>
-    <div>
-      <dt>Responsibilities:</dt>
-      <dd>{{ jobRole.responsibilities }}</dd>
-    </div>
-    <div>
-      <dt>SharePoint URL:</dt>
-      <dd><a href="{{ jobRole.sharepointUrl }}">{{ jobRole.sharepointUrl }}</a></dd>
-    </div>
-    <div>
-      <dt>Number of Open Positions:</dt>
-      <dd>{{ jobRole.numberOfOpenPositions }}</dd>
-    </div>
-  </dl>
+      <dl class="role-card__details role-details__grid">
+        <div>
+          <dt>Location</dt>
+          <dd>{{ jobRole.location }}</dd>
+        </div>
+        <div>
+          <dt>Band</dt>
+          <dd>{{ jobRole.band.bandName }}</dd>
+        </div>
+        <div>
+          <dt>Closing date</dt>
+          <dd>{{ jobRole.closingDate }}</dd>
+        </div>
+        <div>
+          <dt>Status</dt>
+          <dd>{{ jobRole.status }}</dd>
+        </div>
+        <div>
+          <dt>Number of Open Positions</dt>
+          <dd>{{ jobRole.numberOfOpenPositions }}</dd>
+        </div>
+        <div class="role-details__full">
+          <dt>Description</dt>
+          <dd>{{ jobRole.description }}</dd>
+        </div>
+        <div class="role-details__full">
+          <dt>Responsibilities</dt>
+          <dd>{{ jobRole.responsibilities }}</dd>
+        </div>
+        <div class="role-details__full">
+          <dt>SharePoint URL</dt>
+          <dd>
+            <a class="role-details__link" href="{{ jobRole.sharepointUrl }}" target="_blank" rel="noopener noreferrer">
+              {{ jobRole.sharepointUrl }}
+            </a>
+          </dd>
+        </div>
+      </dl>
+    </article>
+  </section>
 {% endblock %}
