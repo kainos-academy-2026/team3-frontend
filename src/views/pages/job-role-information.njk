@@ -1,0 +1,46 @@
+{% extends "layouts/main.njk" %}
+
+{% block content %}
+  <h1>Job Role Information</h1>
+
+  <h2>{{ jobRole.roleName }}</h2>
+
+  <dl>
+    <div>
+      <dt>Location:</dt>
+      <dd>{{ jobRole.location }}</dd>
+    </div>
+    <div>
+      <dt>Capability:</dt>
+      <dd>{{ jobRole.capability.capabilityName }}</dd>
+    </div>
+    <div>
+      <dt>Band:</dt>
+      <dd>{{ jobRole.band.bandName }}</dd>
+    </div>
+    <div>
+      <dt>Closing date:</dt>
+      <dd>{{ jobRole.closingDate }}</dd>
+    </div>
+    <div>
+      <dt>Status:</dt>
+      <dd>{{ jobRole.status }}</dd>
+    </div>
+    <div>
+      <dt>Description:</dt>
+      <dd>{{ jobRole.description }}</dd>
+    </div>
+    <div>
+      <dt>Responsibilities:</dt>
+      <dd>{{ jobRole.responsibilities }}</dd>
+    </div>
+    <div>
+      <dt>SharePoint URL:</dt>
+      <dd><a href="{{ jobRole.sharepointUrl }}">{{ jobRole.sharepointUrl }}</a></dd>
+    </div>
+    <div>
+      <dt>Number of Open Positions:</dt>
+      <dd>{{ jobRole.numberOfOpenPositions }}</dd>
+    </div>
+  </dl>
+{% endblock %}

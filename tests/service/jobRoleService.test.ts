@@ -44,4 +44,34 @@ describe("JobRoleService", () => {
 		await expect(service.getAllJobRoles()).rejects.toThrow("Network error");
 		expect(apiClient.get).toHaveBeenCalledWith("/job-roles");
 	});
+
+	it("should return a job role by id on happy path", async () => {
+		const mockJobRole = {
+			id: 1,
+			roleName: "Software Engineer",
+			location: "Belfast",
+			capability: { capabilityId: 1, capabilityName: "Engineering" },
+			band: { bandId: 1, bandName: "Associate" },
+			closingDate: "2026-12-31",
+			status: "Open",
+		};
+
+		vi.mocked(apiClient.get).mockResolvedValue({ data: mockJobRole });
+
+		const service = new JobRoleService();
+		const result = await service.getJobRoleById(1);
+
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/1");
+		expect(result).toEqual(mockJobRole);
+	});
+
+	it("should throw an error when get by id fails", async () => {
+		const error = new Error("Network error");
+		vi.mocked(apiClient.get).mockRejectedValue(error);
+
+		const service = new JobRoleService();
+
+		await expect(service.getJobRoleById(1)).rejects.toThrow("Network error");
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/1");
+	});
 });
