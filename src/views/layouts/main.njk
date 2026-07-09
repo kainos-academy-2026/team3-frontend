@@ -1,18 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Kainos job application{% endblock %} </title>
-<style>
-  body { margin: 0; padding: 0; }
-</style>
-</head>
-<body style="margin: 0; padding: 0;">
-{% include "partials/header.njk" %}
-<main>
-{% block content %}{% endblock %}
-</main>
-{% include "partials/footer.njk" %}
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Kainos job application{% endblock %}</title>
+    <link rel="icon" type="image/png" href="/assets/favicons/kainos-mark.png" />
+    <link rel="stylesheet" href="/assets/styles/branding.css" />
+  </head>
+  <body>
+    {% include "partials/header.njk" %}
+    <main class="page-shell">
+      {% block content %}{% endblock %}
+    </main>
+    {% include "partials/footer.njk" %}
+  </body>
 </html>

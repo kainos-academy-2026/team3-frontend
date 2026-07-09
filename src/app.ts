@@ -7,14 +7,12 @@ import jobRoleRoutes from "./routes/jobRoleRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const publicAssetsPath = path.join(__dirname, "..", "public", "assets");
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-	"/assets",
-	express.static(path.join(__dirname, "..", "node_modules", "dist", "assets")),
-);
+app.use("/assets", express.static(publicAssetsPath));
 
 nunjucks.configure([path.join(__dirname, "views")], {
 	autoescape: true,
@@ -23,6 +21,10 @@ nunjucks.configure([path.join(__dirname, "views")], {
 });
 
 app.set("view engine", "njk");
+
+app.get("/", (_req: express.Request, res: express.Response) => {
+	res.render("pages/home.njk");
+});
 
 app.get("/health", (_req: express.Request, res: express.Response) => {
 	res.status(200).json({
