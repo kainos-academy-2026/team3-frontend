@@ -26,5 +26,21 @@
       <dt>Status:</dt>
       <dd>{{ jobRole.status }}</dd>
     </div>
+    <div>
+      <dt>Description:</dt>
+      <dd>{{ jobRole.description }}</dd>
+    </div>
+    <div>
+      <dt>Responsibilities:</dt>
+      <dd>{{ jobRole.responsibilities }}</dd>
+    </div>
+    <div>
+      <dt>SharePoint URL:</dt>
+      <dd><a href="{{ jobRole.sharepointUrl }}">{{ jobRole.sharepointUrl }}</a></dd>
+    </div>
+    <div>
+      <dt>Number of Open Positions:</dt>
+      <dd>{{ jobRole.numberOfOpenPositions }}</dd>
+    </div>
   </dl>
 {% endblock %}

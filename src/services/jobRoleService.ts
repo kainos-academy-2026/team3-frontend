@@ -1,5 +1,5 @@
 import apiClient from "../config/apiClient.js";
-import type { JobRole } from "../models/jobRole.js";
+import type { JobRole, JobRoleInformation } from "../models/jobRole.js";
 
 export class JobRoleService {
 	async getAllJobRoles(): Promise<JobRole[]> {
@@ -12,9 +12,11 @@ export class JobRoleService {
 		}
 	}
 
-	async getJobRoleById(id: number): Promise<JobRole> {
+	async getJobRoleById(id: number): Promise<JobRoleInformation> {
 		try {
-			const response = await apiClient.get<JobRole>(`/job-roles/${id}`);
+			const response = await apiClient.get<JobRoleInformation>(
+				`/job-roles/${id}`,
+			);
 			return response.data;
 		} catch (error) {
 			console.error(`Failed to fetch job role with id ${id}:`, error);
