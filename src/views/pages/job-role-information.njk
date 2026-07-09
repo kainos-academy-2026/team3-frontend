@@ -1,0 +1,30 @@
+{% extends "layouts/main.njk" %}
+
+{% block content %}
+  <h1>Job Role Information</h1>
+
+  <h2>{{ jobRole.roleName }}</h2>
+
+  <dl>
+    <div>
+      <dt>Location:</dt>
+      <dd>{{ jobRole.location }}</dd>
+    </div>
+    <div>
+      <dt>Capability:</dt>
+      <dd>{{ jobRole.capability.capabilityName }}</dd>
+    </div>
+    <div>
+      <dt>Band:</dt>
+      <dd>{{ jobRole.band.bandName }}</dd>
+    </div>
+    <div>
+      <dt>Closing date:</dt>
+      <dd>{{ jobRole.closingDate }}</dd>
+    </div>
+    <div>
+      <dt>Status:</dt>
+      <dd>{{ jobRole.status }}</dd>
+    </div>
+  </dl>
+{% endblock %}

@@ -11,4 +11,14 @@ export class JobRoleService {
 			throw error;
 		}
 	}
+
+	async getJobRoleById(id: number): Promise<JobRole> {
+		try {
+			const response = await apiClient.get<JobRole>(`/job-roles/${id}`);
+			return response.data;
+		} catch (error) {
+			console.error(`Failed to fetch job role with id ${id}:`, error);
+			throw error;
+		}
+	}
 }

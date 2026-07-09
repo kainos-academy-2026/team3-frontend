@@ -54,4 +54,48 @@ describe("JobRoleController", () => {
 		expect(res.status).toHaveBeenCalledWith(500);
 		expect(res.send).toHaveBeenCalledWith("Internal Server Error");
 	});
+
+	it("should render job role information on happy path", async () => {
+		const mockJobRole = {
+			id: 1,
+			roleName: "Software Engineer",
+			location: "Belfast",
+			capability: { capabilityId: 1, capabilityName: "Engineering" },
+			band: { bandId: 1, bandName: "Associate" },
+			closingDate: "2026-12-31",
+			status: "Open",
+		};
+
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRole),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = { params: { id: "1" } } as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(mockService.getJobRoleById).toHaveBeenCalledWith(1);
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
+			jobRole: mockJobRole,
+		});
+	});
+
+	it("should return 400 when id is invalid", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn(),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = { params: { id: "abc" } } as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
+	});
 });
