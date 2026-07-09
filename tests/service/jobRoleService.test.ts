@@ -1,8 +1,12 @@
-import axios from "axios";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import apiClient from "../../src/config/apiClient.ts";
 import { JobRoleService } from "../../src/services/jobRoleService.ts";
 
-vi.mock("axios");
+vi.mock("../../src/config/apiClient.ts", () => ({
+	default: {
+		get: vi.fn(),
+	},
+}));
 
 const mockJobRoles = [
 	{
@@ -18,42 +22,26 @@ const mockJobRoles = [
 
 describe("JobRoleService", () => {
 	beforeEach(() => {
-		vi.clearAllMocks();
-		process.env.BACKEND_API = "http://localhost:3000/api";
+		vi.resetAllMocks();
 	});
 
 	it("should return job roles on happy path", async () => {
-		vi.mocked(axios.get).mockResolvedValue({ data: mockJobRoles });
+		vi.mocked(apiClient.get).mockResolvedValue({ data: mockJobRoles });
 
 		const service = new JobRoleService();
 		const result = await service.getAllJobRoles();
 
-		expect(axios.get).toHaveBeenCalledWith(
-			"http://localhost:3000/api/job-roles",
-		);
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles");
 		expect(result).toEqual(mockJobRoles);
 	});
 
 	it("should throw an error when axios fails", async () => {
 		const error = new Error("Network error");
-		vi.mocked(axios.get).mockRejectedValue(error);
+		vi.mocked(apiClient.get).mockRejectedValue(error);
 
 		const service = new JobRoleService();
 
 		await expect(service.getAllJobRoles()).rejects.toThrow("Network error");
-		expect(axios.get).toHaveBeenCalledWith(
-			"http://localhost:3000/api/job-roles",
-		);
-	});
-
-	it("should call axios with undefined base URL when BACKEND_API is not defined", async () => {
-		delete process.env.BACKEND_API;
-		vi.mocked(axios.get).mockResolvedValue({ data: mockJobRoles });
-
-		const service = new JobRoleService();
-		const result = await service.getAllJobRoles();
-
-		expect(axios.get).toHaveBeenCalledWith("undefined/job-roles");
-		expect(result).toEqual(mockJobRoles);
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles");
 	});
 });

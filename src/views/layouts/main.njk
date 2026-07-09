@@ -1,17 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" class="govuk-template">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}Kainos job application{% endblock %} </title>
-<link rel="stylesheet" href="/govuk/govuk-frontend.min.css" >
 <style>
   body { margin: 0; padding: 0; }
 </style>
 </head>
-<body class="govuk-template__body" style="margin: 0; padding: 0;">
+<body style="margin: 0; padding: 0;">
 {% include "partials/header.njk" %}
-<main class="govuk-main-wrapper">
+<main>
 {% block content %}{% endblock %}
 </main>
 {% include "partials/footer.njk" %}

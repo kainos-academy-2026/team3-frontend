@@ -1,32 +1,32 @@
 {% extends "layouts/main.njk" %}
 
 {% block content %}
-  <h1 class="govuk-heading-l">Open Job Roles</h1>
+  <h1>Open Job Roles</h1>
 
   {% if jobRoles and jobRoles.length > 0 %}
     {% for role in jobRoles %}
-      <h2 class="govuk-heading-m govuk-!-margin-bottom-2">{{ role.roleName }}</h2>
+      <h2>{{ role.roleName }}</h2>
 
-      <dl class="govuk-summary-list govuk-!-margin-bottom-6">
-        <div class="govuk-summary-list__row">
-          <dt class="govuk-summary-list__key">Location:</dt>
-          <dd class="govuk-summary-list__value">{{ role.location }}</dd>
+      <dl>
+        <div>
+          <dt>Location:</dt>
+          <dd>{{ role.location }}</dd>
         </div>
-        <div class="govuk-summary-list__row">
-          <dt class="govuk-summary-list__key">Capability:</dt>
-          <dd class="govuk-summary-list__value">{{ role.capability.capabilityName }}</dd>
+        <div>
+          <dt>Capability:</dt>
+          <dd>{{ role.capability.capabilityName }}</dd>
         </div>
-        <div class="govuk-summary-list__row">
-          <dt class="govuk-summary-list__key">Band:</dt>
-          <dd class="govuk-summary-list__value">{{ role.band.bandName }}</dd>
+        <div>
+          <dt>Band:</dt>
+          <dd>{{ role.band.bandName }}</dd>
         </div>
-        <div class="govuk-summary-list__row">
-          <dt class="govuk-summary-list__key">Closing date:</dt>
-          <dd class="govuk-summary-list__value">{{ role.closingDate }}</dd>
+        <div>
+          <dt>Closing date:</dt>
+          <dd>{{ role.closingDate }}</dd>
         </div>
       </dl>
     {% endfor %}
   {% else %}
-    <p class="govuk-body">No open job roles found.</p>
+    <p>No open job roles found.</p>
   {% endif %}
 {% endblock %}

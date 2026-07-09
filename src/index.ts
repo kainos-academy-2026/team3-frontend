@@ -5,6 +5,10 @@ dotenv.config();
 
 const PORT = Number(process.env.PORT) || 3000;
 
+if (!process.env.BACKEND_API) {
+	throw new Error("BACKEND_API environment variable is not defined");
+}
+
 app.listen(PORT, () => {
-	console.log(`Server running at http://localhost:${PORT}`);
+	console.log(`Frontend server running at http://localhost:${PORT}`);
 });
