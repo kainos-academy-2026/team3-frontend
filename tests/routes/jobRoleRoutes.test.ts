@@ -7,6 +7,17 @@ import {
 } from "../../src/models/jobRole.ts";
 import * as jobRoleServiceModule from "../../src/services/jobRoleService.ts";
 
+vi.mock("../../src/middleware/authMiddleware.js", () => ({
+	requireAuth: (
+		req: { session: { jwtToken?: string } },
+		_res: unknown,
+		next: () => void,
+	) => {
+		req.session.jwtToken = "mock-token";
+		next();
+	},
+}));
+
 const mockJobRoleInformation: JobRoleInformation = {
 	id: 1,
 	roleName: "Software Engineer",

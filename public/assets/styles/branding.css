@@ -441,6 +441,11 @@ img {
 	background: var(--kainos-navy-deep);
 }
 
+/* Header auth button alignment */
+.site-header .btn-primary {
+	margin-top: 0;
+}
+
 /* Responsive */
 @media (max-width: 800px) {
 	.site-header__inner,

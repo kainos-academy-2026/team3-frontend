@@ -2,9 +2,11 @@ import apiClient from "../config/apiClient.js";
 import type { JobRole, JobRoleInformation } from "../models/jobRole.js";
 
 export class JobRoleService {
-	async getAllJobRoles(): Promise<JobRole[]> {
+	async getAllJobRoles(token: string): Promise<JobRole[]> {
 		try {
-			const response = await apiClient.get<JobRole[]>("/job-roles");
+			const response = await apiClient.get<JobRole[]>("/job-roles", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			return response.data;
 		} catch (error) {
 			console.error("Failed to fetch job roles:", error);
@@ -12,10 +14,13 @@ export class JobRoleService {
 		}
 	}
 
-	async getJobRoleById(id: number): Promise<JobRoleInformation> {
+	async getJobRoleById(id: number, token: string): Promise<JobRoleInformation> {
 		try {
 			const response = await apiClient.get<JobRoleInformation>(
 				`/job-roles/${id}`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
 			);
 			return response.data;
 		} catch (error) {
