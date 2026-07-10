@@ -69,7 +69,10 @@ describe("GET /job-roles routes", () => {
 		const response = await request(app).get("/job-roles");
 
 		expect(response.status).toBe(500);
-		expect(response.text).toContain("Internal Server Error");
+		expect(response.text).toContain("Unable to load job roles");
+		expect(response.text).toContain(
+			"We could not fetch job roles right now. Please try again shortly.",
+		);
 	});
 
 	it("should return 200 and render html for GET /job-roles/:id", async () => {

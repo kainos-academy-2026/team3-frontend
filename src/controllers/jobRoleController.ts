@@ -17,7 +17,12 @@ export class JobRoleController {
 			res.render("pages/job-role-list.njk", { jobRoles });
 		} catch (error) {
 			console.error("Failed to get job roles:", error);
-			res.status(500).send("Internal Server Error");
+			res.status(500).render("pages/job-role-list.njk", {
+				jobRoles: [],
+				errorTitle: "Unable to load job roles",
+				errorMessage:
+					"We could not fetch job roles right now. Please try again shortly.",
+			});
 		}
 	}
 

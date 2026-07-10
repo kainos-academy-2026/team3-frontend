@@ -73,7 +73,12 @@ describe("JobRoleController", () => {
 		await controller.getAllJobRoles(req, res);
 
 		expect(res.status).toHaveBeenCalledWith(500);
-		expect(res.send).toHaveBeenCalledWith("Internal Server Error");
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
+			jobRoles: [],
+			errorTitle: "Unable to load job roles",
+			errorMessage:
+				"We could not fetch job roles right now. Please try again shortly.",
+		});
 	});
 
 	it("should redirect to login when token is missing for list route", async () => {
