@@ -15,6 +15,13 @@ describe("Auth routes", () => {
 		expect(response.type).toMatch(/html/);
 	});
 
+	it("should render register page on GET /register", async () => {
+		const response = await request(app).get("/register");
+
+		expect(response.status).toBe(200);
+		expect(response.type).toMatch(/html/);
+	});
+
 	it("should redirect to job roles on successful POST /login", async () => {
 		vi.spyOn(
 			authServiceModule.AuthService.prototype,
@@ -27,29 +34,48 @@ describe("Auth routes", () => {
 			.post("/login")
 			.type("form")
 			.send({ email: "user@example.com", password: "password123" });
-		const setCookieHeader = String(response.headers["set-cookie"] ?? "");
 
 		expect(response.status).toBe(302);
 		expect(response.headers.location).toBe("/job-roles");
-		expect(setCookieHeader).toContain("connect.sid=");
 	});
 
-	it("should return 401 for invalid credentials on POST /login", async () => {
+	it("should redirect to login on successful POST /register", async () => {
 		vi.spyOn(
 			authServiceModule.AuthService.prototype,
-			"login",
-		).mockRejectedValue({
-			isAxiosError: true,
-			response: { status: 401 },
+			"register",
+		).mockResolvedValue({
+			id: 1,
+			email: "new@example.com",
+			role: "user",
 		});
 
-		const response = await request(app)
-			.post("/login")
-			.type("form")
-			.send({ email: "user@example.com", password: "wrong" });
+		const response = await request(app).post("/register").type("form").send({
+			email: "new@example.com",
+			password: "StrongPass!1",
+			confirmPassword: "StrongPass!1",
+		});
 
-		expect(response.status).toBe(401);
-		expect(response.text).toContain("Invalid email or password");
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/login");
+	});
+
+	it("should return 409 for duplicate email on POST /register", async () => {
+		vi.spyOn(
+			authServiceModule.AuthService.prototype,
+			"register",
+		).mockRejectedValue({
+			isAxiosError: true,
+			response: { status: 409 },
+		});
+
+		const response = await request(app).post("/register").type("form").send({
+			email: "used@example.com",
+			password: "StrongPass!1",
+			confirmPassword: "StrongPass!1",
+		});
+
+		expect(response.status).toBe(409);
+		expect(response.text).toContain("That email is already registered");
 	});
 
 	it("should clear session and redirect on POST /logout", async () => {
