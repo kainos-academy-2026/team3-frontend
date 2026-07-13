@@ -11,6 +11,7 @@
 		"test": "vitest run",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",
+		"format": "biome format --write .",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write",
 		"lint:ci": "biome ci ."
@@ -32,12 +33,14 @@
 		"axios": "^1.18.1",
 		"dotenv": "^17.4.2",
 		"express": "^5.2.1",
+		"express-session": "^1.19.0",
 		"nunjucks": "^3.2.4"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.2",
 		"@types/axios": "^0.9.36",
 		"@types/express": "^5.0.6",
+		"@types/express-session": "^1.19.0",
 		"@types/node": "^26.1.0",
 		"@types/nunjucks": "^3.2.6",
 		"@types/supertest": "^7.2.0",

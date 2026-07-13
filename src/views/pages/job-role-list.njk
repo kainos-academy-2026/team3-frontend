@@ -8,7 +8,12 @@
       <h1 id="roles-list-heading">Current opportunities</h1>
     </div>
 
-    {% if jobRoles and jobRoles.length > 0 %}
+    {% if errorMessage %}
+      <div class="empty-state" role="alert" aria-live="polite">
+        <h2>{{ errorTitle or "Unable to load job roles" }}</h2>
+        <p>{{ errorMessage }}</p>
+      </div>
+    {% elif jobRoles and jobRoles.length > 0 %}
       <div class="roles-grid">
         {% for role in jobRoles %}
           <a href="/job-roles/{{ role.id }}" aria-label="View {{ role.roleName }} role details">

@@ -25,13 +25,17 @@ describe("JobRoleService", () => {
 		vi.resetAllMocks();
 	});
 
+	const token = "mock-token";
+
 	it("should return job roles on happy path", async () => {
 		vi.mocked(apiClient.get).mockResolvedValue({ data: mockJobRoles });
 
 		const service = new JobRoleService();
-		const result = await service.getAllJobRoles();
+		const result = await service.getAllJobRoles(token);
 
-		expect(apiClient.get).toHaveBeenCalledWith("/job-roles");
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles", {
+			headers: { Authorization: `Bearer ${token}` },
+		});
 		expect(result).toEqual(mockJobRoles);
 	});
 
@@ -41,8 +45,52 @@ describe("JobRoleService", () => {
 
 		const service = new JobRoleService();
 
-		await expect(service.getAllJobRoles()).rejects.toThrow("Network error");
-		expect(apiClient.get).toHaveBeenCalledWith("/job-roles");
+		await expect(service.getAllJobRoles(token)).rejects.toThrow(
+			"Network error",
+		);
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles", {
+			headers: { Authorization: `Bearer ${token}` },
+		});
+	});
+
+	it("should log axios metadata when getAllJobRoles fails with axios error", async () => {
+		const consoleErrorSpy = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+
+		const axiosError = {
+			isAxiosError: true,
+			response: {
+				status: 503,
+				statusText: "Service Unavailable",
+			},
+			config: {
+				method: "get",
+				url: "/job-roles",
+			},
+			code: "ERR_BAD_RESPONSE",
+			message: "Request failed with status code 503",
+		};
+
+		vi.mocked(apiClient.get).mockRejectedValue(axiosError);
+
+		const service = new JobRoleService();
+
+		await expect(service.getAllJobRoles(token)).rejects.toBe(axiosError);
+		expect(consoleErrorSpy).toHaveBeenCalledWith(
+			"Failed to fetch job roles",
+			expect.objectContaining({
+				endpoint: "/job-roles",
+				status: 503,
+				statusText: "Service Unavailable",
+				method: "GET",
+				url: "/job-roles",
+				code: "ERR_BAD_RESPONSE",
+				message: "Request failed with status code 503",
+			}),
+		);
+
+		consoleErrorSpy.mockRestore();
 	});
 
 	it("should return a job role by id on happy path", async () => {
@@ -59,9 +107,11 @@ describe("JobRoleService", () => {
 		vi.mocked(apiClient.get).mockResolvedValue({ data: mockJobRole });
 
 		const service = new JobRoleService();
-		const result = await service.getJobRoleById(1);
+		const result = await service.getJobRoleById(1, token);
 
-		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/1");
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/1", {
+			headers: { Authorization: `Bearer ${token}` },
+		});
 		expect(result).toEqual(mockJobRole);
 	});
 
@@ -71,7 +121,33 @@ describe("JobRoleService", () => {
 
 		const service = new JobRoleService();
 
-		await expect(service.getJobRoleById(1)).rejects.toThrow("Network error");
-		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/1");
+		await expect(service.getJobRoleById(1, token)).rejects.toThrow(
+			"Network error",
+		);
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/1", {
+			headers: { Authorization: `Bearer ${token}` },
+		});
+	});
+
+	it("should log unknown error payload when getJobRoleById fails with non-Error", async () => {
+		const consoleErrorSpy = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => undefined);
+
+		vi.mocked(apiClient.get).mockRejectedValue("boom");
+
+		const service = new JobRoleService();
+
+		await expect(service.getJobRoleById(1, token)).rejects.toBe("boom");
+		expect(consoleErrorSpy).toHaveBeenCalledWith(
+			"Failed to fetch job role by id",
+			expect.objectContaining({
+				endpoint: "/job-roles/1",
+				jobRoleId: 1,
+				error: "boom",
+			}),
+		);
+
+		consoleErrorSpy.mockRestore();
 	});
 });

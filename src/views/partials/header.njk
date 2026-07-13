@@ -2,11 +2,15 @@
   <div class="site-header__bar"></div>
   <div class="site-header__inner">
     <a class="brand" href="/" aria-label="Kainos job roles home">
-      <img
-        class="brand__logo"
-        src="/assets/logos/kainos-logo.png"
-        alt="Kainos"
-      >
+      <img class="brand__logo" src="/assets/logos/kainos-logo.png" alt="Kainos">
     </a>
+
+    {% if isAuthenticated %}
+      <form action="/logout" method="post">
+        <button type="submit" class="btn-primary">Log out</button>
+      </form>
+    {% else %}
+      <a href="/login" class="btn-primary">Sign in</a>
+    {% endif %}
   </div>
 </header>

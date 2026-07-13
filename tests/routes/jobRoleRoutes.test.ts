@@ -7,6 +7,17 @@ import {
 } from "../../src/models/jobRole.ts";
 import * as jobRoleServiceModule from "../../src/services/jobRoleService.ts";
 
+vi.mock("../../src/middleware/authMiddleware.js", () => ({
+	requireAuth: (
+		req: { session: { jwtToken?: string } },
+		_res: unknown,
+		next: () => void,
+	) => {
+		req.session.jwtToken = "mock-token";
+		next();
+	},
+}));
+
 const mockJobRoleInformation: JobRoleInformation = {
 	id: 1,
 	roleName: "Software Engineer",
@@ -58,7 +69,10 @@ describe("GET /job-roles routes", () => {
 		const response = await request(app).get("/job-roles");
 
 		expect(response.status).toBe(500);
-		expect(response.text).toContain("Internal Server Error");
+		expect(response.text).toContain("Unable to load job roles");
+		expect(response.text).toContain(
+			"We could not fetch job roles right now. Please try again shortly.",
+		);
 	});
 
 	it("should return 200 and render html for GET /job-roles/:id", async () => {

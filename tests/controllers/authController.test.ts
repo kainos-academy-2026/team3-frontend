@@ -1,0 +1,149 @@
+import type { Request, Response } from "express";
+import { describe, expect, it, vi } from "vitest";
+import { AuthController } from "../../src/controllers/authController.ts";
+import type { AuthService } from "../../src/services/authService.ts";
+
+const mockRes = () => {
+	const res = {} as Response;
+	res.render = vi.fn();
+	res.status = vi.fn().mockReturnValue(res);
+	res.send = vi.fn().mockReturnValue(res);
+	res.redirect = vi.fn().mockReturnValue(res);
+	res.clearCookie = vi.fn().mockReturnValue(res);
+	return res;
+};
+
+describe("AuthController", () => {
+	it("should render login page", () => {
+		const service = {} as AuthService;
+		const controller = new AuthController(service);
+		const req = {} as Request;
+		const res = mockRes();
+
+		controller.getSignInPage(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
+			error: null,
+		});
+	});
+
+	it("should return 400 when email or password missing", async () => {
+		const service = {
+			login: vi.fn(),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: { email: "user@example.com" },
+			session: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.signIn(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
+			error: "Email and password are required.",
+		});
+	});
+
+	it("should store token in session and redirect on successful login", async () => {
+		const service = {
+			login: vi.fn().mockResolvedValue({ token: "mock-jwt" }),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: { email: "user@example.com", password: "password123" },
+			session: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.signIn(req, res);
+
+		expect(service.login).toHaveBeenCalledWith(
+			"user@example.com",
+			"password123",
+		);
+		expect((req.session as { jwtToken?: string }).jwtToken).toBe("mock-jwt");
+		expect(res.redirect).toHaveBeenCalledWith("/job-roles");
+	});
+
+	it("should return 401 when backend rejects credentials", async () => {
+		const service = {
+			login: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 401 },
+			}),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: { email: "user@example.com", password: "wrong" },
+			session: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.signIn(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(401);
+		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
+			error: "Invalid email or password.",
+		});
+	});
+
+	it("should return 500 when login throws unexpected error", async () => {
+		const service = {
+			login: vi.fn().mockRejectedValue(new Error("Unexpected failure")),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: { email: "user@example.com", password: "password123" },
+			session: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.signIn(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(500);
+		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
+			error: "Unable to sign in right now.",
+		});
+	});
+
+	it("should clear cookie and redirect on successful logout", () => {
+		const service = {} as AuthService;
+		const controller = new AuthController(service);
+
+		const destroy = vi.fn((cb: (err?: unknown) => void) => cb());
+		const req = {
+			session: { destroy },
+		} as unknown as Request;
+		const res = mockRes();
+
+		controller.signOut(req, res);
+
+		expect(destroy).toHaveBeenCalled();
+		expect(res.clearCookie).toHaveBeenCalledWith("connect.sid");
+		expect(res.redirect).toHaveBeenCalledWith("/");
+	});
+
+	it("should return 500 when logout destroy fails", () => {
+		const service = {} as AuthService;
+		const controller = new AuthController(service);
+
+		const destroy = vi.fn((cb: (err?: unknown) => void) =>
+			cb(new Error("fail")),
+		);
+		const req = {
+			session: { destroy },
+		} as unknown as Request;
+		const res = mockRes();
+
+		controller.signOut(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(500);
+		expect(res.send).toHaveBeenCalledWith("Unable to log out");
+	});
+});

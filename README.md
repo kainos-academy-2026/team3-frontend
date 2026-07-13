@@ -80,6 +80,7 @@ This frontend app does not manage a database schema, so migration commands are o
 - Test: npm test
 - Test UI: npm run test:ui
 - Coverage: npm run test:coverage
+- Format: npm run format
 - Lint: npm run lint
 - Lint fix: npm run lint:fix
 - Lint CI: npm run lint:ci

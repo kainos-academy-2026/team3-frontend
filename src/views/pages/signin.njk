@@ -1,0 +1,26 @@
+{% extends "layouts/main.njk" %}
+
+{% block title %}Kainos Careers | Sign In{% endblock %}
+
+{% block content %}
+  <section class="hero" aria-labelledby="signin-heading">
+    <div class="hero__content" style="max-width: 520px;">
+      <p class="hero__eyebrow">Secure Access</p>
+      <h1 id="signin-heading" class="home-heading">Sign in</h1>
+
+      {% if error %}
+        <p style="color:#b42318; font-weight:700;">{{ error }}</p>
+      {% endif %}
+
+      <form action="/login" method="post" style="display:grid; gap:1rem; margin-top:1rem;">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required autocomplete="email" />
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" />
+
+        <button type="submit" class="btn-primary">Sign in</button>
+      </form>
+    </div>
+  </section>
+{% endblock %}

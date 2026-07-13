@@ -23,6 +23,7 @@ const mockRes = () => {
 	res.render = vi.fn();
 	res.status = vi.fn().mockReturnValue(res);
 	res.send = vi.fn().mockReturnValue(res);
+	res.redirect = vi.fn().mockReturnValue(res);
 	return res;
 };
 
@@ -41,18 +42,20 @@ const mockJobRoleInformation: JobRoleInformation = {
 };
 
 describe("JobRoleController", () => {
+	const token = "mock-token";
+
 	it("should render job roles on happy path", async () => {
 		const mockService = {
 			getAllJobRoles: vi.fn().mockResolvedValue(mockJobRoles),
 		} as unknown as JobRoleService;
 
 		const controller = new JobRoleController(mockService);
-		const req = {} as Request;
+		const req = { session: { jwtToken: token } } as unknown as Request;
 		const res = mockRes();
 
 		await controller.getAllJobRoles(req, res);
 
-		expect(mockService.getAllJobRoles).toHaveBeenCalledOnce();
+		expect(mockService.getAllJobRoles).toHaveBeenCalledWith(token);
 		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
 			jobRoles: mockJobRoles,
 		});
@@ -64,13 +67,33 @@ describe("JobRoleController", () => {
 		} as unknown as JobRoleService;
 
 		const controller = new JobRoleController(mockService);
-		const req = {} as Request;
+		const req = { session: { jwtToken: token } } as unknown as Request;
 		const res = mockRes();
 
 		await controller.getAllJobRoles(req, res);
 
 		expect(res.status).toHaveBeenCalledWith(500);
-		expect(res.send).toHaveBeenCalledWith("Internal Server Error");
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
+			jobRoles: [],
+			errorTitle: "Unable to load job roles",
+			errorMessage:
+				"We could not fetch job roles right now. Please try again shortly.",
+		});
+	});
+
+	it("should redirect to login when token is missing for list route", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = { session: {} } as unknown as Request;
+		const res = mockRes();
+
+		await controller.getAllJobRoles(req, res);
+
+		expect(res.redirect).toHaveBeenCalledWith("/login");
+		expect(mockService.getAllJobRoles).not.toHaveBeenCalled();
 	});
 
 	it("should render job role information on happy path", async () => {
@@ -80,12 +103,15 @@ describe("JobRoleController", () => {
 		} as unknown as JobRoleService;
 
 		const controller = new JobRoleController(mockService);
-		const req = { params: { id: "1" } } as unknown as Request;
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+		} as unknown as Request;
 		const res = mockRes();
 
 		await controller.getJobRoleById(req, res);
 
-		expect(mockService.getJobRoleById).toHaveBeenCalledWith(1);
+		expect(mockService.getJobRoleById).toHaveBeenCalledWith(1, token);
 		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
 			jobRole: mockJobRoleInformation,
 		});
@@ -98,12 +124,75 @@ describe("JobRoleController", () => {
 		} as unknown as JobRoleService;
 
 		const controller = new JobRoleController(mockService);
-		const req = { params: { id: "abc" } } as unknown as Request;
+		const req = {
+			params: { id: "abc" },
+			session: { jwtToken: token },
+		} as unknown as Request;
 		const res = mockRes();
 
 		await controller.getJobRoleById(req, res);
 
 		expect(res.status).toHaveBeenCalledWith(400);
 		expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
+	});
+
+	it("should redirect to login when token is missing for detail route", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn(),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.redirect).toHaveBeenCalledWith("/login");
+		expect(mockService.getJobRoleById).not.toHaveBeenCalled();
+	});
+
+	it("should return generic 500 for unhandled detail errors", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 403 },
+			}),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(500);
+		expect(res.send).toHaveBeenCalledWith("Internal Server Error");
+	});
+
+	it("should return 500 when getJobRoleById throws a non-axios error", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockRejectedValue(new Error("boom")),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(500);
+		expect(res.send).toHaveBeenCalledWith("Internal Server Error");
 	});
 });

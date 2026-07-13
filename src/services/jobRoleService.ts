@@ -1,25 +1,68 @@
+import axios from "axios";
 import apiClient from "../config/apiClient.js";
 import type { JobRole, JobRoleInformation } from "../models/jobRole.js";
 
 export class JobRoleService {
-	async getAllJobRoles(): Promise<JobRole[]> {
+	private logRequestError(
+		action: string,
+		error: unknown,
+		context: Record<string, unknown>,
+	): void {
+		if (axios.isAxiosError(error)) {
+			console.error(action, {
+				...context,
+				status: error.response?.status,
+				statusText: error.response?.statusText,
+				method: error.config?.method?.toUpperCase(),
+				url: error.config?.url,
+				code: error.code,
+				message: error.message,
+			});
+			return;
+		}
+
+		if (error instanceof Error) {
+			console.error(action, {
+				...context,
+				message: error.message,
+			});
+			return;
+		}
+
+		console.error(action, {
+			...context,
+			error,
+		});
+	}
+
+	async getAllJobRoles(token: string): Promise<JobRole[]> {
 		try {
-			const response = await apiClient.get<JobRole[]>("/job-roles");
+			const response = await apiClient.get<JobRole[]>("/job-roles", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			return response.data;
 		} catch (error) {
-			console.error("Failed to fetch job roles:", error);
+			this.logRequestError("Failed to fetch job roles", error, {
+				endpoint: "/job-roles",
+			});
 			throw error;
 		}
 	}
 
-	async getJobRoleById(id: number): Promise<JobRoleInformation> {
+	async getJobRoleById(id: number, token: string): Promise<JobRoleInformation> {
 		try {
 			const response = await apiClient.get<JobRoleInformation>(
 				`/job-roles/${id}`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
 			);
 			return response.data;
 		} catch (error) {
-			console.error(`Failed to fetch job role with id ${id}:`, error);
+			this.logRequestError("Failed to fetch job role by id", error, {
+				endpoint: `/job-roles/${id}`,
+				jobRoleId: id,
+			});
 			throw error;
 		}
 	}

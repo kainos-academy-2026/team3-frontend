@@ -5,17 +5,34 @@ import type { JobRoleService } from "../services/jobRoleService.js";
 export class JobRoleController {
 	constructor(private jobRoleService: JobRoleService) {}
 
-	async getAllJobRoles(_req: Request, res: Response): Promise<void> {
+	async getAllJobRoles(req: Request, res: Response): Promise<void> {
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+
 		try {
-			const jobRoles = await this.jobRoleService.getAllJobRoles();
+			const jobRoles = await this.jobRoleService.getAllJobRoles(token);
 			res.render("pages/job-role-list.njk", { jobRoles });
 		} catch (error) {
 			console.error("Failed to get job roles:", error);
-			res.status(500).send("Internal Server Error");
+			res.status(500).render("pages/job-role-list.njk", {
+				jobRoles: [],
+				errorTitle: "Unable to load job roles",
+				errorMessage:
+					"We could not fetch job roles right now. Please try again shortly.",
+			});
 		}
 	}
 
 	async getJobRoleById(req: Request, res: Response): Promise<void> {
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+
 		const jobRoleId = Number(req.params.id);
 
 		if (!Number.isInteger(jobRoleId) || jobRoleId <= 0) {
@@ -24,7 +41,10 @@ export class JobRoleController {
 		}
 
 		try {
-			const jobRole = await this.jobRoleService.getJobRoleById(jobRoleId);
+			const jobRole = await this.jobRoleService.getJobRoleById(
+				jobRoleId,
+				token,
+			);
 			res.render("pages/job-role-information.njk", { jobRole });
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
@@ -32,7 +52,8 @@ export class JobRoleController {
 				if (status === 404) {
 					res.status(404).send("Job role not found");
 					return;
-				} else if (status === 500) {
+				}
+				if (status === 500) {
 					res.status(500).send("Backend server error");
 					return;
 				}
