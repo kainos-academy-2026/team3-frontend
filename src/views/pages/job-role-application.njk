@@ -1,0 +1,143 @@
+{% extends "layouts/main.njk" %}
+
+{% block title %}Kainos Careers | Apply for this role{% endblock %}
+
+{% block content %}
+  <section class="roles-section role-details-section" aria-labelledby="job-application-heading">
+    <a class="role-details__back" href="/job-roles/{{ jobRoleId }}">Back to role details</a>
+    <article class="role-card role-details-card" aria-label="Apply for this role">
+      <div class="role-card__header">
+        <p class="hero__eyebrow">Job Application</p>
+        <h1 id="job-application-heading">Apply for this role</h1>
+      </div>
+
+      <p>Upload your CV to submit your application.</p>
+      <p><strong>Accepted formats:</strong> PDF, DOC, DOCX (max 5MB)</p>
+
+      {% if error %}
+        <p style="color:#b42318; font-weight:700;">{{ error }}</p>
+      {% endif %}
+
+      <p id="upload-error" style="display:none; color:#b42318; font-weight:700;"></p>
+
+      <form id="application-form" action="/job-roles/{{ jobRoleId }}/apply" method="post" style="display:grid; gap:1rem; margin-top:1rem;">
+        <label for="cv">Upload CV</label>
+        <input id="cv" type="file" required accept=".pdf,.doc,.docx" />
+
+        <input type="hidden" name="objectKey" id="objectKey" />
+        <input type="hidden" name="originalFileName" id="originalFileName" />
+        <input type="hidden" name="contentType" id="contentType" />
+        <input type="hidden" name="fileSizeBytes" id="fileSizeBytes" />
+
+        <button type="submit" class="button" id="submit-application">Submit application</button>
+      </form>
+    </article>
+  </section>
+
+  <script>
+    (() => {
+      const form = document.getElementById("application-form");
+      const fileInput = document.getElementById("cv");
+      const submitButton = document.getElementById("submit-application");
+      const errorElement = document.getElementById("upload-error");
+
+      const objectKeyInput = document.getElementById("objectKey");
+      const originalFileNameInput = document.getElementById("originalFileName");
+      const contentTypeInput = document.getElementById("contentType");
+      const fileSizeBytesInput = document.getElementById("fileSizeBytes");
+
+      const allowedExtensions = [".pdf", ".doc", ".docx"];
+      const maxSizeBytes = 5 * 1024 * 1024;
+
+      const showError = (message) => {
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+      };
+
+      const clearError = () => {
+        errorElement.textContent = "";
+        errorElement.style.display = "none";
+      };
+
+      const getExtension = (name) => {
+        const lower = name.toLowerCase();
+        const index = lower.lastIndexOf(".");
+        return index >= 0 ? lower.slice(index) : "";
+      };
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        clearError();
+
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) {
+          showError("Please upload a CV to continue.");
+          return;
+        }
+
+        if (!allowedExtensions.includes(getExtension(file.name))) {
+          showError("Invalid file type. Please upload a PDF, DOC, or DOCX file.");
+          return;
+        }
+
+        if (file.size > maxSizeBytes) {
+          showError("File is too large. Maximum allowed size is 5MB.");
+          return;
+        }
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Uploading CV...";
+
+        try {
+          const uploadUrlResponse = await fetch(
+            "/job-roles/{{ jobRoleId }}/apply/upload-cv",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                fileName: file.name,
+                contentType: file.type || "application/octet-stream",
+                fileSizeBytes: file.size,
+              }),
+            },
+          );
+
+          if (!uploadUrlResponse.ok) {
+            const errorPayload = await uploadUrlResponse.json().catch(() => null);
+            throw new Error(errorPayload && errorPayload.error ? errorPayload.error : "Failed to prepare CV upload.");
+          }
+
+          const uploadDetails = await uploadUrlResponse.json();
+          const uploadHeaders = Object.assign(
+            { "Content-Type": file.type || "application/octet-stream" },
+            uploadDetails.requiredHeaders || {},
+          );
+
+          const s3UploadResponse = await fetch(uploadDetails.uploadUrl, {
+            method: "PUT",
+            headers: uploadHeaders,
+            body: file,
+          });
+
+          if (!s3UploadResponse.ok) {
+            throw new Error("Failed to upload CV to storage.");
+          }
+
+          objectKeyInput.value = uploadDetails.objectKey;
+          originalFileNameInput.value = file.name;
+          contentTypeInput.value = file.type || "application/octet-stream";
+          fileSizeBytesInput.value = String(file.size);
+
+          form.submit();
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "We could not submit your application right now. Please try again.";
+          showError(errorMessage);
+          submitButton.disabled = false;
+          submitButton.textContent = "Submit application";
+        }
+      });
+    })();
+  </script>
+{% endblock %}

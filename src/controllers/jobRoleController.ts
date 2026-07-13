@@ -61,4 +61,26 @@ export class JobRoleController {
 			res.status(500).send("Internal Server Error");
 		}
 	}
-}
+
+	async getJobRoleApplicationPage(req: Request, res: Response): Promise<void> {
+		const jobRoleId = Number(req.params.id);
+		if (!Number.isInteger(jobRoleId) || jobRoleId <= 0) {
+			res.status(400).send("Invalid job role ID");
+			return;
+		}
+
+		res.render("pages/job-role-application.njk", { jobRoleId });
+	}
+
+	async submitJobRoleApplication(req: Request, res: Response): Promise<void> {
+		const jobRoleId = Number(req.params.id);
+		if (!Number.isInteger(jobRoleId) || jobRoleId <= 0) {
+			res.status(400).send("Invalid job role ID");
+			return;
+		}
+
+		// Handle job role submission
+
+		// Handle CV upload (url is generated in backend and returned to frontend)
+	}
+};

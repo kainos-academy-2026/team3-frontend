@@ -7,10 +7,10 @@
 
     {% if isAuthenticated %}
       <form action="/logout" method="post">
-        <button type="submit" class="btn-primary">Log out</button>
+        <button type="submit" class="button">Log out</button>
       </form>
     {% else %}
-      <a href="/login" class="btn-primary">Sign in</a>
+      <a href="/login" class="button">Sign in</a>
     {% endif %}
   </div>
 </header>
