@@ -17,17 +17,54 @@ describe("AuthController", () => {
 	it("should render login page", () => {
 		const service = {} as AuthService;
 		const controller = new AuthController(service);
-		const req = {} as Request;
+		const req = {
+			session: {},
+		} as unknown as Request;
 		const res = mockRes();
 
 		controller.getSignInPage(req, res);
 
 		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
 			error: null,
+			success: null,
 		});
 	});
 
-	it("should return 400 when email or password missing", async () => {
+	it("should render and clear registration success message on login page", () => {
+		const service = {} as AuthService;
+		const controller = new AuthController(service);
+		const req = {
+			session: { registrationSuccess: "Well done, you are now registered." },
+		} as unknown as Request;
+		const res = mockRes();
+
+		controller.getSignInPage(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
+			error: null,
+			success: "Well done, you are now registered.",
+		});
+		expect(
+			(req.session as { registrationSuccess?: string }).registrationSuccess,
+		).toBeUndefined();
+	});
+
+	it("should render register page", () => {
+		const service = {} as AuthService;
+		const controller = new AuthController(service);
+		const req = {} as Request;
+		const res = mockRes();
+
+		controller.getRegisterPage(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/register.njk", {
+			error: null,
+			fieldErrors: {},
+			formValues: { email: "" },
+		});
+	});
+
+	it("should return 400 when email or password missing on login", async () => {
 		const service = {
 			login: vi.fn(),
 		} as unknown as AuthService;
@@ -69,7 +106,7 @@ describe("AuthController", () => {
 		expect(res.redirect).toHaveBeenCalledWith("/job-roles");
 	});
 
-	it("should return 401 when backend rejects credentials", async () => {
+	it("should return 401 when backend rejects login credentials", async () => {
 		const service = {
 			login: vi.fn().mockRejectedValue({
 				isAxiosError: true,
@@ -112,6 +149,147 @@ describe("AuthController", () => {
 		});
 	});
 
+	it("should redirect to login on successful register", async () => {
+		const service = {
+			login: vi.fn(),
+			register: vi.fn().mockResolvedValue({
+				id: 1,
+				email: "new@example.com",
+				role: "user",
+			}),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			session: {},
+			body: {
+				email: "new@example.com",
+				password: "StrongPass!1",
+				confirmPassword: "StrongPass!1",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(service.register).toHaveBeenCalledWith(
+			"new@example.com",
+			"StrongPass!1",
+		);
+		expect(
+			(req.session as { registrationSuccess?: string }).registrationSuccess,
+		).toBe("Well done, you are now registered.");
+		expect(res.redirect).toHaveBeenCalledWith("/login");
+	});
+
+	it("should return 400 with register field errors for invalid body", async () => {
+		const service = {
+			register: vi.fn(),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				email: "bad-email",
+				password: "weak",
+				confirmPassword: "different",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/register.njk",
+			expect.objectContaining({
+				error: "Please fix the highlighted fields.",
+				formValues: { email: "bad-email" },
+			}),
+		);
+	});
+
+	it("should return 409 when backend says email already exists", async () => {
+		const service = {
+			register: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 409 },
+			}),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				email: "used@example.com",
+				password: "StrongPass!1",
+				confirmPassword: "StrongPass!1",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(409);
+		expect(res.render).toHaveBeenCalledWith("pages/register.njk", {
+			error: "That email is already registered.",
+			fieldErrors: {},
+			formValues: { email: "used@example.com" },
+		});
+	});
+
+	it("should return 400 when backend rejects register payload", async () => {
+		const service = {
+			register: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 400 },
+			}),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				email: "valid@example.com",
+				password: "StrongPass!1",
+				confirmPassword: "StrongPass!1",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith("pages/register.njk", {
+			error: "Please check your details and try again.",
+			fieldErrors: {},
+			formValues: { email: "valid@example.com" },
+		});
+	});
+
+	it("should return 500 when register throws unexpected error", async () => {
+		const service = {
+			register: vi.fn().mockRejectedValue(new Error("Unexpected failure")),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				email: "valid@example.com",
+				password: "StrongPass!1",
+				confirmPassword: "StrongPass!1",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(500);
+		expect(res.render).toHaveBeenCalledWith("pages/register.njk", {
+			error: "Unable to register right now.",
+			fieldErrors: {},
+			formValues: { email: "valid@example.com" },
+		});
+	});
+
 	it("should clear cookie and redirect on successful logout", () => {
 		const service = {} as AuthService;
 		const controller = new AuthController(service);
@@ -144,6 +322,9 @@ describe("AuthController", () => {
 		controller.signOut(req, res);
 
 		expect(res.status).toHaveBeenCalledWith(500);
-		expect(res.send).toHaveBeenCalledWith("Unable to log out");
+		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
+			error: "Unable to log out right now.",
+			success: null,
+		});
 	});
 });
