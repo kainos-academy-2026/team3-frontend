@@ -130,7 +130,10 @@ export class AuthController {
 	signOut(req: Request, res: Response): void {
 		req.session.destroy((err) => {
 			if (err) {
-				res.status(500).send("Unable to log out");
+				res.status(500).render("pages/signin.njk", {
+					error: "Unable to log out right now.",
+					success: null,
+				});
 				return;
 			}
 			res.clearCookie("connect.sid");

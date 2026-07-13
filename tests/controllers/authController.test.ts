@@ -322,6 +322,9 @@ describe("AuthController", () => {
 		controller.signOut(req, res);
 
 		expect(res.status).toHaveBeenCalledWith(500);
-		expect(res.send).toHaveBeenCalledWith("Unable to log out");
+		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
+			error: "Unable to log out right now.",
+			success: null,
+		});
 	});
 });
