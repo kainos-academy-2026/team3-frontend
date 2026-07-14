@@ -253,18 +253,16 @@ describe("AuthController", () => {
 			register: vi.fn(),
 		} as unknown as AuthService;
 
-		const safeParseSpy = vi
-			.spyOn(RegisterSchema, "safeParse")
-			.mockReturnValue({
-				success: false,
-				error: {
-					issues: [
-						{ path: ["password"], message: "First password issue" },
-						{ path: ["password"], message: "Second password issue" },
-						{ path: ["otherField"], message: "Other issue" },
-					],
-				},
-			} as never);
+		const safeParseSpy = vi.spyOn(RegisterSchema, "safeParse").mockReturnValue({
+			success: false,
+			error: {
+				issues: [
+					{ path: ["password"], message: "First password issue" },
+					{ path: ["password"], message: "Second password issue" },
+					{ path: ["otherField"], message: "Other issue" },
+				],
+			},
+		} as never);
 
 		const controller = new AuthController(service);
 		const req = {

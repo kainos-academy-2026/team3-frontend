@@ -581,9 +581,12 @@ describe("JobRoleController", () => {
 
 			await controller.getJobRoleApplicationPage(req, res);
 
-			expect(res.render).toHaveBeenCalledWith("pages/job-role-application.njk", {
-				jobRoleId: 4,
-			});
+			expect(res.render).toHaveBeenCalledWith(
+				"pages/job-role-application.njk",
+				{
+					jobRoleId: 4,
+				},
+			);
 		});
 
 		it("should return 400 when application page id is invalid", async () => {
