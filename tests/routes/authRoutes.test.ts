@@ -35,6 +35,7 @@ describe("Auth routes", () => {
 			"login",
 		).mockResolvedValue({
 			token: "mock-jwt",
+			role: "recruitment_admin",
 		});
 
 		const response = await request(app)
@@ -85,8 +86,32 @@ describe("Auth routes", () => {
 		expect(response.text).toContain("That email is already registered");
 	});
 
-	it("should clear session and redirect on POST /logout", async () => {
+	it("should redirect to login on POST /logout when unauthenticated", async () => {
 		const response = await request(app).post("/logout");
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/login");
+	});
+
+	it("should clear session and redirect on POST /logout when authenticated", async () => {
+		vi.spyOn(
+			authServiceModule.AuthService.prototype,
+			"login",
+		).mockResolvedValue({
+			token: "mock-jwt",
+			role: "recruitment_admin",
+		});
+
+		const agent = request.agent(app);
+
+		const loginResponse = await agent
+			.post("/login")
+			.type("form")
+			.send({ email: "user@example.com", password: "password123" });
+
+		expect(loginResponse.status).toBe(302);
+
+		const response = await agent.post("/logout");
 
 		expect(response.status).toBe(302);
 		expect(response.headers.location).toBe("/");
