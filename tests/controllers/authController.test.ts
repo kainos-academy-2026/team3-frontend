@@ -75,9 +75,7 @@ describe("AuthController", () => {
 
 	it("should store token in session and redirect on successful login", async () => {
 		const service = {
-			login: vi
-				.fn()
-				.mockResolvedValue({ token: "mock-jwt", role: "admin" }),
+			login: vi.fn().mockResolvedValue({ token: "mock-jwt", role: "admin" }),
 		} as unknown as AuthService;
 
 		const controller = new AuthController(service);
