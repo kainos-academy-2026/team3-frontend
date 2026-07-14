@@ -77,7 +77,7 @@ describe("AuthController", () => {
 		const service = {
 			login: vi
 				.fn()
-				.mockResolvedValue({ token: "mock-jwt", role: "recruitment_admin" }),
+				.mockResolvedValue({ token: "mock-jwt", role: "admin" }),
 		} as unknown as AuthService;
 
 		const controller = new AuthController(service);
@@ -94,9 +94,7 @@ describe("AuthController", () => {
 			"password123",
 		);
 		expect((req.session as { jwtToken?: string }).jwtToken).toBe("mock-jwt");
-		expect((req.session as { userRole?: string }).userRole).toBe(
-			"recruitment_admin",
-		);
+		expect((req.session as { userRole?: string }).userRole).toBe("admin");
 		expect(res.redirect).toHaveBeenCalledWith("/job-roles");
 	});
 

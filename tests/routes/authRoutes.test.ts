@@ -35,7 +35,7 @@ describe("Auth routes", () => {
 			"login",
 		).mockResolvedValue({
 			token: "mock-jwt",
-			role: "recruitment_admin",
+			role: "admin",
 		});
 
 		const response = await request(app)
@@ -99,7 +99,7 @@ describe("Auth routes", () => {
 			"login",
 		).mockResolvedValue({
 			token: "mock-jwt",
-			role: "recruitment_admin",
+			role: "admin",
 		});
 
 		const agent = request.agent(app);

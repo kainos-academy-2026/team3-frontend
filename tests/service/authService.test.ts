@@ -15,7 +15,7 @@ describe("AuthService", () => {
 
 	it("should return token from backend on successful login", async () => {
 		vi.mocked(apiClient.post).mockResolvedValue({
-			data: { token: "jwt-token", role: "recruitment_admin" },
+			data: { token: "jwt-token", role: "admin" },
 		});
 
 		const service = new AuthService();
@@ -27,7 +27,7 @@ describe("AuthService", () => {
 		});
 		expect(result).toEqual({
 			token: "jwt-token",
-			role: "recruitment_admin",
+			role: "admin",
 		});
 	});
 
