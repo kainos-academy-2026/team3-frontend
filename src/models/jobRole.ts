@@ -43,3 +43,9 @@ export interface UploadCvResponse {
 	uploadUrl: string;
 	objectKey: string;
 }
+
+export interface JobRoleInformationViewModel {
+	jobRole: JobRoleInformation;
+	canApply: boolean;
+	applicationSubmitted: boolean;
+}

@@ -1,28 +1,9 @@
 import axios from "axios";
 import type { Request, Response } from "express";
-import { JobRoleStatus } from "../models/jobRole.js";
+import { JobRoleStatus, type JobRoleInformationViewModel } from "../models/jobRole.js";
+import { extractUserIdFromJwt } from "../services/jwtService.js";
 import type { JobRoleService } from "../services/jobRoleService.js";
 import { UploadCvRequestSchema } from "../validation/applicationSchemas.js";
-
-function extractUserIdFromJwt(token: string): number | null {
-	try {
-		const payload = JSON.parse(
-			Buffer.from(token.split(".")[1], "base64url").toString("utf8"),
-		) as Record<string, unknown>;
-
-		const rawUserId = payload.id ?? payload.userId ?? payload.sub;
-		const userId =
-			typeof rawUserId === "number" ? rawUserId : Number(rawUserId);
-
-		if (!Number.isInteger(userId) || userId <= 0) {
-			return null;
-		}
-
-		return userId;
-	} catch {
-		return null;
-	}
-}
 
 export class JobRoleController {
 	constructor(private jobRoleService: JobRoleService) {}
@@ -67,16 +48,15 @@ export class JobRoleController {
 				jobRoleId,
 				token,
 			);
-			const canApply =
-				jobRole.status === JobRoleStatus.Open &&
-				jobRole.numberOfOpenPositions > 0;
-			const applicationSubmitted = req.query.applicationSubmitted === "true";
-
-			res.render("pages/job-role-information.njk", {
+			const viewModel: JobRoleInformationViewModel = {
 				jobRole,
-				canApply,
-				applicationSubmitted,
-			});
+				canApply:
+					jobRole.status === JobRoleStatus.Open &&
+					jobRole.numberOfOpenPositions > 0,
+				applicationSubmitted: req.query.applicationSubmitted === "true",
+			};
+
+			res.render("pages/job-role-information.njk", viewModel);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				const status = error.response?.status;
