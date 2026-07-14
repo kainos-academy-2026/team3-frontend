@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { describe, expect, it, vi } from "vitest";
 import { AuthController } from "../../src/controllers/authController.ts";
 import type { AuthService } from "../../src/services/authService.ts";
+import { RegisterSchema } from "../../src/validation/authSchemas.ts";
 
 const mockRes = () => {
 	const res = {} as Response;
@@ -194,6 +195,96 @@ describe("AuthController", () => {
 		);
 	});
 
+	it("should keep first field error message when a field has multiple validation issues", async () => {
+		const service = {
+			register: vi.fn(),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				email: "valid@example.com",
+				password: "aaaaaaaaa",
+				confirmPassword: "aaaaaaaaa",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/register.njk",
+			expect.objectContaining({
+				fieldErrors: expect.objectContaining({
+					password: "Password must include an uppercase letter.",
+				}),
+			}),
+		);
+	});
+
+	it("should use empty email string in form values when invalid register body has no email", async () => {
+		const service = {
+			register: vi.fn(),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				password: "StrongPass!1",
+				confirmPassword: "StrongPass!1",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/register.njk",
+			expect.objectContaining({
+				formValues: { email: "" },
+			}),
+		);
+	});
+
+	it("should ignore non-form fields and keep first message when validation returns duplicate field issues", async () => {
+		const service = {
+			register: vi.fn(),
+		} as unknown as AuthService;
+
+		const safeParseSpy = vi
+			.spyOn(RegisterSchema, "safeParse")
+			.mockReturnValue({
+				success: false,
+				error: {
+					issues: [
+						{ path: ["password"], message: "First password issue" },
+						{ path: ["password"], message: "Second password issue" },
+						{ path: ["otherField"], message: "Other issue" },
+					],
+				},
+			} as never);
+
+		const controller = new AuthController(service);
+		const req = {
+			body: { email: "valid@example.com" },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/register.njk",
+			expect.objectContaining({
+				fieldErrors: { password: "First password issue" },
+			}),
+		);
+
+		safeParseSpy.mockRestore();
+	});
+
 	it("should return 409 when backend says email already exists", async () => {
 		const service = {
 			register: vi.fn().mockRejectedValue({
@@ -245,6 +336,34 @@ describe("AuthController", () => {
 		expect(res.status).toHaveBeenCalledWith(400);
 		expect(res.render).toHaveBeenCalledWith("pages/register.njk", {
 			error: "Please check your details and try again.",
+			fieldErrors: {},
+			formValues: { email: "valid@example.com" },
+		});
+	});
+
+	it("should return 500 when register throws axios error with unhandled status", async () => {
+		const service = {
+			register: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 422 },
+			}),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				email: "valid@example.com",
+				password: "StrongPass!1",
+				confirmPassword: "StrongPass!1",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(500);
+		expect(res.render).toHaveBeenCalledWith("pages/register.njk", {
+			error: "Unable to register right now.",
 			fieldErrors: {},
 			formValues: { email: "valid@example.com" },
 		});

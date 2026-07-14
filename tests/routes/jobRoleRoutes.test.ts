@@ -184,4 +184,21 @@ describe("GET /job-roles routes", () => {
 		});
 		expect(getUploadCvUrlSpy).toHaveBeenCalled();
 	});
+
+	it("should delegate to controller for GET /job-roles/:id/apply when authenticated", async () => {
+		const response = await request(app).get("/job-roles/1/apply");
+
+		expect(response.status).toBe(200);
+		expect(response.type).toMatch(/html/);
+		expect(response.text).toContain("Submit application");
+	});
+
+	it("should delegate to controller for POST /job-roles/:id/apply when authenticated", async () => {
+		const response = await request(app).post("/job-roles/1/apply");
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe(
+			"/job-roles/1?applicationSubmitted=true",
+		);
+	});
 });

@@ -386,6 +386,46 @@ describe("JobRoleController", () => {
 			expect(res.json).toHaveBeenCalledWith({ error: "Not authenticated" });
 		});
 
+		it("should return 401 JSON when token payload has invalid user id", async () => {
+			const mockService = {
+				getUploadCvUrl: vi.fn(),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				session: { jwtToken: createJwtWithId(0) },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getUploadCvUrl(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(401);
+			expect(res.json).toHaveBeenCalledWith({ error: "Invalid session" });
+			expect(mockService.getUploadCvUrl).not.toHaveBeenCalled();
+		});
+
+		it("should return 401 JSON when token is malformed", async () => {
+			const mockService = {
+				getUploadCvUrl: vi.fn(),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				session: { jwtToken: "not-a-jwt" },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getUploadCvUrl(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(401);
+			expect(res.json).toHaveBeenCalledWith({ error: "Invalid session" });
+			expect(mockService.getUploadCvUrl).not.toHaveBeenCalled();
+		});
+
 		it("should accept userId claim from JWT payload", async () => {
 			const mockService = {
 				getUploadCvUrl: vi.fn().mockResolvedValue({
@@ -464,6 +504,28 @@ describe("JobRoleController", () => {
 			});
 		});
 
+		it("should return 404 JSON when service throws axios 404", async () => {
+			const mockService = {
+				getUploadCvUrl: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 404 },
+				}),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				session: { jwtToken: createJwtWithId(1) },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getUploadCvUrl(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.json).toHaveBeenCalledWith({ error: "Job role not found" });
+		});
+
 		it("should return 500 JSON when service throws non-axios error", async () => {
 			const mockService = {
 				getUploadCvUrl: vi.fn().mockRejectedValue(new Error("boom")),
@@ -483,6 +545,57 @@ describe("JobRoleController", () => {
 			expect(res.json).toHaveBeenCalledWith({
 				error: "Could not prepare CV upload. Please try again.",
 			});
+		});
+
+		it("should return 500 JSON when service throws axios error with unhandled status", async () => {
+			const mockService = {
+				getUploadCvUrl: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 422 },
+				}),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				session: { jwtToken: createJwtWithId(1) },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getUploadCvUrl(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.json).toHaveBeenCalledWith({
+				error: "Could not prepare CV upload. Please try again.",
+			});
+		});
+	});
+
+	describe("getJobRoleApplicationPage", () => {
+		it("should render application page with jobRoleId for valid id", async () => {
+			const mockService = {} as JobRoleService;
+			const controller = new JobRoleController(mockService);
+			const req = { params: { id: "4" } } as unknown as Request;
+			const res = mockRes();
+
+			await controller.getJobRoleApplicationPage(req, res);
+
+			expect(res.render).toHaveBeenCalledWith("pages/job-role-application.njk", {
+				jobRoleId: 4,
+			});
+		});
+
+		it("should return 400 when application page id is invalid", async () => {
+			const mockService = {} as JobRoleService;
+			const controller = new JobRoleController(mockService);
+			const req = { params: { id: "abc" } } as unknown as Request;
+			const res = mockRes();
+
+			await controller.getJobRoleApplicationPage(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
 		});
 	});
 
