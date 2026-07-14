@@ -7,13 +7,40 @@ import {
 } from "../../src/models/jobRole.ts";
 import * as jobRoleServiceModule from "../../src/services/jobRoleService.ts";
 
+let mockIsAuthenticated = true;
+const { mockJwtToken } = vi.hoisted(() => {
+	const jwtPayload = Buffer.from(JSON.stringify({ id: 1 }), "utf8").toString(
+		"base64url",
+	);
+	return {
+		mockJwtToken: `header.${jwtPayload}.signature`,
+	};
+});
+
+vi.mock("express-session", () => ({
+	default:
+		() =>
+		(
+			req: { session: { jwtToken?: string } },
+			_res: unknown,
+			next: () => void,
+		) => {
+			req.session = { ...(req.session ?? {}), jwtToken: mockJwtToken };
+			next();
+		},
+}));
+
 vi.mock("../../src/middleware/authMiddleware.js", () => ({
 	requireAuth: (
 		req: { session: { jwtToken?: string } },
-		_res: unknown,
+		res: { redirect: (path: string) => unknown },
 		next: () => void,
 	) => {
-		req.session.jwtToken = "mock-token";
+		if (!mockIsAuthenticated) {
+			res.redirect("/login");
+			return;
+		}
+		req.session.jwtToken = mockJwtToken;
 		next();
 	},
 }));
@@ -35,6 +62,7 @@ const mockJobRoleInformation: JobRoleInformation = {
 describe("GET /job-roles routes", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		mockIsAuthenticated = true;
 	});
 
 	it("should return 200 and render job roles on happy path", async () => {
@@ -124,5 +152,36 @@ describe("GET /job-roles routes", () => {
 
 		expect(response.status).toBe(500);
 		expect(response.text).toContain("Backend server error");
+	});
+
+	it("should redirect to /login for POST /job-roles/:id/apply/upload-cv when unauthenticated", async () => {
+		mockIsAuthenticated = false;
+
+		const response = await request(app)
+			.post("/job-roles/1/apply/upload-cv")
+			.send({ fileName: "cv.pdf", contentType: "application/pdf" });
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/login");
+	});
+
+	it("should delegate to controller for POST /job-roles/:id/apply/upload-cv when authenticated", async () => {
+		const getUploadCvUrlSpy = vi
+			.spyOn(jobRoleServiceModule.JobRoleService.prototype, "getUploadCvUrl")
+			.mockResolvedValue({
+				uploadUrl: "https://upload.example.com",
+				objectKey: "uploads/cv.pdf",
+			});
+
+		const response = await request(app)
+			.post("/job-roles/1/apply/upload-cv")
+			.send({ fileName: "cv.pdf", contentType: "application/pdf" });
+
+		expect(response.status).toBe(200);
+		expect(response.body).toEqual({
+			uploadUrl: "https://upload.example.com",
+			objectKey: "uploads/cv.pdf",
+		});
+		expect(getUploadCvUrlSpy).toHaveBeenCalled();
 	});
 });

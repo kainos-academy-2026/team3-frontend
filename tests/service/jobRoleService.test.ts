@@ -5,6 +5,7 @@ import { JobRoleService } from "../../src/services/jobRoleService.ts";
 vi.mock("../../src/config/apiClient.ts", () => ({
 	default: {
 		get: vi.fn(),
+		post: vi.fn(),
 	},
 }));
 
@@ -149,5 +150,78 @@ describe("JobRoleService", () => {
 		);
 
 		consoleErrorSpy.mockRestore();
+	});
+
+	describe("getUploadCvUrl", () => {
+		it("should request upload URL and normalize key to objectKey", async () => {
+			vi.mocked(apiClient.post).mockResolvedValue({
+				data: {
+					uploadUrl: "https://upload.example.com",
+					key: "uploads/cv.pdf",
+				},
+			});
+
+			const service = new JobRoleService();
+			const result = await service.getUploadCvUrl(
+				1,
+				1,
+				"cv.pdf",
+				"application/pdf",
+				token,
+			);
+
+			expect(apiClient.post).toHaveBeenCalledWith(
+				"/job-roles/1/apply",
+				{
+					userId: 1,
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+				},
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			expect(result).toEqual({
+				uploadUrl: "https://upload.example.com",
+				objectKey: "uploads/cv.pdf",
+			});
+		});
+
+		it("should log and rethrow when upload URL request fails", async () => {
+			const service = new JobRoleService();
+			const logRequestErrorSpy = vi.spyOn(
+				service as unknown as { logRequestError: (...args: unknown[]) => void },
+				"logRequestError",
+			);
+
+			const axiosError = {
+				isAxiosError: true,
+				response: {
+					status: 400,
+					statusText: "Bad Request",
+				},
+				config: {
+					method: "post",
+					url: "/job-roles/1/apply",
+				},
+				code: "ERR_BAD_REQUEST",
+				message: "Request failed with status code 400",
+			};
+
+			vi.mocked(apiClient.post).mockRejectedValue(axiosError);
+
+			await expect(
+				service.getUploadCvUrl(1, 1, "cv.pdf", "application/pdf", token),
+			).rejects.toBe(axiosError);
+			expect(logRequestErrorSpy).toHaveBeenCalledWith(
+				"Failed to prepare CV upload",
+				axiosError,
+				expect.objectContaining({
+					endpoint: "/job-roles/1/apply",
+					jobRoleId: 1,
+					userId: 1,
+				}),
+			);
+		});
 	});
 });

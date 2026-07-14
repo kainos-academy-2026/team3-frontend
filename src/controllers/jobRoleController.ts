@@ -1,6 +1,28 @@
 import axios from "axios";
 import type { Request, Response } from "express";
+import { JobRoleStatus } from "../models/jobRole.js";
 import type { JobRoleService } from "../services/jobRoleService.js";
+import { UploadCvRequestSchema } from "../validation/applicationSchemas.js";
+
+function extractUserIdFromJwt(token: string): number | null {
+	try {
+		const payload = JSON.parse(
+			Buffer.from(token.split(".")[1], "base64url").toString("utf8"),
+		) as Record<string, unknown>;
+
+		const rawUserId = payload.id ?? payload.userId ?? payload.sub;
+		const userId =
+			typeof rawUserId === "number" ? rawUserId : Number(rawUserId);
+
+		if (!Number.isInteger(userId) || userId <= 0) {
+			return null;
+		}
+
+		return userId;
+	} catch {
+		return null;
+	}
+}
 
 export class JobRoleController {
 	constructor(private jobRoleService: JobRoleService) {}
@@ -45,7 +67,16 @@ export class JobRoleController {
 				jobRoleId,
 				token,
 			);
-			res.render("pages/job-role-information.njk", { jobRole });
+			const canApply =
+				jobRole.status === JobRoleStatus.Open &&
+				jobRole.numberOfOpenPositions > 0;
+			const applicationSubmitted = req.query.applicationSubmitted === "true";
+
+			res.render("pages/job-role-information.njk", {
+				jobRole,
+				canApply,
+				applicationSubmitted,
+			});
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				const status = error.response?.status;
@@ -79,8 +110,61 @@ export class JobRoleController {
 			return;
 		}
 
-		// Handle job role submission
-
-		// Handle CV upload (url is generated in backend and returned to frontend)
+		res.redirect(`/job-roles/${jobRoleId}?applicationSubmitted=true`);
 	}
-};
+
+	async getUploadCvUrl(req: Request, res: Response): Promise<void> {
+		const jobRoleId = Number(req.params.id);
+		if (!Number.isInteger(jobRoleId) || jobRoleId <= 0) {
+			res.status(400).json({ error: "Invalid job role ID" });
+			return;
+		}
+
+		const validationResult = UploadCvRequestSchema.safeParse(req.body);
+		if (!validationResult.success) {
+			res.status(400).json({ error: validationResult.error.issues[0].message });
+			return;
+		}
+
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.status(401).json({ error: "Not authenticated" });
+			return;
+		}
+
+		const userId = extractUserIdFromJwt(token);
+		if (!userId) {
+			res.status(401).json({ error: "Invalid session" });
+			return;
+		}
+
+		try {
+			const { fileName, contentType } = validationResult.data;
+			const { uploadUrl, objectKey } = await this.jobRoleService.getUploadCvUrl(
+				jobRoleId,
+				userId,
+				fileName,
+				contentType,
+				token,
+			);
+
+			res.json({ uploadUrl, objectKey });
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				const status = error.response?.status;
+				if (status === 400) {
+					res.status(400).json({ error: "Invalid upload request" });
+					return;
+				}
+				if (status === 404) {
+					res.status(404).json({ error: "Job role not found" });
+					return;
+				}
+			}
+
+			res
+				.status(500)
+				.json({ error: "Could not prepare CV upload. Please try again." });
+		}
+	}
+}
