@@ -1,8 +1,11 @@
 import axios from "axios";
 import type { Request, Response } from "express";
-import { JobRoleStatus, type JobRoleInformationViewModel } from "../models/jobRole.js";
-import { extractUserIdFromJwt } from "../services/jwtService.js";
+import {
+	type JobRoleInformationViewModel,
+	JobRoleStatus,
+} from "../models/jobRole.js";
 import type { JobRoleService } from "../services/jobRoleService.js";
+import { extractUserIdFromJwt } from "../services/jwtService.js";
 import { UploadCvRequestSchema } from "../validation/applicationSchemas.js";
 
 export class JobRoleController {
