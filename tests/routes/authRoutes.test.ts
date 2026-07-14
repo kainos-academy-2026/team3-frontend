@@ -22,6 +22,13 @@ describe("Auth routes", () => {
 		expect(response.type).toMatch(/html/);
 	});
 
+	it("should render register success page on GET /register/success", async () => {
+		const response = await request(app).get("/register/success");
+
+		expect(response.status).toBe(200);
+		expect(response.type).toMatch(/html/);
+	});
+
 	it("should redirect to job roles on successful POST /login", async () => {
 		vi.spyOn(
 			authServiceModule.AuthService.prototype,
@@ -39,7 +46,7 @@ describe("Auth routes", () => {
 		expect(response.headers.location).toBe("/job-roles");
 	});
 
-	it("should redirect to login on successful POST /register", async () => {
+	it("should redirect to register success page on successful POST /register", async () => {
 		vi.spyOn(
 			authServiceModule.AuthService.prototype,
 			"register",
@@ -56,7 +63,7 @@ describe("Auth routes", () => {
 		});
 
 		expect(response.status).toBe(302);
-		expect(response.headers.location).toBe("/login");
+		expect(response.headers.location).toBe("/register/success");
 	});
 
 	it("should return 409 for duplicate email on POST /register", async () => {

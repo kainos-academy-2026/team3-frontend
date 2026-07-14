@@ -17,36 +17,25 @@ describe("AuthController", () => {
 	it("should render login page", () => {
 		const service = {} as AuthService;
 		const controller = new AuthController(service);
-		const req = {
-			session: {},
-		} as unknown as Request;
+		const req = {} as Request;
 		const res = mockRes();
 
 		controller.getSignInPage(req, res);
 
 		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
 			error: null,
-			success: null,
 		});
 	});
 
-	it("should render and clear registration success message on login page", () => {
+	it("should render register success page", () => {
 		const service = {} as AuthService;
 		const controller = new AuthController(service);
-		const req = {
-			session: { registrationSuccess: "Well done, you are now registered." },
-		} as unknown as Request;
+		const req = {} as Request;
 		const res = mockRes();
 
-		controller.getSignInPage(req, res);
+		controller.getRegisterSuccessPage(req, res);
 
-		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
-			error: null,
-			success: "Well done, you are now registered.",
-		});
-		expect(
-			(req.session as { registrationSuccess?: string }).registrationSuccess,
-		).toBeUndefined();
+		expect(res.render).toHaveBeenCalledWith("pages/register-success.njk");
 	});
 
 	it("should render register page", () => {
@@ -149,7 +138,7 @@ describe("AuthController", () => {
 		});
 	});
 
-	it("should redirect to login on successful register", async () => {
+	it("should redirect to register success page on successful register", async () => {
 		const service = {
 			login: vi.fn(),
 			register: vi.fn().mockResolvedValue({
@@ -161,7 +150,6 @@ describe("AuthController", () => {
 
 		const controller = new AuthController(service);
 		const req = {
-			session: {},
 			body: {
 				email: "new@example.com",
 				password: "StrongPass!1",
@@ -176,10 +164,7 @@ describe("AuthController", () => {
 			"new@example.com",
 			"StrongPass!1",
 		);
-		expect(
-			(req.session as { registrationSuccess?: string }).registrationSuccess,
-		).toBe("Well done, you are now registered.");
-		expect(res.redirect).toHaveBeenCalledWith("/login");
+		expect(res.redirect).toHaveBeenCalledWith("/register/success");
 	});
 
 	it("should return 400 with register field errors for invalid body", async () => {
@@ -324,7 +309,6 @@ describe("AuthController", () => {
 		expect(res.status).toHaveBeenCalledWith(500);
 		expect(res.render).toHaveBeenCalledWith("pages/signin.njk", {
 			error: "Unable to log out right now.",
-			success: null,
 		});
 	});
 });

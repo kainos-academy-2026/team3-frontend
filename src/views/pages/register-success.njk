@@ -1,0 +1,17 @@
+{% extends "layouts/main.njk" %}
+
+{% block title %}Kainos Careers | Registration Complete{% endblock %}
+
+{% block content %}
+  <section class="hero" style="min-height: calc(100vh - 220px); display:flex; align-items:center;" aria-labelledby="register-success-heading">
+    <div class="hero__content" style="max-width: 600px;">
+      <p class="hero__eyebrow">Account Created</p>
+      <h1 id="register-success-heading" class="home-heading">Well done, you are now registered.</h1>
+      <p style="font-size:1.125rem; margin-top:0.75rem;">You can now sign in with your new account.</p>
+
+      <div style="margin-top:1.5rem;">
+        <a href="/login" class="btn-primary" style="display:inline-block; text-decoration:none;">Go to sign in</a>
+      </div>
+    </div>
+  </section>
+{% endblock %}

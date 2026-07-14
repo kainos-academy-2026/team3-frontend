@@ -16,11 +16,12 @@ type RegisterPageModel = {
 export class AuthController {
 	constructor(private authService: AuthService) {}
 
-	getSignInPage(req: Request, res: Response): void {
-		const success = req.session.registrationSuccess ?? null;
-		delete req.session.registrationSuccess;
+	getSignInPage(_req: Request, res: Response): void {
+		res.render("pages/signin.njk", { error: null });
+	}
 
-		res.render("pages/signin.njk", { error: null, success });
+	getRegisterSuccessPage(_req: Request, res: Response): void {
+		res.render("pages/register-success.njk");
 	}
 
 	getRegisterPage(_req: Request, res: Response): void {
@@ -96,8 +97,7 @@ export class AuthController {
 
 		try {
 			await this.authService.register(email, password);
-			req.session.registrationSuccess = "Well done, you are now registered.";
-			res.redirect("/login");
+			res.redirect("/register/success");
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				if (error.response?.status === 409) {
@@ -132,7 +132,6 @@ export class AuthController {
 			if (err) {
 				res.status(500).render("pages/signin.njk", {
 					error: "Unable to log out right now.",
-					success: null,
 				});
 				return;
 			}
