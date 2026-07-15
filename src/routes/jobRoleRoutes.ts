@@ -5,16 +5,16 @@ import { JobRoleService } from "../services/jobRoleService.js";
 
 const router = Router();
 const service = new JobRoleService();
-const controller = new JobRoleController(service);
+const jobRoleController = new JobRoleController(service);
 
 router.get("/job-roles", requireAuth, (req, res) =>
-	controller.getAllJobRoles(req, res),
+	jobRoleController.getAllJobRoles(req, res),
 );
 router.get("/job-roles/report", requireAdmin, (req, res) =>
-	controller.downloadJobRoleReport(req, res),
+	jobRoleController.downloadJobRoleReport(req, res),
 );
 router.get("/job-roles/:id", requireAuth, (req, res) =>
-	controller.getJobRoleById(req, res),
+	jobRoleController.getJobRoleById(req, res),
 );
 
 export default router;
