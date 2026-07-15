@@ -24,6 +24,7 @@ const mockRes = () => {
 	res.status = vi.fn().mockReturnValue(res);
 	res.send = vi.fn().mockReturnValue(res);
 	res.redirect = vi.fn().mockReturnValue(res);
+	res.json = vi.fn().mockReturnValue(res);
 	return res;
 };
 
@@ -106,6 +107,7 @@ describe("JobRoleController", () => {
 		const req = {
 			params: { id: "1" },
 			session: { jwtToken: token },
+			query: {},
 		} as unknown as Request;
 		const res = mockRes();
 
@@ -114,6 +116,83 @@ describe("JobRoleController", () => {
 		expect(mockService.getJobRoleById).toHaveBeenCalledWith(1, token);
 		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
 			jobRole: mockJobRoleInformation,
+			canApply: true,
+			applicationSubmitted: false,
+		});
+	});
+
+	it("should render canApply false when role is closed", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue({
+				...mockJobRoleInformation,
+				status: JobRoleStatus.Closed,
+			}),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+			query: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
+			jobRole: { ...mockJobRoleInformation, status: JobRoleStatus.Closed },
+			canApply: false,
+			applicationSubmitted: false,
+		});
+	});
+
+	it("should render applicationSubmitted true when query param is true", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+			query: { applicationSubmitted: "true" },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
+			jobRole: mockJobRoleInformation,
+			canApply: true,
+			applicationSubmitted: true,
+		});
+	});
+
+	it("should render canApply false when open positions are zero", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue({
+				...mockJobRoleInformation,
+				numberOfOpenPositions: 0,
+			}),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+			query: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
+			jobRole: { ...mockJobRoleInformation, numberOfOpenPositions: 0 },
+			canApply: false,
+			applicationSubmitted: false,
 		});
 	});
 
@@ -127,6 +206,7 @@ describe("JobRoleController", () => {
 		const req = {
 			params: { id: "abc" },
 			session: { jwtToken: token },
+			query: {},
 		} as unknown as Request;
 		const res = mockRes();
 
@@ -146,6 +226,7 @@ describe("JobRoleController", () => {
 		const req = {
 			params: { id: "1" },
 			session: {},
+			query: {},
 		} as unknown as Request;
 		const res = mockRes();
 
@@ -168,6 +249,7 @@ describe("JobRoleController", () => {
 		const req = {
 			params: { id: "1" },
 			session: { jwtToken: token },
+			query: {},
 		} as unknown as Request;
 		const res = mockRes();
 
@@ -187,6 +269,7 @@ describe("JobRoleController", () => {
 		const req = {
 			params: { id: "1" },
 			session: { jwtToken: token },
+			query: {},
 		} as unknown as Request;
 		const res = mockRes();
 

@@ -1,5 +1,9 @@
 import axios from "axios";
 import type { Request, Response } from "express";
+import {
+	type JobRoleInformationViewModel,
+	JobRoleStatus,
+} from "../models/jobRole.js";
 import type { JobRoleService } from "../services/jobRoleService.js";
 
 export class JobRoleController {
@@ -45,7 +49,15 @@ export class JobRoleController {
 				jobRoleId,
 				token,
 			);
-			res.render("pages/job-role-information.njk", { jobRole });
+			const viewModel: JobRoleInformationViewModel = {
+				jobRole,
+				canApply:
+					jobRole.status === JobRoleStatus.Open &&
+					jobRole.numberOfOpenPositions > 0,
+				applicationSubmitted: req.query.applicationSubmitted === "true",
+			};
+
+			res.render("pages/job-role-information.njk", viewModel);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				const status = error.response?.status;

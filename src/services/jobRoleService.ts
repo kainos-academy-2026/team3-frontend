@@ -1,6 +1,10 @@
 import axios from "axios";
 import apiClient from "../config/apiClient.js";
-import type { JobRole, JobRoleInformation } from "../models/jobRole.js";
+import type {
+	JobRole,
+	JobRoleInformation,
+	UploadCvResponse,
+} from "../models/jobRole.js";
 
 export class JobRoleService {
 	private logRequestError(
@@ -62,6 +66,36 @@ export class JobRoleService {
 			this.logRequestError("Failed to fetch job role by id", error, {
 				endpoint: `/job-roles/${id}`,
 				jobRoleId: id,
+			});
+			throw error;
+		}
+	}
+
+	async getUploadCvUrl(
+		jobRoleId: number,
+		userId: number,
+		fileName: string,
+		contentType: string,
+		token: string,
+	): Promise<UploadCvResponse> {
+		try {
+			const response = await apiClient.post<{ uploadUrl: string; key: string }>(
+				`/job-roles/${jobRoleId}/apply`,
+				{ userId, fileName, contentType },
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+
+			return {
+				uploadUrl: response.data.uploadUrl,
+				objectKey: response.data.key,
+			};
+		} catch (error) {
+			this.logRequestError("Failed to prepare CV upload", error, {
+				endpoint: `/job-roles/${jobRoleId}/apply`,
+				jobRoleId,
+				userId,
 			});
 			throw error;
 		}

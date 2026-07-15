@@ -38,3 +38,14 @@ export enum JobRoleStatus {
 	Open = "Open",
 	Closed = "Closed",
 }
+
+export interface UploadCvResponse {
+	uploadUrl: string;
+	objectKey: string;
+}
+
+export interface JobRoleInformationViewModel {
+	jobRole: JobRoleInformation;
+	canApply: boolean;
+	applicationSubmitted: boolean;
+}
