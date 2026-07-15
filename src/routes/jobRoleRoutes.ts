@@ -9,7 +9,9 @@ const service = new JobRoleService();
 const jobRoleController = new JobRoleController(service);
 const applicationController = new ApplicationController(service);
 
-router.get("/job-roles", (req, res) => jobRoleController.getAllJobRoles(req, res));
+router.get("/job-roles", (req, res) =>
+	jobRoleController.getAllJobRoles(req, res),
+);
 router.get("/job-roles/:id", (req, res) =>
 	jobRoleController.getJobRoleById(req, res),
 );
