@@ -16,4 +16,4 @@ Briefly describe the change and why you made it. Link to any exercise or task nu
 Confirm what tests you added and what paths were tested, even if already ran in the CI/CD pipeline
 
 ## Other notes:
-IMPORTANT: Do not add co-authored commits by Guithub Copilot. Lines starting "Co-authored-by: Copilot" should be omitted from commit messages.1
+IMPORTANT: Do not add co-authored commits by Guithub Copilot. Lines starting "Co-authored-by: Copilot" should be omitted from commit messages.
