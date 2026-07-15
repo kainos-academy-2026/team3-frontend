@@ -2,6 +2,7 @@ import apiClient from "../config/apiClient.js";
 
 interface LoginResponse {
 	token: string;
+	role: string;
 }
 
 interface RegisterResponse {

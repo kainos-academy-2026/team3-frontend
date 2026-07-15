@@ -15,7 +15,7 @@ describe("AuthService", () => {
 
 	it("should return token from backend on successful login", async () => {
 		vi.mocked(apiClient.post).mockResolvedValue({
-			data: { token: "jwt-token" },
+			data: { token: "jwt-token", role: "admin" },
 		});
 
 		const service = new AuthService();
@@ -25,7 +25,10 @@ describe("AuthService", () => {
 			email: "user@example.com",
 			password: "password123",
 		});
-		expect(result).toEqual({ token: "jwt-token" });
+		expect(result).toEqual({
+			token: "jwt-token",
+			role: "admin",
+		});
 	});
 
 	it("should return register payload on successful register", async () => {
