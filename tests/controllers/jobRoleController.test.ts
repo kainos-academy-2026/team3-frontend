@@ -307,7 +307,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithId(1) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -335,7 +339,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "abc" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithId(1) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -354,7 +362,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "", contentType: "application/pdf" },
+				body: {
+					fileName: "",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithId(1) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -363,7 +375,7 @@ describe("JobRoleController", () => {
 
 			expect(res.status).toHaveBeenCalledWith(400);
 			expect(res.json).toHaveBeenCalledWith({
-				error: "File name is required.",
+				error: "Please upload a CV to continue.",
 			});
 		});
 
@@ -427,7 +439,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: {},
 			} as unknown as Request;
 			const res = mockRes();
@@ -446,7 +462,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithId(0) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -466,7 +486,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: "not-a-jwt" },
 			} as unknown as Request;
 			const res = mockRes();
@@ -489,7 +513,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithPayload({ userId: 2 }) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -516,7 +544,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithPayload({ sub: "3" }) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -543,7 +575,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithId(1) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -567,7 +603,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithId(1) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -578,6 +618,34 @@ describe("JobRoleController", () => {
 			expect(res.json).toHaveBeenCalledWith({ error: "Job role not found" });
 		});
 
+		it("should return 409 JSON when service throws axios 409", async () => {
+			const mockService = {
+				getUploadCvUrl: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 409 },
+				}),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
+				session: { jwtToken: createJwtWithId(1) },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getUploadCvUrl(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(409);
+			expect(res.json).toHaveBeenCalledWith({
+				error: "You have already applied for this role.",
+			});
+		});
+
 		it("should return 500 JSON when service throws non-axios error", async () => {
 			const mockService = {
 				getUploadCvUrl: vi.fn().mockRejectedValue(new Error("boom")),
@@ -586,7 +654,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithId(1) },
 			} as unknown as Request;
 			const res = mockRes();
@@ -610,7 +682,11 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "1" },
-				body: { fileName: "cv.pdf", contentType: "application/pdf" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 1024,
+				},
 				session: { jwtToken: createJwtWithId(1) },
 			} as unknown as Request;
 			const res = mockRes();

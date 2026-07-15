@@ -159,7 +159,11 @@ describe("GET /job-roles routes", () => {
 
 		const response = await request(app)
 			.post("/job-roles/1/apply/upload-cv")
-			.send({ fileName: "cv.pdf", contentType: "application/pdf" });
+			.send({
+				fileName: "cv.pdf",
+				contentType: "application/pdf",
+				fileSizeBytes: 1024,
+			});
 
 		expect(response.status).toBe(302);
 		expect(response.headers.location).toBe("/login");
@@ -175,7 +179,11 @@ describe("GET /job-roles routes", () => {
 
 		const response = await request(app)
 			.post("/job-roles/1/apply/upload-cv")
-			.send({ fileName: "cv.pdf", contentType: "application/pdf" });
+			.send({
+				fileName: "cv.pdf",
+				contentType: "application/pdf",
+				fileSizeBytes: 1024,
+			});
 
 		expect(response.status).toBe(200);
 		expect(response.body).toEqual({
