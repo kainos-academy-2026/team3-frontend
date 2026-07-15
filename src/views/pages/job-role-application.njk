@@ -1,0 +1,38 @@
+{% extends "layouts/main.njk" %}
+
+{% block title %}Kainos Careers | Apply for this role{% endblock %}
+
+{% block content %}
+  <section class="roles-section role-details-section" aria-labelledby="job-application-heading">
+    <a class="role-details__back" href="/job-roles/{{ jobRoleId }}">Back to role details</a>
+    <article class="role-card role-details-card" aria-label="Apply for this role">
+      <div class="role-card__header">
+        <p class="hero__eyebrow">Job Application</p>
+        <h1 id="job-application-heading">Apply for this role</h1>
+      </div>
+
+      <p>Upload your CV to submit your application.</p>
+      <p><strong>Accepted formats:</strong> PDF, DOC, DOCX (max 5MB)</p>
+
+      {% if error %}
+        <p class="form-error">{{ error }}</p>
+      {% endif %}
+
+      <p id="upload-error" class="form-error form-error--hidden"></p>
+
+      <form id="application-form" class="application-form" action="/job-roles/{{ jobRoleId }}/apply" method="post">
+        <label for="cv">Upload CV</label>
+        <input id="cv" type="file" required accept=".pdf,.doc,.docx" />
+
+        <input type="hidden" name="objectKey" id="objectKey" />
+        <input type="hidden" name="originalFileName" id="originalFileName" />
+        <input type="hidden" name="contentType" id="contentType" />
+        <input type="hidden" name="fileSizeBytes" id="fileSizeBytes" />
+
+        <button type="submit" class="button" id="submit-application">Submit application</button>
+      </form>
+    </article>
+  </section>
+
+  <script src="/assets/scripts/job-role-application.js"></script>
+{% endblock %}

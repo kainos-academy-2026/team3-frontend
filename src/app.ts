@@ -1,6 +1,7 @@
 import "dotenv/config";
 import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import cors from "cors";
 import express from "express";
 import session from "express-session";
 import nunjucks from "nunjucks";
@@ -12,6 +13,11 @@ const __dirname = dirname(__filename);
 const publicAssetsPath = path.join(__dirname, "..", "public", "assets");
 
 const app = express();
+
+const allowedOrigins = [
+	"http://localhost:3000",
+	"https://academy-test-team3-067502745215.s3.us-east-1.amazonaws.com",
+];
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -26,6 +32,12 @@ app.use(
 			sameSite: "strict",
 			secure: process.env.NODE_ENV === "production",
 		},
+	}),
+);
+
+app.use(
+	cors({
+		origin: allowedOrigins,
 	}),
 );
 

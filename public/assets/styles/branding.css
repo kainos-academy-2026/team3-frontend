@@ -376,6 +376,27 @@ img {
 	color: var(--kainos-navy);
 }
 
+.application-form {
+	display: grid;
+	gap: 1rem;
+	margin-top: 1rem;
+}
+
+.form-error {
+	color: #b42318;
+	font-weight: 700;
+}
+
+.form-error--hidden {
+	display: none;
+}
+
+.form-success {
+	color: #0d6b2f;
+	font-weight: 700;
+	margin: 0.5rem 0 1.5rem;
+}
+
 /* Footer */
 .site-footer {
 	margin-top: auto;
@@ -428,25 +449,44 @@ img {
 	color: var(--kainos-navy-deep);
 }
 
-/* Primary Action */
+/* Button */
+.button,
 .btn-primary {
-	display: inline-block;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: fit-content;
+	justify-self: start;
 	margin-top: 1.75rem;
 	padding: 0.75rem 1.75rem;
 	background: var(--kainos-green);
 	color: #ffffff;
+	font: inherit;
 	font-size: 1rem;
 	font-weight: 700;
+	border: 0;
 	border-radius: 0.5rem;
+	cursor: pointer;
 	text-decoration: none;
-	transition: background 0.2s ease;
+	transition:
+		background 0.2s ease,
+		transform 0.2s ease;
 }
 
+.button:hover,
 .btn-primary:hover {
 	background: var(--kainos-navy-deep);
+	transform: translateY(-1px);
+}
+
+.button:focus-visible,
+.btn-primary:focus-visible {
+	outline: 3px solid rgba(13, 173, 61, 0.28);
+	outline-offset: 3px;
 }
 
 /* Header auth button alignment */
+.site-header .button,
 .site-header .btn-primary {
 	margin-top: 0;
 }
