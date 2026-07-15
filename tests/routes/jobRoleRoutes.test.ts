@@ -16,6 +16,15 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 		req.session.jwtToken = "mock-token";
 		next();
 	},
+	requireAdmin: (
+		req: { session: { jwtToken?: string; userRole?: string } },
+		_res: unknown,
+		next: () => void,
+	) => {
+		req.session.jwtToken = "mock-token";
+		req.session.userRole = "ADMIN";
+		next();
+	},
 }));
 
 const mockJobRoleInformation: JobRoleInformation = {
@@ -124,5 +133,18 @@ describe("GET /job-roles routes", () => {
 
 		expect(response.status).toBe(500);
 		expect(response.text).toContain("Backend server error");
+	});
+
+	it("should return csv report for GET /job-roles/report", async () => {
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getJobRoleReport",
+		).mockResolvedValue(Buffer.from("id,roleName\n1,Software Engineer"));
+
+		const response = await request(app).get("/job-roles/report");
+
+		expect(response.status).toBe(200);
+		expect(response.headers["content-type"]).toContain("text/csv");
+		expect(response.text).toContain("id,roleName");
 	});
 });

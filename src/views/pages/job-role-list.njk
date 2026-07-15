@@ -41,6 +41,11 @@
           </a>
         {% endfor %}
       </div>
+      {% if isAdmin %}
+        <div class="roles-report-action">
+          <a class="btn-primary" href="/job-roles/report">Generate CSV report</a>
+        </div>
+      {% endif %}
     {% else %}
       <div class="empty-state">
         <h2>No open job roles found.</h2>
