@@ -1,0 +1,1 @@
+IMPORTANT: Read instructions files in .github/instructions before making changes to the codebase. These files contain guidelines and rules that must be followed to ensure consistency and maintainability of the project.

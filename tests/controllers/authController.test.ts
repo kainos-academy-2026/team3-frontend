@@ -75,7 +75,7 @@ describe("AuthController", () => {
 
 	it("should store token in session and redirect on successful login", async () => {
 		const service = {
-			login: vi.fn().mockResolvedValue({ token: "mock-jwt" }),
+			login: vi.fn().mockResolvedValue({ token: "mock-jwt", role: "admin" }),
 		} as unknown as AuthService;
 
 		const controller = new AuthController(service);
@@ -92,6 +92,7 @@ describe("AuthController", () => {
 			"password123",
 		);
 		expect((req.session as { jwtToken?: string }).jwtToken).toBe("mock-jwt");
+		expect((req.session as { userRole?: string }).userRole).toBe("admin");
 		expect(res.redirect).toHaveBeenCalledWith("/job-roles");
 	});
 
@@ -194,6 +195,53 @@ describe("AuthController", () => {
 		);
 	});
 
+	it("should render empty email fallback when invalid register body has no email", async () => {
+		const service = {
+			register: vi.fn(),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				password: "weak",
+				confirmPassword: "different",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/register.njk",
+			expect.objectContaining({
+				formValues: { email: "" },
+			}),
+		);
+	});
+
+	it("should ignore non-field validation issues in register field errors", async () => {
+		const service = {
+			register: vi.fn(),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: "not-an-object",
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/register.njk",
+			expect.objectContaining({
+				fieldErrors: {},
+			}),
+		);
+	});
+
 	it("should return 409 when backend says email already exists", async () => {
 		const service = {
 			register: vi.fn().mockRejectedValue({
@@ -253,6 +301,34 @@ describe("AuthController", () => {
 	it("should return 500 when register throws unexpected error", async () => {
 		const service = {
 			register: vi.fn().mockRejectedValue(new Error("Unexpected failure")),
+		} as unknown as AuthService;
+
+		const controller = new AuthController(service);
+		const req = {
+			body: {
+				email: "valid@example.com",
+				password: "StrongPass!1",
+				confirmPassword: "StrongPass!1",
+			},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.register(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(500);
+		expect(res.render).toHaveBeenCalledWith("pages/register.njk", {
+			error: "Unable to register right now.",
+			fieldErrors: {},
+			formValues: { email: "valid@example.com" },
+		});
+	});
+
+	it("should return 500 when axios register error is not 400 or 409", async () => {
+		const service = {
+			register: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 503 },
+			}),
 		} as unknown as AuthService;
 
 		const controller = new AuthController(service);

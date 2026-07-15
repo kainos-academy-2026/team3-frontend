@@ -31,6 +31,8 @@ app.use(
 
 app.use((req, res, next) => {
 	res.locals.isAuthenticated = Boolean(req.session.jwtToken);
+	res.locals.userRole = req.session.userRole ?? null;
+	res.locals.isAdmin = req.session.userRole === "ADMIN";
 	next();
 });
 

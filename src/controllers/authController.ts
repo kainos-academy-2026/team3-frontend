@@ -47,8 +47,9 @@ export class AuthController {
 		}
 
 		try {
-			const { token } = await this.authService.login(email, password);
+			const { token, role } = await this.authService.login(email, password);
 			req.session.jwtToken = token;
+			req.session.userRole = role;
 			res.redirect("/job-roles");
 		} catch (error) {
 			if (axios.isAxiosError(error) && error.response?.status === 401) {
