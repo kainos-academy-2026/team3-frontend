@@ -367,6 +367,58 @@ describe("JobRoleController", () => {
 			});
 		});
 
+		it("should return 400 JSON when file extension is not allowed", async () => {
+			const mockService = {
+				getUploadCvUrl: vi.fn(),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: {
+					fileName: "cv.exe",
+					contentType: "application/octet-stream",
+					fileSizeBytes: 1024,
+				},
+				session: { jwtToken: createJwtWithId(1) },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getUploadCvUrl(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({
+				error: "Invalid file type. Please upload a PDF, DOC, or DOCX file.",
+			});
+			expect(mockService.getUploadCvUrl).not.toHaveBeenCalled();
+		});
+
+		it("should return 400 JSON when file exceeds max size", async () => {
+			const mockService = {
+				getUploadCvUrl: vi.fn(),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: {
+					fileName: "cv.pdf",
+					contentType: "application/pdf",
+					fileSizeBytes: 6 * 1024 * 1024,
+				},
+				session: { jwtToken: createJwtWithId(1) },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getUploadCvUrl(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.json).toHaveBeenCalledWith({
+				error: "File is too large. Maximum allowed size is 5MB.",
+			});
+			expect(mockService.getUploadCvUrl).not.toHaveBeenCalled();
+		});
+
 		it("should return 401 JSON when token is missing", async () => {
 			const mockService = {
 				getUploadCvUrl: vi.fn(),

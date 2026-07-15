@@ -8,8 +8,19 @@ import type { JobRoleService } from "../services/jobRoleService.js";
 import { extractUserIdFromJwt } from "../services/jwtService.js";
 import { UploadCvRequestSchema } from "../validation/applicationSchemas.js";
 
+const ALLOWED_CV_EXTENSIONS = [".pdf", ".doc", ".docx"];
+const MAX_CV_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+
 export class JobRoleController {
 	constructor(private jobRoleService: JobRoleService) {}
+
+	private getFileExtension(fileName: string): string {
+		const lowerFileName = fileName.toLowerCase();
+		const extensionStartIndex = lowerFileName.lastIndexOf(".");
+		return extensionStartIndex >= 0
+			? lowerFileName.slice(extensionStartIndex)
+			: "";
+	}
 
 	async getAllJobRoles(req: Request, res: Response): Promise<void> {
 		const token = req.session.jwtToken;
@@ -109,6 +120,31 @@ export class JobRoleController {
 			return;
 		}
 
+		const { fileName, contentType } = validationResult.data;
+		const fileExtension = this.getFileExtension(fileName);
+		if (!ALLOWED_CV_EXTENSIONS.includes(fileExtension)) {
+			res.status(400).json({
+				error: "Invalid file type. Please upload a PDF, DOC, or DOCX file.",
+			});
+			return;
+		}
+
+		const hasFileSizeInRequest = req.body.fileSizeBytes !== undefined;
+		if (hasFileSizeInRequest) {
+			const fileSizeBytes = Number(req.body.fileSizeBytes);
+			if (!Number.isFinite(fileSizeBytes) || fileSizeBytes <= 0) {
+				res.status(400).json({ error: "File size is invalid." });
+				return;
+			}
+
+			if (fileSizeBytes > MAX_CV_FILE_SIZE_BYTES) {
+				res
+					.status(400)
+					.json({ error: "File is too large. Maximum allowed size is 5MB." });
+				return;
+			}
+		}
+
 		const token = req.session.jwtToken;
 		if (!token) {
 			res.status(401).json({ error: "Not authenticated" });
@@ -122,7 +158,6 @@ export class JobRoleController {
 		}
 
 		try {
-			const { fileName, contentType } = validationResult.data;
 			const { uploadUrl, objectKey } = await this.jobRoleService.getUploadCvUrl(
 				jobRoleId,
 				userId,

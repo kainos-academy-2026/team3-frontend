@@ -15,12 +15,12 @@
       <p><strong>Accepted formats:</strong> PDF, DOC, DOCX (max 5MB)</p>
 
       {% if error %}
-        <p style="color:#b42318; font-weight:700;">{{ error }}</p>
+        <p class="form-error">{{ error }}</p>
       {% endif %}
 
-      <p id="upload-error" style="display:none; color:#b42318; font-weight:700;"></p>
+      <p id="upload-error" class="form-error form-error--hidden"></p>
 
-      <form id="application-form" action="/job-roles/{{ jobRoleId }}/apply" method="post" style="display:grid; gap:1rem; margin-top:1rem;">
+      <form id="application-form" class="application-form" action="/job-roles/{{ jobRoleId }}/apply" method="post">
         <label for="cv">Upload CV</label>
         <input id="cv" type="file" required accept=".pdf,.doc,.docx" />
 
@@ -46,23 +46,14 @@
       const contentTypeInput = document.getElementById("contentType");
       const fileSizeBytesInput = document.getElementById("fileSizeBytes");
 
-      const allowedExtensions = [".pdf", ".doc", ".docx"];
-      const maxSizeBytes = 5 * 1024 * 1024;
-
       const showError = (message) => {
         errorElement.textContent = message;
-        errorElement.style.display = "block";
+        errorElement.classList.remove("form-error--hidden");
       };
 
       const clearError = () => {
         errorElement.textContent = "";
-        errorElement.style.display = "none";
-      };
-
-      const getExtension = (name) => {
-        const lower = name.toLowerCase();
-        const index = lower.lastIndexOf(".");
-        return index >= 0 ? lower.slice(index) : "";
+        errorElement.classList.add("form-error--hidden");
       };
 
       form.addEventListener("submit", async (event) => {
@@ -72,16 +63,6 @@
         const file = fileInput.files && fileInput.files[0];
         if (!file) {
           showError("Please upload a CV to continue.");
-          return;
-        }
-
-        if (!allowedExtensions.includes(getExtension(file.name))) {
-          showError("Invalid file type. Please upload a PDF, DOC, or DOCX file.");
-          return;
-        }
-
-        if (file.size > maxSizeBytes) {
-          showError("File is too large. Maximum allowed size is 5MB.");
           return;
         }
 
