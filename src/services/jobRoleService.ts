@@ -85,6 +85,11 @@ export class JobRoleService {
 		} catch (error) {
 			this.logRequestError("Failed to fetch job role report", error, {
 				endpoint: "/job-roles/report",
+			});
+			throw error;
+		}
+	}
+
 	async getUploadCvUrl(
 		jobRoleId: number,
 		userId: number,

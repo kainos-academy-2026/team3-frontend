@@ -180,6 +180,8 @@ describe("JobRoleService", () => {
 		await expect(service.getJobRoleReport(token)).rejects.toThrow(
 			"Network error",
 		);
+	});
+
 	describe("getUploadCvUrl", () => {
 		it("should request upload URL and normalize key to objectKey", async () => {
 			vi.mocked(apiClient.post).mockResolvedValue({
