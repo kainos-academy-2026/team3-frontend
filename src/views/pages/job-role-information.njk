@@ -12,6 +12,14 @@
         <h1 id="job-role-heading">{{ jobRole.roleName }}</h1>
       </div>
 
+      {% if applicationAction == "hire-success" %}
+        <p class="form-success">Applicant hired successfully.</p>
+      {% elif applicationAction == "reject-success" %}
+        <p class="form-success">Applicant rejected successfully.</p>
+      {% elif applicationAction == "error" %}
+        <p class="form-error">Could not update application status. Please try again.</p>
+      {% endif %}
+
       {% if applicationSubmitted %}
         <p class="form-success">Application submitted successfully. Your status is now in progress.</p>
       {% endif %}
@@ -58,6 +66,66 @@
       {% if canApply %}
         <a class="button" href="/job-roles/{{ jobRole.id }}/apply">Apply for this role</a>
       {% endif %}
+
+      {% if isAdmin %}
+        <section class="admin-applications" aria-labelledby="admin-applications-heading">
+          <h2 id="admin-applications-heading">Applicants</h2>
+
+          {% if adminApplicationsError %}
+            <p class="form-error">{{ adminApplicationsError }}</p>
+          {% elif applicants and applicants.length > 0 %}
+            <div class="admin-applications__list" role="list">
+              {% for applicant in applicants %}
+                <article class="admin-applications__item" role="listitem">
+                  <div>
+                    <a
+                      class="admin-applications__username"
+                      href="{{ applicant.cvDownloadUrl }}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {{ applicant.username }}
+                    </a>
+                    <p class="admin-applications__meta">Applied {{ applicant.appliedAt }}</p>
+                  </div>
+
+                  <div class="admin-applications__actions">
+                    <span class="admin-applications__status admin-applications__status--{{ applicant.status | lower | replace(' ', '-') }}">
+                      {{ applicant.status }}
+                    </span>
+
+                    {% if applicant.status == "In Progress" %}
+                      <form
+                        action="/job-roles/{{ jobRole.id }}/applications/{{ applicant.applicationId }}/hire"
+                        method="post"
+                        class="admin-applications__action-form"
+                        data-confirm-message="Are you sure you want to hire this applicant?"
+                      >
+                        <button type="submit" class="button admin-applications__button">Hire</button>
+                      </form>
+
+                      <form
+                        action="/job-roles/{{ jobRole.id }}/applications/{{ applicant.applicationId }}/reject"
+                        method="post"
+                        class="admin-applications__action-form"
+                        data-confirm-message="Are you sure you want to reject this applicant?"
+                      >
+                        <button type="submit" class="button admin-applications__button admin-applications__button--secondary">Reject</button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </article>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="admin-applications__empty">No applications yet for this role.</p>
+          {% endif %}
+        </section>
+      {% endif %}
     </article>
   </section>
+
+  {% if isAdmin %}
+    <script src="/assets/scripts/job-role-admin-applications.js"></script>
+  {% endif %}
 {% endblock %}

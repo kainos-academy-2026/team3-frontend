@@ -473,6 +473,104 @@ img {
 	margin-top: 0.5rem;
 }
 
+.admin-applications {
+	margin-top: 1.25rem;
+	padding-top: 1rem;
+	border-top: 1px solid rgba(13, 173, 61, 0.12);
+	display: grid;
+	gap: 1rem;
+}
+
+.admin-applications h2 {
+	margin: 0;
+	font-size: 1.25rem;
+	color: var(--kainos-navy-deep);
+}
+
+.admin-applications__list {
+	display: grid;
+	gap: 0.85rem;
+}
+
+.admin-applications__item {
+	padding: 0.9rem;
+	border: 1px solid rgba(13, 173, 61, 0.12);
+	border-radius: 0.7rem;
+	background: rgba(255, 255, 255, 0.92);
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.admin-applications__username {
+	font-weight: 700;
+	color: var(--kainos-navy-deep);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.admin-applications__meta {
+	margin: 0.3rem 0 0;
+	font-size: 0.9rem;
+	color: var(--kainos-muted);
+}
+
+.admin-applications__actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+.admin-applications__status {
+	padding: 0.25rem 0.5rem;
+	font-size: 0.78rem;
+	font-weight: 700;
+	border-radius: 999px;
+	letter-spacing: 0.02em;
+	border: 1px solid transparent;
+}
+
+.admin-applications__status--in-progress {
+	background: rgba(255, 209, 102, 0.28);
+	color: #8f6300;
+	border-color: rgba(143, 99, 0, 0.2);
+}
+
+.admin-applications__status--hired {
+	background: rgba(13, 173, 61, 0.12);
+	color: #0d6b2f;
+	border-color: rgba(13, 173, 61, 0.24);
+}
+
+.admin-applications__status--rejected {
+	background: rgba(180, 35, 24, 0.12);
+	color: #8f1c12;
+	border-color: rgba(180, 35, 24, 0.2);
+}
+
+.admin-applications__action-form {
+	margin: 0;
+	padding: 0;
+}
+
+.admin-applications__button {
+	margin-top: 0;
+	padding: 0.45rem 0.9rem;
+	font-size: 0.9rem;
+}
+
+.admin-applications__button--secondary {
+	background: var(--kainos-navy);
+}
+
+.admin-applications__empty {
+	margin: 0;
+	color: var(--kainos-muted);
+}
+
 .form-error {
 	color: #b42318;
 	font-weight: 700;
@@ -636,5 +734,14 @@ img {
 
 	.job-role-form-card {
 		padding: 1.3rem;
+	}
+
+	.admin-applications__item {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.admin-applications__actions {
+		justify-content: flex-start;
 	}
 }

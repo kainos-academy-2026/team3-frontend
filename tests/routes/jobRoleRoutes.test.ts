@@ -250,6 +250,86 @@ describe("GET /job-roles routes", () => {
 		});
 	});
 
+	describe("POST /job-roles/:id/applications/:applicationId/hire", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/hire")
+				.send({});
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/hire")
+				.send({});
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should delegate to controller for admins", async () => {
+			const hireSpy = vi
+				.spyOn(JobRoleController.prototype, "hireApplicant")
+				.mockImplementation(async (_req, res) => {
+					res
+						.status(302)
+						.redirect("/job-roles/1?applicationAction=hire-success");
+				});
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/hire")
+				.send({});
+
+			expect(response.status).toBe(302);
+			expect(hireSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe("POST /job-roles/:id/applications/:applicationId/reject", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/reject")
+				.send({});
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/reject")
+				.send({});
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should delegate to controller for admins", async () => {
+			const rejectSpy = vi
+				.spyOn(JobRoleController.prototype, "rejectApplicant")
+				.mockImplementation(async (_req, res) => {
+					res
+						.status(302)
+						.redirect("/job-roles/1?applicationAction=reject-success");
+				});
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/reject")
+				.send({});
+
+			expect(response.status).toBe(302);
+			expect(rejectSpy).toHaveBeenCalledOnce();
+		});
+	});
+
 	it("should return csv report for GET /job-roles/report", async () => {
 		vi.spyOn(
 			jobRoleServiceModule.JobRoleService.prototype,

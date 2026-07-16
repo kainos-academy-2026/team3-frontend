@@ -25,6 +25,18 @@ router.post("/job-roles", requireAuth, requireAdmin, (req, res) =>
 router.get("/job-roles/:id", (req, res) =>
 	jobRoleController.getJobRoleById(req, res),
 );
+router.post(
+	"/job-roles/:id/applications/:applicationId/hire",
+	requireAuth,
+	requireAdmin,
+	(req, res) => jobRoleController.hireApplicant(req, res),
+);
+router.post(
+	"/job-roles/:id/applications/:applicationId/reject",
+	requireAuth,
+	requireAdmin,
+	(req, res) => jobRoleController.rejectApplicant(req, res),
+);
 router.get("/job-roles/:id/apply", requireAuth, (req, res) =>
 	applicationController.getJobRoleApplicationPage(req, res),
 );

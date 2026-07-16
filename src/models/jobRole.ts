@@ -71,8 +71,45 @@ export interface CreateJobRolePayload {
 	numberOfOpenPositions: number;
 }
 
+export enum JobRoleApplicationStatus {
+	InProgress = "In Progress",
+	Hired = "Hired",
+	Rejected = "Rejected",
+}
+
+export interface JobRoleApplicantSummary {
+	applicationId: number;
+	userId: number;
+	username: string;
+	status: JobRoleApplicationStatus;
+	appliedAt: string;
+	cvDownloadUrl: string;
+}
+
+export interface JobRoleAdminApplicationsResponse {
+	jobRoleId: number;
+	roleName: string;
+	numberOfOpenPositions: number;
+	applicants: JobRoleApplicantSummary[];
+}
+
+export interface HireApplicantResponse {
+	applicationId: number;
+	status: JobRoleApplicationStatus;
+	numberOfOpenPositions: number;
+}
+
+export interface RejectApplicantResponse {
+	applicationId: number;
+	status: JobRoleApplicationStatus;
+}
+
 export interface JobRoleInformationViewModel {
 	jobRole: JobRoleInformation;
 	canApply: boolean;
 	applicationSubmitted: boolean;
+	isAdmin?: boolean;
+	applicants?: JobRoleApplicantSummary[];
+	adminApplicationsError?: string | null;
+	applicationAction?: "hire-success" | "reject-success" | "error" | null;
 }

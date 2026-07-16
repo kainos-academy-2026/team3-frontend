@@ -2,9 +2,12 @@ import axios from "axios";
 import apiClient from "../config/apiClient.js";
 import type {
 	CreateJobRolePayload,
+	HireApplicantResponse,
 	JobRole,
+	JobRoleAdminApplicationsResponse,
 	JobRoleInformation,
 	JobRoleMetadataResponse,
+	RejectApplicantResponse,
 	UploadCvResponse,
 } from "../models/jobRole.js";
 
@@ -156,6 +159,79 @@ export class JobRoleService {
 			this.logRequestError("Failed to create job role", error, {
 				endpoint: "/job-roles",
 				payload,
+			});
+			throw error;
+		}
+	}
+
+	async getJobRoleApplicationsForAdmin(
+		jobRoleId: number,
+		token: string,
+	): Promise<JobRoleAdminApplicationsResponse> {
+		try {
+			const response = await apiClient.get<JobRoleAdminApplicationsResponse>(
+				`/job-roles/${jobRoleId}/applications`,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data;
+		} catch (error) {
+			this.logRequestError(
+				"Failed to fetch job role applications for admin",
+				error,
+				{
+					endpoint: `/job-roles/${jobRoleId}/applications`,
+					jobRoleId,
+				},
+			);
+			throw error;
+		}
+	}
+
+	async hireApplicant(
+		jobRoleId: number,
+		applicationId: number,
+		token: string,
+	): Promise<HireApplicantResponse> {
+		try {
+			const response = await apiClient.patch<HireApplicantResponse>(
+				`/job-roles/${jobRoleId}/applications/${applicationId}/hire`,
+				undefined,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data;
+		} catch (error) {
+			this.logRequestError("Failed to hire applicant", error, {
+				endpoint: `/job-roles/${jobRoleId}/applications/${applicationId}/hire`,
+				jobRoleId,
+				applicationId,
+			});
+			throw error;
+		}
+	}
+
+	async rejectApplicant(
+		jobRoleId: number,
+		applicationId: number,
+		token: string,
+	): Promise<RejectApplicantResponse> {
+		try {
+			const response = await apiClient.patch<RejectApplicantResponse>(
+				`/job-roles/${jobRoleId}/applications/${applicationId}/reject`,
+				undefined,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data;
+		} catch (error) {
+			this.logRequestError("Failed to reject applicant", error, {
+				endpoint: `/job-roles/${jobRoleId}/applications/${applicationId}/reject`,
+				jobRoleId,
+				applicationId,
 			});
 			throw error;
 		}
