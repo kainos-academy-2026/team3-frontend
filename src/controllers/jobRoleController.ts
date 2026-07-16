@@ -73,4 +73,27 @@ export class JobRoleController {
 			res.status(500).send("Internal Server Error");
 		}
 	}
+
+	async downloadJobRoleReport(req: Request, res: Response): Promise<void> {
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+
+		try {
+			const reportBuffer = await this.jobRoleService.getJobRoleReport(token);
+			const today = new Date().toISOString().split("T")[0];
+
+			res.setHeader("Content-Type", "text/csv; charset=utf-8");
+			res.setHeader(
+				"Content-Disposition",
+				`attachment; filename="job-roles-report-${today}.csv"`,
+			);
+			res.status(200).send(reportBuffer);
+		} catch (error) {
+			console.error("Failed to generate job role report:", error);
+			res.status(500).send("Unable to generate report");
+		}
+	}
 }

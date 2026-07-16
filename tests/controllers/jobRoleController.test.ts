@@ -24,6 +24,7 @@ const mockRes = () => {
 	res.status = vi.fn().mockReturnValue(res);
 	res.send = vi.fn().mockReturnValue(res);
 	res.redirect = vi.fn().mockReturnValue(res);
+	res.setHeader = vi.fn().mockReturnValue(res);
 	res.json = vi.fn().mockReturnValue(res);
 	return res;
 };
@@ -277,5 +278,66 @@ describe("JobRoleController", () => {
 
 		expect(res.status).toHaveBeenCalledWith(500);
 		expect(res.send).toHaveBeenCalledWith("Internal Server Error");
+	});
+
+	it("should stream csv report to browser", async () => {
+		const reportBuffer = Buffer.from("id,roleName\n1,Software Engineer");
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn(),
+			getJobRoleReport: vi.fn().mockResolvedValue(reportBuffer),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = { session: { jwtToken: token } } as unknown as Request;
+		const res = mockRes();
+
+		await controller.downloadJobRoleReport(req, res);
+
+		expect(mockService.getJobRoleReport).toHaveBeenCalledWith(token);
+		expect(res.setHeader).toHaveBeenCalledWith(
+			"Content-Type",
+			"text/csv; charset=utf-8",
+		);
+		expect(res.setHeader).toHaveBeenCalledWith(
+			"Content-Disposition",
+			expect.stringContaining('attachment; filename="job-roles-report-'),
+		);
+		expect(res.status).toHaveBeenCalledWith(200);
+		expect(res.send).toHaveBeenCalledWith(reportBuffer);
+	});
+
+	it("should redirect to login when token is missing for report route", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn(),
+			getJobRoleReport: vi.fn(),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = { session: {} } as unknown as Request;
+		const res = mockRes();
+
+		await controller.downloadJobRoleReport(req, res);
+
+		expect(res.redirect).toHaveBeenCalledWith("/login");
+		expect(mockService.getJobRoleReport).not.toHaveBeenCalled();
+	});
+
+	it("should return 500 when report generation fails", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn(),
+			getJobRoleReport: vi.fn().mockRejectedValue(new Error("boom")),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = { session: { jwtToken: token } } as unknown as Request;
+		const res = mockRes();
+
+		await controller.downloadJobRoleReport(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(500);
+		expect(res.send).toHaveBeenCalledWith("Unable to generate report");
 	});
 });
