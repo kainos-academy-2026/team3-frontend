@@ -92,6 +92,8 @@ describe("UpdateJobRoleRequestSchema", () => {
 			roleName: "   ",
 		});
 		expect(result.success).toBe(false);
+	});
+});
 
 const validPayload = {
 	roleName: "Senior Backend Engineer",

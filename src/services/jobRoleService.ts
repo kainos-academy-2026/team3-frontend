@@ -132,6 +132,20 @@ export class JobRoleService {
 			const response = await apiClient.patch<JobRoleInformation>(
 				`/job-roles/${id}`,
 				data,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data;
+		} catch (error) {
+			this.logRequestError("Failed to update job role", error, {
+				endpoint: `/job-roles/${id}`,
+				jobRoleId: id,
+			});
+			throw error;
+		}
+	}
+
 	async getJobRoleMetadata(token: string): Promise<JobRoleMetadataResponse> {
 		try {
 			const response = await apiClient.get<JobRoleMetadataResponse>(
@@ -163,9 +177,6 @@ export class JobRoleService {
 			);
 			return response.data;
 		} catch (error) {
-			this.logRequestError("Failed to update job role", error, {
-				endpoint: `/job-roles/${id}`,
-				jobRoleId: id,
 			this.logRequestError("Failed to create job role", error, {
 				endpoint: "/job-roles",
 				payload,

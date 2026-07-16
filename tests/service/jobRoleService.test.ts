@@ -303,6 +303,36 @@ describe("JobRoleService", () => {
 		});
 
 		it("should log and rethrow when updateJobRole fails", async () => {
+			const service = new JobRoleService();
+			const logRequestErrorSpy = vi.spyOn(
+				service as unknown as { logRequestError: (...args: unknown[]) => void },
+				"logRequestError",
+			);
+
+			const axiosError = {
+				isAxiosError: true,
+				response: { status: 404, statusText: "Not Found" },
+				config: { method: "patch", url: "/job-roles/1" },
+				code: "ERR_BAD_RESPONSE",
+				message: "Request failed with status code 404",
+			};
+
+			vi.mocked(apiClient.patch).mockRejectedValue(axiosError);
+
+			await expect(
+				service.updateJobRole(1, { roleName: "Test" }, token),
+			).rejects.toBe(axiosError);
+			expect(logRequestErrorSpy).toHaveBeenCalledWith(
+				"Failed to update job role",
+				axiosError,
+				expect.objectContaining({
+					endpoint: "/job-roles/1",
+					jobRoleId: 1,
+				}),
+			);
+		});
+	});
+
 	describe("getJobRoleMetadata", () => {
 		it("should request metadata with authorization header", async () => {
 			const metadata = {
@@ -355,31 +385,8 @@ describe("JobRoleService", () => {
 
 			const axiosError = {
 				isAxiosError: true,
-				response: { status: 404, statusText: "Not Found" },
-				config: { method: "patch", url: "/job-roles/1" },
-				code: "ERR_BAD_RESPONSE",
-				message: "Request failed with status code 404",
-			};
-
-			vi.mocked(apiClient.patch).mockRejectedValue(axiosError);
-
-			await expect(
-				service.updateJobRole(1, { roleName: "Test" }, token),
-			).rejects.toBe(axiosError);
-			expect(logRequestErrorSpy).toHaveBeenCalledWith(
-				"Failed to update job role",
-				axiosError,
-				expect.objectContaining({
-					endpoint: "/job-roles/1",
-					jobRoleId: 1,
-				response: {
-					status: 400,
-					statusText: "Bad Request",
-				},
-				config: {
-					method: "post",
-					url: "/job-roles",
-				},
+				response: { status: 400, statusText: "Bad Request" },
+				config: { method: "post", url: "/job-roles" },
 				code: "ERR_BAD_REQUEST",
 				message: "Request failed with status code 400",
 			};

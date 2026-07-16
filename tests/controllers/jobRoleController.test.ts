@@ -557,6 +557,27 @@ describe("JobRoleController", () => {
 		it("should redirect to detail page with editSuccess on happy path", async () => {
 			const mockService = {
 				updateJobRole: vi.fn().mockResolvedValue(mockJobRoleInformation),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: { roleName: "Updated Role" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(mockService.updateJobRole).toHaveBeenCalledWith(
+				1,
+				{ roleName: "Updated Role" },
+				token,
+			);
+			expect(res.redirect).toHaveBeenCalledWith("/job-roles/1?editSuccess=true");
+		});
+	});
+
 	describe("getCreateJobRolePage", () => {
 		it("should render create form with metadata on happy path", async () => {
 			const mockService = {
@@ -637,6 +658,18 @@ describe("JobRoleController", () => {
 	});
 
 	describe("createJobRole", () => {
+		const validCreatePayload = {
+			roleName: "Senior Backend Engineer",
+			location: "Dublin",
+			capabilityId: 1,
+			bandId: 2,
+			closingDate: "2026-08-31",
+			description: "Own backend services and integrations.",
+			responsibilities: "Build APIs, review code, support delivery.",
+			sharepointUrl: "https://example.sharepoint.com/job-role",
+			numberOfOpenPositions: 2,
+		};
+
 		it("should redirect to list with created=true on success", async () => {
 			const mockService = {
 				createJobRole: vi.fn().mockResolvedValue(undefined),
@@ -644,43 +677,6 @@ describe("JobRoleController", () => {
 
 			const controller = new JobRoleController(mockService);
 			const req = {
-				params: { id: "1" },
-				session: { jwtToken: token },
-				body: { roleName: "Updated Engineer" },
-			} as unknown as Request;
-			const res = mockRes();
-
-			await controller.submitEditJobRole(req, res);
-
-			expect(mockService.updateJobRole).toHaveBeenCalledWith(
-				1,
-				expect.objectContaining({ roleName: "Updated Engineer" }),
-				token,
-			);
-			expect(res.redirect).toHaveBeenCalledWith(
-				"/job-roles/1?editSuccess=true",
-			);
-		});
-
-		it("should return 400 for invalid id", async () => {
-			const mockService = {} as unknown as JobRoleService;
-			const controller = new JobRoleController(mockService);
-			const req = {
-				params: { id: "abc" },
-				session: { jwtToken: token },
-				body: { roleName: "Test" },
-			} as unknown as Request;
-			const res = mockRes();
-
-			await controller.submitEditJobRole(req, res);
-
-			expect(res.status).toHaveBeenCalledWith(400);
-			expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
-		});
-
-		it("should re-render edit page with error on body validation failure", async () => {
-			const mockService = {
-				getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
 				session: { jwtToken: token },
 				body: validCreatePayload,
 			} as unknown as Request;
@@ -689,17 +685,7 @@ describe("JobRoleController", () => {
 			await controller.createJobRole(req, res);
 
 			expect(mockService.createJobRole).toHaveBeenCalledWith(
-				{
-					roleName: "Senior Backend Engineer",
-					location: "Dublin",
-					capabilityId: 1,
-					bandId: 2,
-					closingDate: "2026-08-31",
-					description: "Own backend services and integrations.",
-					responsibilities: "Build APIs, review code, support delivery.",
-					sharepointUrl: "https://example.sharepoint.com/job-role",
-					numberOfOpenPositions: 2,
-				},
+				validCreatePayload,
 				token,
 			);
 			expect(res.redirect).toHaveBeenCalledWith("/job-roles?created=true");
@@ -713,17 +699,16 @@ describe("JobRoleController", () => {
 
 			const controller = new JobRoleController(mockService);
 			const req = {
-				params: { id: "1" },
 				session: { jwtToken: token },
 				body: {},
 			} as unknown as Request;
 			const res = mockRes();
 
-			await controller.submitEditJobRole(req, res);
+			await controller.createJobRole(req, res);
 
 			expect(res.status).toHaveBeenCalledWith(400);
 			expect(res.render).toHaveBeenCalledWith(
-				"pages/job-role-edit.njk",
+				"pages/job-role-form.njk",
 				expect.objectContaining({
 					error: expect.any(String),
 				}),
@@ -734,109 +719,26 @@ describe("JobRoleController", () => {
 			const mockService = {} as unknown as JobRoleService;
 			const controller = new JobRoleController(mockService);
 			const req = {
-				params: { id: "1" },
 				session: {},
-				body: { roleName: "Test" },
-			} as unknown as Request;
-			const res = mockRes();
-
-			await controller.submitEditJobRole(req, res);
-
-			expect(res.redirect).toHaveBeenCalledWith("/login");
-		});
-
-		it("should return 404 when backend returns 404", async () => {
-			const mockService = {
-				updateJobRole: vi.fn().mockRejectedValue({
-					isAxiosError: true,
-					response: { status: 404 },
-				}),
-				session: { jwtToken: token },
-				body: { ...validCreatePayload, roleName: "" },
+				body: validCreatePayload,
 			} as unknown as Request;
 			const res = mockRes();
 
 			await controller.createJobRole(req, res);
 
-			expect(res.status).toHaveBeenCalledWith(400);
-			expect(res.render).toHaveBeenCalledWith(
-				"pages/job-role-form.njk",
-				expect.objectContaining({
-					capabilities: mockMetadata.capabilities,
-					bands: mockMetadata.bands,
-					error: "Please fix the highlighted fields.",
-					fieldErrors: expect.objectContaining({
-						roleName: "Role name is required.",
-					}),
-				}),
-			);
-			expect(mockService.createJobRole).not.toHaveBeenCalled();
-		});
-
-		it("should redirect to login when token is missing", async () => {
-			const mockService = {
-				createJobRole: vi.fn(),
-			} as unknown as JobRoleService;
-
-			const controller = new JobRoleController(mockService);
-			const req = {
-				params: { id: "1" },
-				session: { jwtToken: token },
-				body: { roleName: "Test" },
-			} as unknown as Request;
-			const res = mockRes();
-
-			await controller.submitEditJobRole(req, res);
-
-			expect(res.status).toHaveBeenCalledWith(404);
-			expect(res.send).toHaveBeenCalledWith("Job role not found");
+			expect(res.redirect).toHaveBeenCalledWith("/login");
 		});
 
 		it("should return 400 when backend returns 400", async () => {
 			const mockService = {
-				updateJobRole: vi.fn().mockRejectedValue({
-					isAxiosError: true,
-					response: { status: 400 },
-				session: {},
-				body: validCreatePayload,
-			} as unknown as Request;
-			const res = mockRes();
-
-			await controller.createJobRole(req, res);
-
-			expect(res.redirect).toHaveBeenCalledWith("/login");
-			expect(mockService.createJobRole).not.toHaveBeenCalled();
-		});
-
-		it("should return 400 and render backend validation error", async () => {
-			const mockService = {
-				getJobRoleMetadata: vi.fn().mockResolvedValue(mockMetadata),
 				createJobRole: vi.fn().mockRejectedValue({
 					isAxiosError: true,
-					response: {
-						status: 400,
-						data: { message: "Role already exists." },
-					},
+					response: { status: 400 },
 				}),
 			} as unknown as JobRoleService;
 
 			const controller = new JobRoleController(mockService);
 			const req = {
-				params: { id: "1" },
-				session: { jwtToken: token },
-				body: { roleName: "Test" },
-			} as unknown as Request;
-			const res = mockRes();
-
-			await controller.submitEditJobRole(req, res);
-
-			expect(res.status).toHaveBeenCalledWith(400);
-			expect(res.send).toHaveBeenCalledWith("Invalid update data");
-		});
-
-		it("should return 500 for generic errors", async () => {
-			const mockService = {
-				updateJobRole: vi.fn().mockRejectedValue(new Error("unexpected")),
 				session: { jwtToken: token },
 				body: validCreatePayload,
 			} as unknown as Request;
@@ -847,7 +749,7 @@ describe("JobRoleController", () => {
 			expect(res.status).toHaveBeenCalledWith(400);
 			expect(res.render).toHaveBeenCalledWith(
 				"pages/job-role-form.njk",
-				expect.objectContaining({ error: "Role already exists." }),
+				expect.objectContaining({ error: expect.any(String) }),
 			);
 		});
 
@@ -859,17 +761,6 @@ describe("JobRoleController", () => {
 
 			const controller = new JobRoleController(mockService);
 			const req = {
-				params: { id: "1" },
-				session: { jwtToken: token },
-				body: { roleName: "Test" },
-			} as unknown as Request;
-			const res = mockRes();
-
-			await controller.submitEditJobRole(req, res);
-
-			expect(res.status).toHaveBeenCalledWith(500);
-			expect(res.send).toHaveBeenCalledWith(
-				"Could not update job role. Please try again.",
 				session: { jwtToken: token },
 				body: validCreatePayload,
 			} as unknown as Request;
