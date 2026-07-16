@@ -365,10 +365,13 @@ describe("JobRoleController", () => {
 
 		await controller.getJobRoleById(req, res);
 
-		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", expect.objectContaining({
-			canEdit: true,
-			editSuccess: false,
-		}));
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				canEdit: true,
+				editSuccess: false,
+			}),
+		);
 	});
 
 	it("should pass canEdit=false when user is not ADMIN", async () => {
@@ -387,10 +390,13 @@ describe("JobRoleController", () => {
 
 		await controller.getJobRoleById(req, res);
 
-		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", expect.objectContaining({
-			canEdit: false,
-			editSuccess: false,
-		}));
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				canEdit: false,
+				editSuccess: false,
+			}),
+		);
 	});
 
 	it("should pass editSuccess=true when editSuccess query param is true", async () => {
@@ -409,9 +415,12 @@ describe("JobRoleController", () => {
 
 		await controller.getJobRoleById(req, res);
 
-		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", expect.objectContaining({
-			editSuccess: true,
-		}));
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				editSuccess: true,
+			}),
+		);
 	});
 
 	describe("getEditJobRolePage", () => {
@@ -525,7 +534,9 @@ describe("JobRoleController", () => {
 				expect.objectContaining({ roleName: "Updated Engineer" }),
 				token,
 			);
-			expect(res.redirect).toHaveBeenCalledWith("/job-roles/1?editSuccess=true");
+			expect(res.redirect).toHaveBeenCalledWith(
+				"/job-roles/1?editSuccess=true",
+			);
 		});
 
 		it("should return 400 for invalid id", async () => {
@@ -643,7 +654,9 @@ describe("JobRoleController", () => {
 			await controller.submitEditJobRole(req, res);
 
 			expect(res.status).toHaveBeenCalledWith(500);
-			expect(res.send).toHaveBeenCalledWith("Could not update job role. Please try again.");
+			expect(res.send).toHaveBeenCalledWith(
+				"Could not update job role. Please try again.",
+			);
 		});
 	});
 });

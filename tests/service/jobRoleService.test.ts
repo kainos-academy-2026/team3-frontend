@@ -280,13 +280,9 @@ describe("JobRoleService", () => {
 			const data = { roleName: "Senior Engineer" };
 			const result = await service.updateJobRole(1, data, token);
 
-			expect(apiClient.patch).toHaveBeenCalledWith(
-				"/job-roles/1",
-				data,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
-			);
+			expect(apiClient.patch).toHaveBeenCalledWith("/job-roles/1", data, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
 			expect(result).toEqual(mockUpdatedJobRole);
 		});
 

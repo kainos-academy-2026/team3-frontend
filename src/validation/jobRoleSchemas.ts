@@ -53,8 +53,11 @@ export const UpdateJobRoleRequestSchema = z
 			.optional(),
 	})
 	.refine(
-		(data) => Object.keys(data).some((k) => data[k as keyof typeof data] !== undefined),
+		(data) =>
+			Object.keys(data).some((k) => data[k as keyof typeof data] !== undefined),
 		{ message: "At least one field must be provided." },
 	);
 
-export type UpdateJobRoleRequestData = z.infer<typeof UpdateJobRoleRequestSchema>;
+export type UpdateJobRoleRequestData = z.infer<
+	typeof UpdateJobRoleRequestSchema
+>;

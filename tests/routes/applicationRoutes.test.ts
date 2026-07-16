@@ -41,7 +41,12 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 	},
 	requireAdmin: (
 		req: { session: { jwtToken?: string } },
-		res: { redirect: (path: string) => unknown; status: (code: number) => { render: (view: string, data?: unknown) => unknown } },
+		res: {
+			redirect: (path: string) => unknown;
+			status: (code: number) => {
+				render: (view: string, data?: unknown) => unknown;
+			};
+		},
 		next: () => void,
 	) => {
 		if (!mockIsAuthenticated) {

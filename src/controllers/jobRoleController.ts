@@ -117,7 +117,10 @@ export class JobRoleController {
 		}
 
 		try {
-			const jobRole = await this.jobRoleService.getJobRoleById(jobRoleId, token);
+			const jobRole = await this.jobRoleService.getJobRoleById(
+				jobRoleId,
+				token,
+			);
 			const viewModel: EditJobRoleViewModel = { jobRole };
 			res.render("pages/job-role-edit.njk", viewModel);
 		} catch (error) {
@@ -147,7 +150,10 @@ export class JobRoleController {
 				return;
 			}
 			try {
-				const jobRole = await this.jobRoleService.getJobRoleById(jobRoleId, token);
+				const jobRole = await this.jobRoleService.getJobRoleById(
+					jobRoleId,
+					token,
+				);
 				const viewModel: EditJobRoleViewModel = {
 					jobRole,
 					error: parseResult.error.issues[0].message,
@@ -167,7 +173,11 @@ export class JobRoleController {
 		}
 
 		try {
-			await this.jobRoleService.updateJobRole(jobRoleId, parseResult.data, token);
+			await this.jobRoleService.updateJobRole(
+				jobRoleId,
+				parseResult.data,
+				token,
+			);
 			res.redirect(`/job-roles/${jobRoleId}?editSuccess=true`);
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
