@@ -16,6 +16,10 @@
         <p class="form-success">Application submitted successfully. Your status is now in progress.</p>
       {% endif %}
 
+      {% if editSuccess %}
+        <p class="form-success">Job role updated successfully.</p>
+      {% endif %}
+
       <dl class="role-card__details role-details__grid">
         <div>
           <dt>Location</dt>
@@ -55,9 +59,15 @@
         </div>
       </dl>
 
-      {% if canApply %}
-        <a class="button" href="/job-roles/{{ jobRole.id }}/apply">Apply for this role</a>
-      {% endif %}
+      <div class="role-details__actions">
+        {% if canApply %}
+          <a class="button" href="/job-roles/{{ jobRole.id }}/apply">Apply for this role</a>
+        {% endif %}
+
+        {% if canEdit %}
+          <a class="button button--secondary" href="/job-roles/{{ jobRole.id }}/edit">Edit job role</a>
+        {% endif %}
+      </div>
     </article>
   </section>
 {% endblock %}

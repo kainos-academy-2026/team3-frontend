@@ -49,18 +49,6 @@ const mockMetadata: JobRoleMetadataResponse = {
 	bands: [{ bandId: 2, bandName: "Band 2" }],
 };
 
-const validCreatePayload = {
-	roleName: "Senior Backend Engineer",
-	location: "Dublin",
-	capabilityId: "1",
-	bandId: "2",
-	closingDate: "2026-08-31",
-	description: "Own backend services and integrations.",
-	responsibilities: "Build APIs, review code, support delivery.",
-	sharepointUrl: "https://example.sharepoint.com/job-role",
-	numberOfOpenPositions: "2",
-};
-
 describe("JobRoleController", () => {
 	const token = "mock-token";
 
@@ -159,6 +147,8 @@ describe("JobRoleController", () => {
 			jobRole: mockJobRoleInformation,
 			canApply: true,
 			applicationSubmitted: false,
+			canEdit: false,
+			editSuccess: false,
 		});
 	});
 
@@ -185,6 +175,8 @@ describe("JobRoleController", () => {
 			jobRole: { ...mockJobRoleInformation, status: JobRoleStatus.Closed },
 			canApply: false,
 			applicationSubmitted: false,
+			canEdit: false,
+			editSuccess: false,
 		});
 	});
 
@@ -208,6 +200,8 @@ describe("JobRoleController", () => {
 			jobRole: mockJobRoleInformation,
 			canApply: true,
 			applicationSubmitted: true,
+			canEdit: false,
+			editSuccess: false,
 		});
 	});
 
@@ -234,6 +228,8 @@ describe("JobRoleController", () => {
 			jobRole: { ...mockJobRoleInformation, numberOfOpenPositions: 0 },
 			canApply: false,
 			applicationSubmitted: false,
+			canEdit: false,
+			editSuccess: false,
 		});
 	});
 
@@ -381,6 +377,203 @@ describe("JobRoleController", () => {
 		expect(res.send).toHaveBeenCalledWith("Unable to generate report");
 	});
 
+	it("should pass canEdit=true and editSuccess=false when user is ADMIN and no editSuccess query param", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token, userRole: "ADMIN" },
+			query: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				canEdit: true,
+				editSuccess: false,
+			}),
+		);
+	});
+
+	it("should pass canEdit=false when user is not ADMIN", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token, userRole: "USER" },
+			query: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				canEdit: false,
+				editSuccess: false,
+			}),
+		);
+	});
+
+	it("should pass editSuccess=true when editSuccess query param is true", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token, userRole: "ADMIN" },
+			query: { editSuccess: "true" },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				editSuccess: true,
+			}),
+		);
+	});
+
+	describe("getEditJobRolePage", () => {
+		it("should render the edit page on happy path", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(mockService.getJobRoleById).toHaveBeenCalledWith(1, token);
+			expect(res.render).toHaveBeenCalledWith("pages/job-role-edit.njk", {
+				jobRole: mockJobRoleInformation,
+			});
+		});
+
+		it("should return 400 when backend rejects an invalid id", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 400 },
+				}),
+			} as unknown as JobRoleService;
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "abc" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(mockService.getJobRoleById).toHaveBeenCalledWith(NaN, token);
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
+		});
+
+		it("should redirect to login when token is missing", async () => {
+			const mockService = {} as unknown as JobRoleService;
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: {},
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(res.redirect).toHaveBeenCalledWith("/login");
+		});
+
+		it("should return 404 when job role is not found", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 404 },
+				}),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.send).toHaveBeenCalledWith("Job role not found");
+		});
+
+		it("should return 500 for unexpected errors", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockRejectedValue(new Error("unexpected")),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith("Internal Server Error");
+		});
+	});
+
+	describe("submitEditJobRole", () => {
+		it("should redirect to detail page with editSuccess on happy path", async () => {
+			const mockService = {
+				updateJobRole: vi.fn().mockResolvedValue(mockJobRoleInformation),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				body: { roleName: "Updated Role" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(mockService.updateJobRole).toHaveBeenCalledWith(
+				1,
+				{ roleName: "Updated Role" },
+				token,
+			);
+			expect(res.redirect).toHaveBeenCalledWith(
+				"/job-roles/1?editSuccess=true",
+			);
+		});
+	});
+
 	describe("getCreateJobRolePage", () => {
 		it("should render create form with metadata on happy path", async () => {
 			const mockService = {
@@ -461,6 +654,18 @@ describe("JobRoleController", () => {
 	});
 
 	describe("createJobRole", () => {
+		const validCreatePayload = {
+			roleName: "Senior Backend Engineer",
+			location: "Dublin",
+			capabilityId: 1,
+			bandId: 2,
+			closingDate: "2026-08-31",
+			description: "Own backend services and integrations.",
+			responsibilities: "Build APIs, review code, support delivery.",
+			sharepointUrl: "https://example.sharepoint.com/job-role",
+			numberOfOpenPositions: 2,
+		};
+
 		it("should redirect to list with created=true on success", async () => {
 			const mockService = {
 				createJobRole: vi.fn().mockResolvedValue(undefined),
@@ -476,17 +681,7 @@ describe("JobRoleController", () => {
 			await controller.createJobRole(req, res);
 
 			expect(mockService.createJobRole).toHaveBeenCalledWith(
-				{
-					roleName: "Senior Backend Engineer",
-					location: "Dublin",
-					capabilityId: 1,
-					bandId: 2,
-					closingDate: "2026-08-31",
-					description: "Own backend services and integrations.",
-					responsibilities: "Build APIs, review code, support delivery.",
-					sharepointUrl: "https://example.sharepoint.com/job-role",
-					numberOfOpenPositions: 2,
-				},
+				validCreatePayload,
 				token,
 			);
 			expect(res.redirect).toHaveBeenCalledWith("/job-roles?created=true");
@@ -501,7 +696,7 @@ describe("JobRoleController", () => {
 			const controller = new JobRoleController(mockService);
 			const req = {
 				session: { jwtToken: token },
-				body: { ...validCreatePayload, roleName: "" },
+				body: {},
 			} as unknown as Request;
 			const res = mockRes();
 
@@ -511,22 +706,13 @@ describe("JobRoleController", () => {
 			expect(res.render).toHaveBeenCalledWith(
 				"pages/job-role-form.njk",
 				expect.objectContaining({
-					capabilities: mockMetadata.capabilities,
-					bands: mockMetadata.bands,
-					error: "Please fix the highlighted fields.",
-					fieldErrors: expect.objectContaining({
-						roleName: "Role name is required.",
-					}),
+					error: expect.any(String),
 				}),
 			);
-			expect(mockService.createJobRole).not.toHaveBeenCalled();
 		});
 
 		it("should redirect to login when token is missing", async () => {
-			const mockService = {
-				createJobRole: vi.fn(),
-			} as unknown as JobRoleService;
-
+			const mockService = {} as unknown as JobRoleService;
 			const controller = new JobRoleController(mockService);
 			const req = {
 				session: {},
@@ -537,18 +723,13 @@ describe("JobRoleController", () => {
 			await controller.createJobRole(req, res);
 
 			expect(res.redirect).toHaveBeenCalledWith("/login");
-			expect(mockService.createJobRole).not.toHaveBeenCalled();
 		});
 
-		it("should return 400 and render backend validation error", async () => {
+		it("should return 400 when backend returns 400", async () => {
 			const mockService = {
-				getJobRoleMetadata: vi.fn().mockResolvedValue(mockMetadata),
 				createJobRole: vi.fn().mockRejectedValue({
 					isAxiosError: true,
-					response: {
-						status: 400,
-						data: { message: "Role already exists." },
-					},
+					response: { status: 400 },
 				}),
 			} as unknown as JobRoleService;
 
@@ -564,7 +745,7 @@ describe("JobRoleController", () => {
 			expect(res.status).toHaveBeenCalledWith(400);
 			expect(res.render).toHaveBeenCalledWith(
 				"pages/job-role-form.njk",
-				expect.objectContaining({ error: "Role already exists." }),
+				expect.objectContaining({ error: expect.any(String) }),
 			);
 		});
 

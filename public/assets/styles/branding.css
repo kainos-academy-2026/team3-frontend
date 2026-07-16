@@ -377,6 +377,14 @@ img {
 	grid-column: 1 / -1;
 }
 
+.role-details__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 1rem;
+	justify-content: space-between;
+}
+
 .role-details__link {
 	color: var(--kainos-green);
 	text-decoration: underline;
@@ -393,6 +401,49 @@ img {
 	display: grid;
 	gap: 1rem;
 	margin-top: 1rem;
+}
+
+.role-edit-section {
+	max-width: 760px;
+	gap: 1rem;
+}
+
+.role-edit-form {
+	display: grid;
+	gap: 0.95rem;
+	max-width: 700px;
+	margin-top: 0.5rem;
+}
+
+.role-edit-form .form-group {
+	display: grid;
+	grid-template-columns: minmax(170px, 210px) minmax(0, 1fr);
+	align-items: start;
+	column-gap: 1rem;
+	row-gap: 0.35rem;
+}
+
+.role-edit-form .form-label {
+	font-weight: 700;
+	padding-top: 0.55rem;
+	color: var(--kainos-navy-deep);
+}
+
+.role-edit-form .form-input {
+	width: 100%;
+	min-height: 2.45rem;
+	padding: 0.5rem 0.65rem;
+	font: inherit;
+	color: var(--kainos-text);
+	border: 1px solid rgba(16, 32, 63, 0.25);
+	border-radius: 0.35rem;
+	background: #ffffff;
+}
+
+.role-edit-form textarea.form-input {
+	min-height: 8.5rem;
+	resize: vertical;
+	line-height: 1.45;
 }
 
 .job-role-form-page {
@@ -576,6 +627,10 @@ img {
 	outline-offset: 3px;
 }
 
+.role-edit-form .button {
+	margin-top: 0.5rem;
+}
+
 /* Header auth button alignment */
 .site-header .button,
 .site-header .btn-primary {
@@ -628,6 +683,15 @@ img {
 
 	.role-details-card {
 		padding: 1.5rem;
+	}
+
+	.role-edit-form .form-group {
+		grid-template-columns: 1fr;
+		row-gap: 0.45rem;
+	}
+
+	.role-edit-form .form-label {
+		padding-top: 0;
 	}
 
 	.job-role-form {
