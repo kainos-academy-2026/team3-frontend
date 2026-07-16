@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import {
 	type CreateJobRolePayload,
 	type JobRoleApplicantSummary,
+	type EditJobRoleViewModel,
 	type JobRoleInformationViewModel,
 	JobRoleStatus,
 } from "../models/jobRole.js";
@@ -16,6 +17,7 @@ import type { JobRoleService } from "../services/jobRoleService.js";
 import {
 	type CreateJobRoleData,
 	CreateJobRoleSchema,
+	UpdateJobRoleRequestSchema,
 } from "../validation/jobRoleSchemas.js";
 
 const toCreateJobRoleFormValues = (body: unknown): CreateJobRoleFormValues => {
@@ -162,6 +164,8 @@ export class JobRoleController {
 			) {
 				applicationAction = action;
 			}
+			const canEdit = req.session.userRole === "ADMIN";
+			const editSuccess = req.query.editSuccess === "true";
 			const viewModel: JobRoleInformationViewModel = {
 				jobRole,
 				canApply:
@@ -172,6 +176,8 @@ export class JobRoleController {
 				applicants,
 				adminApplicationsError,
 				applicationAction,
+				canEdit,
+				editSuccess,
 			};
 
 			res.render("pages/job-role-information.njk", viewModel);
@@ -421,6 +427,94 @@ export class JobRoleController {
 		} catch (error) {
 			console.error("Failed to generate job role report:", error);
 			res.status(500).send("Unable to generate report");
+		}
+	}
+
+	async getEditJobRolePage(req: Request, res: Response): Promise<void> {
+		const jobRoleId = Number(req.params.id);
+
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+
+		try {
+			const jobRole = await this.jobRoleService.getJobRoleById(
+				jobRoleId,
+				token,
+			);
+			const viewModel: EditJobRoleViewModel = { jobRole };
+			res.render("pages/job-role-edit.njk", viewModel);
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				const status = error.response?.status;
+				if (status === 400) {
+					res.status(400).send("Invalid job role ID");
+					return;
+				}
+				if (status === 404) {
+					res.status(404).send("Job role not found");
+					return;
+				}
+			}
+			res.status(500).send("Internal Server Error");
+		}
+	}
+
+	async submitEditJobRole(req: Request, res: Response): Promise<void> {
+		const jobRoleId = Number(req.params.id);
+		if (!Number.isInteger(jobRoleId) || jobRoleId <= 0) {
+			res.status(400).send("Invalid job role ID");
+			return;
+		}
+
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+		const authenticatedToken: string = token;
+
+		const parseResult = UpdateJobRoleRequestSchema.safeParse(req.body);
+		if (!parseResult.success) {
+			try {
+				const jobRole = await this.jobRoleService.getJobRoleById(
+					jobRoleId,
+					authenticatedToken,
+				);
+				const viewModel: EditJobRoleViewModel = {
+					jobRole,
+					error: parseResult.error.issues[0].message,
+					formValues: req.body as Record<string, string>,
+				};
+				res.status(400).render("pages/job-role-edit.njk", viewModel);
+			} catch {
+				res.status(500).send("Internal Server Error");
+			}
+			return;
+		}
+
+		try {
+			await this.jobRoleService.updateJobRole(
+				jobRoleId,
+				parseResult.data,
+				authenticatedToken,
+			);
+			res.redirect(`/job-roles/${jobRoleId}?editSuccess=true`);
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				const status = error.response?.status;
+				if (status === 404) {
+					res.status(404).send("Job role not found");
+					return;
+				}
+				if (status === 400) {
+					res.status(400).send("Invalid update data");
+					return;
+				}
+			}
+			res.status(500).send("Could not update job role. Please try again.");
 		}
 	}
 }

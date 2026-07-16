@@ -112,4 +112,12 @@ export interface JobRoleInformationViewModel {
 	applicants?: JobRoleApplicantSummary[];
 	adminApplicationsError?: string | null;
 	applicationAction?: "hire-success" | "reject-success" | "error" | null;
+	canEdit?: boolean;
+	editSuccess?: boolean;
+}
+
+export interface EditJobRoleViewModel {
+	jobRole: JobRoleInformation;
+	error?: string;
+	formValues?: Record<string, string>;
 }
