@@ -73,6 +73,25 @@ export class JobRoleService {
 		}
 	}
 
+	async getJobRoleReport(token: string): Promise<Buffer> {
+        try {
+            const response = await apiClient.get<ArrayBuffer>("/job-roles/report", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    Accept: "text/csv",
+                },
+                responseType: "arraybuffer",
+            });
+ 
+            return Buffer.from(response.data);
+        } catch (error) {
+            this.logRequestError("Failed to fetch job role report", error, {
+                endpoint: "/job-roles/report",
+            });
+            throw error;
+        }
+    }
+
 	async getUploadCvUrl(
 		jobRoleId: number,
 		userId: number,
