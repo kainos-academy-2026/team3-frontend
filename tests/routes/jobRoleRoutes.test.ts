@@ -1,6 +1,7 @@
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../../src/app.ts";
+import { JobRoleController } from "../../src/controllers/jobRoleController.ts";
 import {
 	type JobRoleInformation,
 	JobRoleStatus,
@@ -8,6 +9,7 @@ import {
 import * as jobRoleServiceModule from "../../src/services/jobRoleService.ts";
 
 let mockIsAuthenticated = true;
+let mockIsAdmin = true;
 const { mockJwtToken } = vi.hoisted(() => {
 	const jwtPayload = Buffer.from(JSON.stringify({ id: 1 }), "utf8").toString(
 		"base64url",
@@ -44,10 +46,20 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 		next();
 	},
 	requireAdmin: (
-		req: { session: { jwtToken?: string; userRole?: string } },
-		_res: unknown,
+		req: { session: { userRole?: string; jwtToken?: string } },
+		res: {
+			status: (code: number) => {
+				render: (view: string, model: unknown) => void;
+			};
+		},
 		next: () => void,
 	) => {
+		if (!mockIsAdmin) {
+			res.status(403).render("pages/home.njk", {
+				error: "You do not have permission to access this page.",
+			});
+			return;
+		}
 		req.session.jwtToken = "mock-token";
 		req.session.userRole = "ADMIN";
 		next();
@@ -72,6 +84,7 @@ describe("GET /job-roles routes", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		mockIsAuthenticated = true;
+		mockIsAdmin = true;
 	});
 
 	it("should return 200 and render job roles on happy path", async () => {
@@ -161,6 +174,80 @@ describe("GET /job-roles routes", () => {
 
 		expect(response.status).toBe(500);
 		expect(response.text).toContain("Backend server error");
+	});
+
+	describe("GET /job-roles/new", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app).get("/job-roles/new");
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app).get("/job-roles/new");
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should delegate to controller for admins", async () => {
+			const createPageSpy = vi
+				.spyOn(JobRoleController.prototype, "getCreateJobRolePage")
+				.mockImplementation(async (_req, res) => {
+					res.status(200).send("create form");
+				});
+
+			const response = await request(app).get("/job-roles/new");
+
+			expect(response.status).toBe(200);
+			expect(response.text).toContain("create form");
+			expect(createPageSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe("POST /job-roles", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app).post("/job-roles").send({});
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app).post("/job-roles").send({});
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should allow admins and follow controller success path", async () => {
+			vi.spyOn(
+				jobRoleServiceModule.JobRoleService.prototype,
+				"createJobRole",
+			).mockResolvedValue(undefined);
+
+			const response = await request(app).post("/job-roles").send({
+				roleName: "Senior Backend Engineer",
+				location: "Dublin",
+				capabilityId: "1",
+				bandId: "2",
+				closingDate: "2026-08-31",
+				description: "Own backend services and integrations.",
+				responsibilities: "Build APIs, review code, support delivery.",
+				sharepointUrl: "https://example.sharepoint.com/job-role",
+				numberOfOpenPositions: "2",
+			});
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/job-roles?created=true");
+		});
 	});
 
 	it("should return csv report for GET /job-roles/report", async () => {

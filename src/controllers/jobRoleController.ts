@@ -1,10 +1,68 @@
 import axios from "axios";
 import type { Request, Response } from "express";
 import {
+	type CreateJobRolePayload,
 	type JobRoleInformationViewModel,
 	JobRoleStatus,
 } from "../models/jobRole.js";
+import {
+	type CreateJobRoleFieldErrors,
+	type CreateJobRoleFormValues,
+	type CreateJobRolePageModel,
+	defaultCreateJobRoleFormValues,
+} from "../models/jobRoleForm.js";
 import type { JobRoleService } from "../services/jobRoleService.js";
+import {
+	type CreateJobRoleData,
+	CreateJobRoleSchema,
+} from "../validation/jobRoleSchemas.js";
+
+const toCreateJobRoleFormValues = (body: unknown): CreateJobRoleFormValues => {
+	if (!body || typeof body !== "object") {
+		return { ...defaultCreateJobRoleFormValues };
+	}
+
+	return {
+		...defaultCreateJobRoleFormValues,
+		...(body as CreateJobRoleFormValues),
+	};
+};
+
+const createJobRoleFields = [
+	"roleName",
+	"location",
+	"capabilityId",
+	"bandId",
+	"closingDate",
+	"description",
+	"responsibilities",
+	"sharepointUrl",
+	"numberOfOpenPositions",
+] as const satisfies readonly (keyof CreateJobRolePayload)[];
+
+const isCreateJobRoleField = (
+	value: PropertyKey,
+): value is keyof CreateJobRolePayload => {
+	return (
+		typeof value === "string" &&
+		(createJobRoleFields as readonly string[]).includes(value)
+	);
+};
+
+const toFieldErrors = (
+	issues: { path: PropertyKey[]; message: string }[],
+): CreateJobRoleFieldErrors => {
+	const fieldErrors: CreateJobRoleFieldErrors = {};
+
+	for (const issue of issues) {
+		const field = issue.path[0];
+		if (isCreateJobRoleField(field)) {
+			fieldErrors[field] ??= issue.message;
+		}
+	}
+
+	return fieldErrors;
+};
 
 export class JobRoleController {
 	constructor(private jobRoleService: JobRoleService) {}
@@ -18,11 +76,17 @@ export class JobRoleController {
 
 		try {
 			const jobRoles = await this.jobRoleService.getAllJobRoles(token);
-			res.render("pages/job-role-list.njk", { jobRoles });
+			const created = req.query?.created === "true";
+			res.render("pages/job-role-list.njk", {
+				jobRoles,
+				created,
+			});
 		} catch (error) {
 			console.error("Failed to get job roles:", error);
+			const created = req.query?.created === "true";
 			res.status(500).render("pages/job-role-list.njk", {
 				jobRoles: [],
+				created,
 				errorTitle: "Unable to load job roles",
 				errorMessage:
 					"We could not fetch job roles right now. Please try again shortly.",
@@ -71,6 +135,142 @@ export class JobRoleController {
 				}
 			}
 			res.status(500).send("Internal Server Error");
+		}
+	}
+
+	private async buildCreateJobRolePageModel(
+		token: string,
+		overrides: Partial<CreateJobRolePageModel> = {},
+	): Promise<CreateJobRolePageModel> {
+		const metadata = await this.jobRoleService.getJobRoleMetadata(token);
+
+		return {
+			capabilities: metadata.capabilities,
+			bands: metadata.bands,
+			formValues: { ...defaultCreateJobRoleFormValues },
+			fieldErrors: {},
+			error: null,
+			...overrides,
+		};
+	}
+
+	async getCreateJobRolePage(req: Request, res: Response): Promise<void> {
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+
+		try {
+			const model = await this.buildCreateJobRolePageModel(token);
+			res.render("pages/job-role-form.njk", model);
+		} catch (error) {
+			console.error("Failed to get create job role page:", error);
+			res.status(500).render("pages/job-role-form.njk", {
+				capabilities: [],
+				bands: [],
+				formValues: { ...defaultCreateJobRoleFormValues },
+				fieldErrors: {},
+				error: "Unable to load create role form right now.",
+			});
+		}
+	}
+
+	async createJobRole(req: Request, res: Response): Promise<void> {
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+
+		const parseResult = CreateJobRoleSchema.safeParse(req.body);
+
+		if (!parseResult.success) {
+			try {
+				const model = await this.buildCreateJobRolePageModel(token, {
+					formValues: toCreateJobRoleFormValues(req.body),
+					fieldErrors: toFieldErrors(parseResult.error.issues),
+					error: "Please fix the highlighted fields.",
+				});
+				res.status(400).render("pages/job-role-form.njk", model);
+				return;
+			} catch {
+				res.status(400).render("pages/job-role-form.njk", {
+					capabilities: [],
+					bands: [],
+					formValues: toCreateJobRoleFormValues(req.body),
+					fieldErrors: toFieldErrors(parseResult.error.issues),
+					error: "Please fix the highlighted fields.",
+				});
+				return;
+			}
+		}
+
+		const payload: CreateJobRoleData = parseResult.data;
+
+		try {
+			await this.jobRoleService.createJobRole(payload, token);
+			res.redirect("/job-roles?created=true");
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				const status = error.response?.status;
+
+				if (status === 401) {
+					res.redirect("/login");
+					return;
+				}
+
+				if (status === 403) {
+					res.status(403).render("pages/home.njk", {
+						error: "You do not have permission to access this page.",
+					});
+					return;
+				}
+
+				if (status === 400) {
+					const responseError = error.response?.data as { message?: unknown };
+					const errorMessage =
+						typeof responseError?.message === "string"
+							? responseError.message
+							: "Please check the form details and try again.";
+
+					try {
+						const model = await this.buildCreateJobRolePageModel(token, {
+							formValues: toCreateJobRoleFormValues(req.body),
+							fieldErrors: {},
+							error: errorMessage,
+						});
+						res.status(400).render("pages/job-role-form.njk", model);
+						return;
+					} catch {
+						res.status(400).render("pages/job-role-form.njk", {
+							capabilities: [],
+							bands: [],
+							formValues: toCreateJobRoleFormValues(req.body),
+							fieldErrors: {},
+							error: errorMessage,
+						});
+						return;
+					}
+				}
+			}
+
+			try {
+				const model = await this.buildCreateJobRolePageModel(token, {
+					formValues: toCreateJobRoleFormValues(req.body),
+					fieldErrors: {},
+					error: "Unable to create job role right now. Please try again.",
+				});
+				res.status(500).render("pages/job-role-form.njk", model);
+			} catch {
+				res.status(500).render("pages/job-role-form.njk", {
+					capabilities: [],
+					bands: [],
+					formValues: toCreateJobRoleFormValues(req.body),
+					fieldErrors: {},
+					error: "Unable to create job role right now. Please try again.",
+				});
+			}
 		}
 	}
 
