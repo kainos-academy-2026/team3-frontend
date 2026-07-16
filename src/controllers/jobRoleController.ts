@@ -2,7 +2,6 @@ import axios from "axios";
 import type { Request, Response } from "express";
 import {
 	type CreateJobRolePayload,
-	type JobRoleApplicantSummary,
 	type EditJobRoleViewModel,
 	type JobRoleInformationViewModel,
 	JobRoleStatus,
@@ -67,22 +66,6 @@ const toFieldErrors = (
 	return fieldErrors;
 };
 
-const toPositiveInteger = (
-	value: string | string[] | undefined,
-): number | null => {
-	if (Array.isArray(value)) {
-		return null;
-	}
-	if (!value) {
-		return null;
-	}
-	const parsed = Number(value);
-	if (!Number.isInteger(parsed) || parsed <= 0) {
-		return null;
-	}
-	return parsed;
-};
-
 export class JobRoleController {
 	constructor(private jobRoleService: JobRoleService) {}
 
@@ -132,38 +115,6 @@ export class JobRoleController {
 				jobRoleId,
 				token,
 			);
-			const isAdmin = Boolean(res.locals?.isAdmin);
-			let applicants: JobRoleApplicantSummary[] = [];
-			let adminApplicationsError: string | null = null;
-
-			if (isAdmin) {
-				try {
-					const applicationsResponse =
-						await this.jobRoleService.getJobRoleApplicationsForAdmin(
-							jobRoleId,
-							token,
-						);
-					applicants = applicationsResponse.applicants;
-				} catch (adminError) {
-					console.error("Failed to fetch applications for admin:", adminError);
-					adminApplicationsError =
-						"Unable to load applicant list right now. Please try again shortly.";
-				}
-			}
-
-			const action = req.query.applicationAction;
-			let applicationAction:
-				| "hire-success"
-				| "reject-success"
-				| "error"
-				| null = null;
-			if (
-				action === "hire-success" ||
-				action === "reject-success" ||
-				action === "error"
-			) {
-				applicationAction = action;
-			}
 			const canEdit = req.session.userRole === "ADMIN";
 			const editSuccess = req.query.editSuccess === "true";
 			const viewModel: JobRoleInformationViewModel = {
@@ -172,10 +123,6 @@ export class JobRoleController {
 					jobRole.status === JobRoleStatus.Open &&
 					jobRole.numberOfOpenPositions > 0,
 				applicationSubmitted: req.query.applicationSubmitted === "true",
-				isAdmin,
-				applicants,
-				adminApplicationsError,
-				applicationAction,
 				canEdit,
 				editSuccess,
 			};
@@ -194,80 +141,6 @@ export class JobRoleController {
 				}
 			}
 			res.status(500).send("Internal Server Error");
-		}
-	}
-
-	async hireApplicant(req: Request, res: Response): Promise<void> {
-		const token = req.session.jwtToken;
-		if (!token) {
-			res.redirect("/login");
-			return;
-		}
-
-		const jobRoleId = toPositiveInteger(req.params.id);
-		const applicationId = toPositiveInteger(req.params.applicationId);
-
-		if (!jobRoleId || !applicationId) {
-			res.status(400).send("Invalid IDs provided");
-			return;
-		}
-
-		try {
-			await this.jobRoleService.hireApplicant(jobRoleId, applicationId, token);
-			res.redirect(`/job-roles/${jobRoleId}?applicationAction=hire-success`);
-		} catch (error) {
-			if (axios.isAxiosError(error)) {
-				const status = error.response?.status;
-				if (status === 401) {
-					res.redirect("/login");
-					return;
-				}
-				if (status === 400 || status === 404 || status === 409) {
-					res.redirect(`/job-roles/${jobRoleId}?applicationAction=error`);
-					return;
-				}
-			}
-
-			res.redirect(`/job-roles/${jobRoleId}?applicationAction=error`);
-		}
-	}
-
-	async rejectApplicant(req: Request, res: Response): Promise<void> {
-		const token = req.session.jwtToken;
-		if (!token) {
-			res.redirect("/login");
-			return;
-		}
-
-		const jobRoleId = toPositiveInteger(req.params.id);
-		const applicationId = toPositiveInteger(req.params.applicationId);
-
-		if (!jobRoleId || !applicationId) {
-			res.status(400).send("Invalid IDs provided");
-			return;
-		}
-
-		try {
-			await this.jobRoleService.rejectApplicant(
-				jobRoleId,
-				applicationId,
-				token,
-			);
-			res.redirect(`/job-roles/${jobRoleId}?applicationAction=reject-success`);
-		} catch (error) {
-			if (axios.isAxiosError(error)) {
-				const status = error.response?.status;
-				if (status === 401) {
-					res.redirect("/login");
-					return;
-				}
-				if (status === 400 || status === 404 || status === 409) {
-					res.redirect(`/job-roles/${jobRoleId}?applicationAction=error`);
-					return;
-				}
-			}
-
-			res.redirect(`/job-roles/${jobRoleId}?applicationAction=error`);
 		}
 	}
 

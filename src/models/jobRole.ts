@@ -104,14 +104,26 @@ export interface RejectApplicantResponse {
 	status: JobRoleApplicationStatus;
 }
 
+export enum AdminApplicationActionStatus {
+	HireSuccess = "hire-success",
+	RejectSuccess = "reject-success",
+	Error = "error",
+}
+
+export interface AdminApplicationsPageViewModel {
+	jobRoleId: number;
+	roleName: string;
+	numberOfOpenPositions: number;
+	applicants: JobRoleApplicantSummary[];
+	adminApplicationsError: string | null;
+	applicationAction: AdminApplicationActionStatus | null;
+}
+
 export interface JobRoleInformationViewModel {
 	jobRole: JobRoleInformation;
 	canApply: boolean;
 	applicationSubmitted: boolean;
 	isAdmin?: boolean;
-	applicants?: JobRoleApplicantSummary[];
-	adminApplicationsError?: string | null;
-	applicationAction?: "hire-success" | "reject-success" | "error" | null;
 	canEdit?: boolean;
 	editSuccess?: boolean;
 }
