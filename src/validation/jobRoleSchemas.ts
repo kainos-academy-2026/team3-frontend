@@ -27,7 +27,7 @@ export const UpdateJobRoleRequestSchema = z
 			.optional(),
 		status: z
 			.nativeEnum(JobRoleStatus, {
-				errorMap: () => ({ message: "Status must be Open or Closed." }),
+				message: "Status must be Open or Closed.",
 			})
 			.optional(),
 		description: z
