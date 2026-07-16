@@ -1,8 +1,8 @@
 import axios from "axios";
 import type { Request, Response } from "express";
 import {
-	type EditJobRoleViewModel,
 	type CreateJobRolePayload,
+	type EditJobRoleViewModel,
 	type JobRoleInformationViewModel,
 	JobRoleStatus,
 } from "../models/jobRole.js";
@@ -13,10 +13,10 @@ import {
 	defaultCreateJobRoleFormValues,
 } from "../models/jobRoleForm.js";
 import type { JobRoleService } from "../services/jobRoleService.js";
-import { UpdateJobRoleRequestSchema } from "../validation/jobRoleSchemas.js";
 import {
 	type CreateJobRoleData,
 	CreateJobRoleSchema,
+	UpdateJobRoleRequestSchema,
 } from "../validation/jobRoleSchemas.js";
 
 const toCreateJobRoleFormValues = (body: unknown): CreateJobRoleFormValues => {

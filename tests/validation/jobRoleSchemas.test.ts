@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { UpdateJobRoleRequestSchema, CreateJobRoleSchema } from "../../src/validation/jobRoleSchemas.ts";
+import {
+	CreateJobRoleSchema,
+	UpdateJobRoleRequestSchema,
+} from "../../src/validation/jobRoleSchemas.ts";
 
 describe("UpdateJobRoleRequestSchema", () => {
 	it("should accept a valid partial payload", () => {

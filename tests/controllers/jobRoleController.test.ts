@@ -49,18 +49,6 @@ const mockMetadata: JobRoleMetadataResponse = {
 	bands: [{ bandId: 2, bandName: "Band 2" }],
 };
 
-const validCreatePayload = {
-	roleName: "Senior Backend Engineer",
-	location: "Dublin",
-	capabilityId: "1",
-	bandId: "2",
-	closingDate: "2026-08-31",
-	description: "Own backend services and integrations.",
-	responsibilities: "Build APIs, review code, support delivery.",
-	sharepointUrl: "https://example.sharepoint.com/job-role",
-	numberOfOpenPositions: "2",
-};
-
 describe("JobRoleController", () => {
 	const token = "mock-token";
 
@@ -574,7 +562,9 @@ describe("JobRoleController", () => {
 				{ roleName: "Updated Role" },
 				token,
 			);
-			expect(res.redirect).toHaveBeenCalledWith("/job-roles/1?editSuccess=true");
+			expect(res.redirect).toHaveBeenCalledWith(
+				"/job-roles/1?editSuccess=true",
+			);
 		});
 	});
 

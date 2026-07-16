@@ -444,6 +444,8 @@ img {
 	min-height: 8.5rem;
 	resize: vertical;
 	line-height: 1.45;
+}
+
 .job-role-form-page {
 	max-width: 860px;
 	display: grid;
@@ -690,6 +692,8 @@ img {
 
 	.role-edit-form .form-label {
 		padding-top: 0;
+	}
+
 	.job-role-form {
 		grid-template-columns: 1fr;
 	}
