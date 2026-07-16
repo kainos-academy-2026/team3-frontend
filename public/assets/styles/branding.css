@@ -227,6 +227,11 @@ img {
 	gap: 1.25rem;
 }
 
+.roles-report-action {
+	display: flex;
+	justify-content: flex-end;
+}
+
 .roles-grid > a {
 	display: block;
 	height: 100%;

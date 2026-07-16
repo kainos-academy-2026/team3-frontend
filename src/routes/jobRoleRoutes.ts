@@ -1,12 +1,16 @@
 import { Router } from "express";
 import { ApplicationController } from "../controllers/applicationController.js";
 import { JobRoleController } from "../controllers/jobRoleController.js";
-import { requireAuth } from "../middleware/authMiddleware.js";
+import { requireAdmin, requireAuth } from "../middleware/authMiddleware.js";
 import { JobRoleService } from "../services/jobRoleService.js";
 
 const router = Router();
 const service = new JobRoleService();
 const jobRoleController = new JobRoleController(service);
+
+router.get("/job-roles/report", requireAdmin, (req, res) =>
+	jobRoleController.downloadJobRoleReport(req, res),
+);
 const applicationController = new ApplicationController(service);
 
 router.get("/job-roles", (req, res) =>

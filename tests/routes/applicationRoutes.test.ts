@@ -39,6 +39,7 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 		req.session.jwtToken = mockJwtToken;
 		next();
 	},
+	requireAdmin: (_req: unknown, _res: unknown, next: () => void) => next(),
 }));
 
 describe("Application routes", () => {

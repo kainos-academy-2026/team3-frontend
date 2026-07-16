@@ -152,6 +152,36 @@ describe("JobRoleService", () => {
 		consoleErrorSpy.mockRestore();
 	});
 
+	it("should return report buffer on happy path", async () => {
+		const mockArrayBuffer = new TextEncoder().encode(
+			"id,roleName\n1,Engineer",
+		).buffer;
+		vi.mocked(apiClient.get).mockResolvedValue({ data: mockArrayBuffer });
+
+		const service = new JobRoleService();
+		const result = await service.getJobRoleReport(token);
+
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/report", {
+			headers: {
+				Authorization: `Bearer ${token}`,
+				Accept: "text/csv",
+			},
+			responseType: "arraybuffer",
+		});
+		expect(result.toString()).toContain("id,roleName");
+	});
+
+	it("should throw when report API call fails", async () => {
+		const error = new Error("Network error");
+		vi.mocked(apiClient.get).mockRejectedValue(error);
+
+		const service = new JobRoleService();
+
+		await expect(service.getJobRoleReport(token)).rejects.toThrow(
+			"Network error",
+		);
+	});
+
 	describe("getUploadCvUrl", () => {
 		it("should request upload URL and normalize key to objectKey", async () => {
 			vi.mocked(apiClient.post).mockResolvedValue({
