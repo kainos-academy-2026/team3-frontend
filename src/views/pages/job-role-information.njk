@@ -59,15 +59,17 @@
         </div>
       </dl>
 
-      <div class="role-details__actions">
-        {% if canApply %}
-          <a class="button" href="/job-roles/{{ jobRole.id }}/apply">Apply for this role</a>
-        {% endif %}
-
-        {% if canEdit %}
+      {% if canApply %}
+        <a class="button" href="/job-roles/{{ jobRole.id }}/apply">Apply for this role</a>
+      {% endif %}
+      
+      {% if canEdit %}
           <a class="button button--secondary" href="/job-roles/{{ jobRole.id }}/edit">Edit job role</a>
-        {% endif %}
-      </div>
+       {% endif %}
+
+      {% if isAdmin %}
+        <a class="button button--secondary" href="/job-roles/{{ jobRole.id }}/applications">Manage applications</a>
+      {% endif %}
     </article>
   </section>
 {% endblock %}

@@ -1,6 +1,7 @@
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../../src/app.ts";
+import { ApplicationController } from "../../src/controllers/applicationController.ts";
 import { JobRoleController } from "../../src/controllers/jobRoleController.ts";
 import {
 	type JobRoleInformation,
@@ -248,6 +249,123 @@ describe("GET /job-roles routes", () => {
 
 			expect(response.status).toBe(302);
 			expect(response.headers.location).toBe("/job-roles?created=true");
+		});
+	});
+
+	describe("POST /job-roles/:id/applications/:applicationId/hire", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/hire")
+				.send({});
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/hire")
+				.send({});
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should delegate to controller for admins", async () => {
+			const hireSpy = vi
+				.spyOn(ApplicationController.prototype, "hireApplicant")
+				.mockImplementation(async (_req, res) => {
+					res
+						.status(302)
+						.redirect(
+							"/job-roles/1/applications?applicationAction=hire-success",
+						);
+				});
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/hire")
+				.send({});
+
+			expect(response.status).toBe(302);
+			expect(hireSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe("POST /job-roles/:id/applications/:applicationId/reject", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/reject")
+				.send({});
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/reject")
+				.send({});
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should delegate to controller for admins", async () => {
+			const rejectSpy = vi
+				.spyOn(ApplicationController.prototype, "rejectApplicant")
+				.mockImplementation(async (_req, res) => {
+					res
+						.status(302)
+						.redirect(
+							"/job-roles/1/applications?applicationAction=reject-success",
+						);
+				});
+
+			const response = await request(app)
+				.post("/job-roles/1/applications/10/reject")
+				.send({});
+
+			expect(response.status).toBe(302);
+			expect(rejectSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe("GET /job-roles/:id/applications", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app).get("/job-roles/1/applications");
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app).get("/job-roles/1/applications");
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should delegate to ApplicationController for admins", async () => {
+			const pageSpy = vi
+				.spyOn(ApplicationController.prototype, "getAdminApplicationsPage")
+				.mockImplementation(async (_req, res) => {
+					res.status(200).send("applications admin page");
+				});
+
+			const response = await request(app).get("/job-roles/1/applications");
+
+			expect(response.status).toBe(200);
+			expect(response.text).toContain("applications admin page");
+			expect(pageSpy).toHaveBeenCalledOnce();
 		});
 	});
 

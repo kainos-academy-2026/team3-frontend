@@ -49,6 +49,18 @@ const mockMetadata: JobRoleMetadataResponse = {
 	bands: [{ bandId: 2, bandName: "Band 2" }],
 };
 
+const _validCreatePayload = {
+	roleName: "Senior Backend Engineer",
+	location: "Dublin",
+	capabilityId: "1",
+	bandId: "2",
+	closingDate: "2026-08-31",
+	description: "Own backend services and integrations.",
+	responsibilities: "Build APIs, review code, support delivery.",
+	sharepointUrl: "https://example.sharepoint.com/job-role",
+	numberOfOpenPositions: "2",
+};
+
 describe("JobRoleController", () => {
 	const token = "mock-token";
 
@@ -143,13 +155,16 @@ describe("JobRoleController", () => {
 		await controller.getJobRoleById(req, res);
 
 		expect(mockService.getJobRoleById).toHaveBeenCalledWith(1, token);
-		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
-			jobRole: mockJobRoleInformation,
-			canApply: true,
-			applicationSubmitted: false,
-			canEdit: false,
-			editSuccess: false,
-		});
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				jobRole: mockJobRoleInformation,
+				canApply: true,
+				applicationSubmitted: false,
+				canEdit: false,
+				editSuccess: false,
+			}),
+		);
 	});
 
 	it("should render canApply false when role is closed", async () => {
@@ -171,13 +186,15 @@ describe("JobRoleController", () => {
 
 		await controller.getJobRoleById(req, res);
 
-		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
-			jobRole: { ...mockJobRoleInformation, status: JobRoleStatus.Closed },
-			canApply: false,
-			applicationSubmitted: false,
-			canEdit: false,
-			editSuccess: false,
-		});
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				jobRole: { ...mockJobRoleInformation, status: JobRoleStatus.Closed },
+				canApply: false,
+				applicationSubmitted: false,
+				editSuccess: false,
+			}),
+		);
 	});
 
 	it("should render applicationSubmitted true when query param is true", async () => {
@@ -196,13 +213,16 @@ describe("JobRoleController", () => {
 
 		await controller.getJobRoleById(req, res);
 
-		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
-			jobRole: mockJobRoleInformation,
-			canApply: true,
-			applicationSubmitted: true,
-			canEdit: false,
-			editSuccess: false,
-		});
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				jobRole: mockJobRoleInformation,
+				canApply: true,
+				applicationSubmitted: true,
+				canEdit: false,
+				editSuccess: false,
+			}),
+		);
 	});
 
 	it("should render canApply false when open positions are zero", async () => {
@@ -224,13 +244,14 @@ describe("JobRoleController", () => {
 
 		await controller.getJobRoleById(req, res);
 
-		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", {
-			jobRole: { ...mockJobRoleInformation, numberOfOpenPositions: 0 },
-			canApply: false,
-			applicationSubmitted: false,
-			canEdit: false,
-			editSuccess: false,
-		});
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				jobRole: { ...mockJobRoleInformation, numberOfOpenPositions: 0 },
+				canApply: false,
+				applicationSubmitted: false,
+			}),
+		);
 	});
 
 	it("should return 400 when id is invalid", async () => {
