@@ -6,7 +6,16 @@
   <section class="roles-section" aria-labelledby="roles-list-heading">
     <div class="roles-section__header">
       <h1 id="roles-list-heading">Current opportunities</h1>
+      {% if isAdmin %}
+        <a class="button roles-section__create-button" href="/job-roles/new">Create new role</a>
+      {% endif %}
     </div>
+
+    {% if created %}
+      <div class="roles-section__success-banner" role="status" aria-live="polite">
+        Job role created successfully.
+      </div>
+    {% endif %}
 
     {% if errorMessage %}
       <div class="empty-state" role="alert" aria-live="polite">

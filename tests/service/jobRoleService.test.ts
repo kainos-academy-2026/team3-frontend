@@ -303,6 +303,50 @@ describe("JobRoleService", () => {
 		});
 
 		it("should log and rethrow when updateJobRole fails", async () => {
+	describe("getJobRoleMetadata", () => {
+		it("should request metadata with authorization header", async () => {
+			const metadata = {
+				capabilities: [{ capabilityId: 1, capabilityName: "Engineering" }],
+				bands: [{ bandId: 2, bandName: "Band 2" }],
+			};
+
+			vi.mocked(apiClient.get).mockResolvedValue({ data: metadata });
+
+			const service = new JobRoleService();
+			const result = await service.getJobRoleMetadata(token);
+
+			expect(apiClient.get).toHaveBeenCalledWith("/job-roles/metadata", {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+			expect(result).toEqual(metadata);
+		});
+	});
+
+	describe("createJobRole", () => {
+		const payload = {
+			roleName: "Senior Backend Engineer",
+			location: "Dublin",
+			capabilityId: 1,
+			bandId: 2,
+			closingDate: "2026-08-31",
+			description: "Own backend services and integrations.",
+			responsibilities: "Build APIs, review code, support delivery.",
+			sharepointUrl: "https://example.sharepoint.com/job-role",
+			numberOfOpenPositions: 2,
+		};
+
+		it("should post payload with authorization header", async () => {
+			vi.mocked(apiClient.post).mockResolvedValue({ data: undefined });
+
+			const service = new JobRoleService();
+			await service.createJobRole(payload, token);
+
+			expect(apiClient.post).toHaveBeenCalledWith("/job-roles", payload, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+		});
+
+		it("should log and rethrow on axios error", async () => {
 			const service = new JobRoleService();
 			const logRequestErrorSpy = vi.spyOn(
 				service as unknown as { logRequestError: (...args: unknown[]) => void },
@@ -328,6 +372,29 @@ describe("JobRoleService", () => {
 				expect.objectContaining({
 					endpoint: "/job-roles/1",
 					jobRoleId: 1,
+				response: {
+					status: 400,
+					statusText: "Bad Request",
+				},
+				config: {
+					method: "post",
+					url: "/job-roles",
+				},
+				code: "ERR_BAD_REQUEST",
+				message: "Request failed with status code 400",
+			};
+
+			vi.mocked(apiClient.post).mockRejectedValue(axiosError);
+
+			await expect(service.createJobRole(payload, token)).rejects.toBe(
+				axiosError,
+			);
+			expect(logRequestErrorSpy).toHaveBeenCalledWith(
+				"Failed to create job role",
+				axiosError,
+				expect.objectContaining({
+					endpoint: "/job-roles",
+					payload,
 				}),
 			);
 		});

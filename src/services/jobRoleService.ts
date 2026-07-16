@@ -1,8 +1,10 @@
 import axios from "axios";
 import apiClient from "../config/apiClient.js";
 import type {
+	CreateJobRolePayload,
 	JobRole,
 	JobRoleInformation,
+	JobRoleMetadataResponse,
 	UploadCvResponse,
 } from "../models/jobRole.js";
 import type { UpdateJobRoleRequestData } from "../validation/jobRoleSchemas.js";
@@ -130,6 +132,31 @@ export class JobRoleService {
 			const response = await apiClient.patch<JobRoleInformation>(
 				`/job-roles/${id}`,
 				data,
+	async getJobRoleMetadata(token: string): Promise<JobRoleMetadataResponse> {
+		try {
+			const response = await apiClient.get<JobRoleMetadataResponse>(
+				"/job-roles/metadata",
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data;
+		} catch (error) {
+			this.logRequestError("Failed to fetch job role metadata", error, {
+				endpoint: "/job-roles/metadata",
+			});
+			throw error;
+		}
+	}
+
+	async createJobRole(
+		payload: CreateJobRolePayload,
+		token: string,
+	): Promise<JobRoleInformation | undefined> {
+		try {
+			const response = await apiClient.post<JobRoleInformation>(
+				"/job-roles",
+				payload,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				},
@@ -139,6 +166,9 @@ export class JobRoleService {
 			this.logRequestError("Failed to update job role", error, {
 				endpoint: `/job-roles/${id}`,
 				jobRoleId: id,
+			this.logRequestError("Failed to create job role", error, {
+				endpoint: "/job-roles",
+				payload,
 			});
 			throw error;
 		}

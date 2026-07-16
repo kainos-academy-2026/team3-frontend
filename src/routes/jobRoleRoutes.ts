@@ -21,6 +21,11 @@ router.get("/job-roles/:id/edit", requireAdmin, (req, res) =>
 );
 router.post("/job-roles/:id/edit", requireAdmin, (req, res) =>
 	jobRoleController.submitEditJobRole(req, res),
+router.get("/job-roles/new", requireAuth, requireAdmin, (req, res) =>
+	jobRoleController.getCreateJobRolePage(req, res),
+);
+router.post("/job-roles", requireAuth, requireAdmin, (req, res) =>
+	jobRoleController.createJobRole(req, res),
 );
 router.get("/job-roles/:id", (req, res) =>
 	jobRoleController.getJobRoleById(req, res),

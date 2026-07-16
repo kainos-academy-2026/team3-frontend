@@ -1,6 +1,7 @@
 import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import app from "../../src/app.ts";
+import { JobRoleController } from "../../src/controllers/jobRoleController.ts";
 import {
 	type JobRoleInformation,
 	JobRoleStatus,
@@ -45,11 +46,10 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 		next();
 	},
 	requireAdmin: (
-		req: { session: { jwtToken?: string } },
+		req: { session: { userRole?: string; jwtToken?: string } },
 		res: {
-			redirect: (path: string) => unknown;
 			status: (code: number) => {
-				render: (view: string, data?: unknown) => unknown;
+				render: (view: string, model: unknown) => void;
 			};
 		},
 		next: () => void,
@@ -175,6 +175,80 @@ describe("GET /job-roles routes", () => {
 
 		expect(response.status).toBe(500);
 		expect(response.text).toContain("Backend server error");
+	});
+
+	describe("GET /job-roles/new", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app).get("/job-roles/new");
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app).get("/job-roles/new");
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should delegate to controller for admins", async () => {
+			const createPageSpy = vi
+				.spyOn(JobRoleController.prototype, "getCreateJobRolePage")
+				.mockImplementation(async (_req, res) => {
+					res.status(200).send("create form");
+				});
+
+			const response = await request(app).get("/job-roles/new");
+
+			expect(response.status).toBe(200);
+			expect(response.text).toContain("create form");
+			expect(createPageSpy).toHaveBeenCalledOnce();
+		});
+	});
+
+	describe("POST /job-roles", () => {
+		it("should redirect to /login when unauthenticated", async () => {
+			mockIsAuthenticated = false;
+
+			const response = await request(app).post("/job-roles").send({});
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/login");
+		});
+
+		it("should return 403 for authenticated non-admin users", async () => {
+			mockIsAdmin = false;
+
+			const response = await request(app).post("/job-roles").send({});
+
+			expect(response.status).toBe(403);
+		});
+
+		it("should allow admins and follow controller success path", async () => {
+			vi.spyOn(
+				jobRoleServiceModule.JobRoleService.prototype,
+				"createJobRole",
+			).mockResolvedValue(undefined);
+
+			const response = await request(app).post("/job-roles").send({
+				roleName: "Senior Backend Engineer",
+				location: "Dublin",
+				capabilityId: "1",
+				bandId: "2",
+				closingDate: "2026-08-31",
+				description: "Own backend services and integrations.",
+				responsibilities: "Build APIs, review code, support delivery.",
+				sharepointUrl: "https://example.sharepoint.com/job-role",
+				numberOfOpenPositions: "2",
+			});
+
+			expect(response.status).toBe(302);
+			expect(response.headers.location).toBe("/job-roles?created=true");
+		});
 	});
 
 	it("should return csv report for GET /job-roles/report", async () => {

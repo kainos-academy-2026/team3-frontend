@@ -1,0 +1,122 @@
+{% extends "layouts/main.njk" %}
+
+{% block title %}Kainos Careers | Create Job Role{% endblock %}
+
+{% block content %}
+  <section class="job-role-form-page" aria-labelledby="create-role-heading">
+    <a class="role-details__back" href="/job-roles">Back to all job roles</a>
+
+    <article class="job-role-form-card">
+      <p class="hero__eyebrow">Admin only</p>
+      <h1 id="create-role-heading">Create a new role</h1>
+
+      {% if error %}
+        <p class="job-role-form__error" role="alert">{{ error }}</p>
+      {% endif %}
+
+      <form class="job-role-form" action="/job-roles" method="post" novalidate>
+        <div class="job-role-form__field">
+          <label for="roleName">Role name</label>
+          <input id="roleName" name="roleName" type="text" required value="{{ formValues.roleName }}" />
+          {% if fieldErrors.roleName %}
+            <p class="job-role-form__field-error">{{ fieldErrors.roleName }}</p>
+          {% endif %}
+        </div>
+
+        <div class="job-role-form__field">
+          <label for="location">Location</label>
+          <input id="location" name="location" type="text" required value="{{ formValues.location }}" />
+          {% if fieldErrors.location %}
+            <p class="job-role-form__field-error">{{ fieldErrors.location }}</p>
+          {% endif %}
+        </div>
+
+        <div class="job-role-form__field">
+          <label for="capabilityId">Capability</label>
+          <select id="capabilityId" name="capabilityId" required>
+            <option value="">Select capability</option>
+            {% for capability in capabilities %}
+              <option value="{{ capability.capabilityId }}" {% if formValues.capabilityId == capability.capabilityId %}selected{% endif %}>
+                {{ capability.capabilityName }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if fieldErrors.capabilityId %}
+            <p class="job-role-form__field-error">{{ fieldErrors.capabilityId }}</p>
+          {% endif %}
+        </div>
+
+        <div class="job-role-form__field">
+          <label for="bandId">Band</label>
+          <select id="bandId" name="bandId" required>
+            <option value="">Select band</option>
+            {% for band in bands %}
+              <option value="{{ band.bandId }}" {% if formValues.bandId == band.bandId %}selected{% endif %}>
+                {{ band.bandName }}
+              </option>
+            {% endfor %}
+          </select>
+          {% if fieldErrors.bandId %}
+            <p class="job-role-form__field-error">{{ fieldErrors.bandId }}</p>
+          {% endif %}
+        </div>
+
+        <div class="job-role-form__field">
+          <label for="closingDate">Closing date</label>
+          <input id="closingDate" name="closingDate" type="date" required value="{{ formValues.closingDate }}" />
+          {% if fieldErrors.closingDate %}
+            <p class="job-role-form__field-error">{{ fieldErrors.closingDate }}</p>
+          {% endif %}
+        </div>
+
+        <div class="job-role-form__field">
+          <label for="numberOfOpenPositions">Number of open positions</label>
+          <input
+            id="numberOfOpenPositions"
+            name="numberOfOpenPositions"
+            type="number"
+            min="1"
+            step="1"
+            required
+            value="{{ formValues.numberOfOpenPositions }}"
+          />
+          {% if fieldErrors.numberOfOpenPositions %}
+            <p class="job-role-form__field-error">{{ fieldErrors.numberOfOpenPositions }}</p>
+          {% endif %}
+        </div>
+
+        <div class="job-role-form__field job-role-form__field--full">
+          <label for="description">Description</label>
+          <textarea id="description" name="description" rows="4" required>{{ formValues.description }}</textarea>
+          {% if fieldErrors.description %}
+            <p class="job-role-form__field-error">{{ fieldErrors.description }}</p>
+          {% endif %}
+        </div>
+
+        <div class="job-role-form__field job-role-form__field--full">
+          <label for="responsibilities">Responsibilities</label>
+          <textarea id="responsibilities" name="responsibilities" rows="4" required>{{ formValues.responsibilities }}</textarea>
+          {% if fieldErrors.responsibilities %}
+            <p class="job-role-form__field-error">{{ fieldErrors.responsibilities }}</p>
+          {% endif %}
+        </div>
+
+        <div class="job-role-form__field job-role-form__field--full">
+          <label for="sharepointUrl">SharePoint URL</label>
+          <input
+            id="sharepointUrl"
+            name="sharepointUrl"
+            type="url"
+            required
+            value="{{ formValues.sharepointUrl }}"
+          />
+          {% if fieldErrors.sharepointUrl %}
+            <p class="job-role-form__field-error">{{ fieldErrors.sharepointUrl }}</p>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="button job-role-form__submit">Create role</button>
+      </form>
+    </article>
+  </section>
+{% endblock %}
