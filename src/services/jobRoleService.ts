@@ -5,6 +5,7 @@ import type {
 	JobRoleInformation,
 	UploadCvResponse,
 } from "../models/jobRole.js";
+import type { UpdateJobRoleRequestData } from "../validation/jobRoleSchemas.js";
 
 export class JobRoleService {
 	private logRequestError(
@@ -115,6 +116,29 @@ export class JobRoleService {
 				endpoint: `/job-roles/${jobRoleId}/apply`,
 				jobRoleId,
 				userId,
+			});
+			throw error;
+		}
+	}
+
+	async updateJobRole(
+		id: number,
+		data: UpdateJobRoleRequestData,
+		token: string,
+	): Promise<JobRoleInformation> {
+		try {
+			const response = await apiClient.patch<JobRoleInformation>(
+				`/job-roles/${id}`,
+				data,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			return response.data;
+		} catch (error) {
+			this.logRequestError("Failed to update job role", error, {
+				endpoint: `/job-roles/${id}`,
+				jobRoleId: id,
 			});
 			throw error;
 		}

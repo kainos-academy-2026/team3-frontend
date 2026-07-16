@@ -16,6 +16,12 @@ const applicationController = new ApplicationController(service);
 router.get("/job-roles", (req, res) =>
 	jobRoleController.getAllJobRoles(req, res),
 );
+router.get("/job-roles/:id/edit", requireAdmin, (req, res) =>
+	jobRoleController.getEditJobRolePage(req, res),
+);
+router.post("/job-roles/:id/edit", requireAdmin, (req, res) =>
+	jobRoleController.submitEditJobRole(req, res),
+);
 router.get("/job-roles/:id", (req, res) =>
 	jobRoleController.getJobRoleById(req, res),
 );

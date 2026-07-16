@@ -6,6 +6,7 @@ vi.mock("../../src/config/apiClient.ts", () => ({
 	default: {
 		get: vi.fn(),
 		post: vi.fn(),
+		patch: vi.fn(),
 	},
 }));
 
@@ -250,6 +251,87 @@ describe("JobRoleService", () => {
 					endpoint: "/job-roles/1/apply",
 					jobRoleId: 1,
 					userId: 1,
+				}),
+			);
+		});
+	});
+
+	describe("updateJobRole", () => {
+		const mockUpdatedJobRole = {
+			id: 1,
+			roleName: "Senior Engineer",
+			location: "Belfast",
+			capability: { capabilityId: 1, capabilityName: "Engineering" },
+			band: { bandId: 2, bandName: "Senior Associate" },
+			closingDate: "2027-01-01",
+			status: "Open",
+			description: "Updated description",
+			responsibilities: "Updated responsibilities",
+			sharepointUrl: "https://example.com/updated",
+			numberOfOpenPositions: 3,
+		};
+
+		it("should call PATCH and return updated job role on happy path", async () => {
+			vi.mocked(apiClient.patch).mockResolvedValue({
+				data: mockUpdatedJobRole,
+			});
+
+			const service = new JobRoleService();
+			const data = { roleName: "Senior Engineer" };
+			const result = await service.updateJobRole(1, data, token);
+
+			expect(apiClient.patch).toHaveBeenCalledWith(
+				"/job-roles/1",
+				data,
+				{
+					headers: { Authorization: `Bearer ${token}` },
+				},
+			);
+			expect(result).toEqual(mockUpdatedJobRole);
+		});
+
+		it("should send correct request shape and authorization header", async () => {
+			vi.mocked(apiClient.patch).mockResolvedValue({
+				data: mockUpdatedJobRole,
+			});
+
+			const service = new JobRoleService();
+			const data = { roleName: "Senior Engineer", location: "London" };
+			await service.updateJobRole(1, data, token);
+
+			expect(apiClient.patch).toHaveBeenCalledWith(
+				"/job-roles/1",
+				{ roleName: "Senior Engineer", location: "London" },
+				{ headers: { Authorization: `Bearer ${token}` } },
+			);
+		});
+
+		it("should log and rethrow when updateJobRole fails", async () => {
+			const service = new JobRoleService();
+			const logRequestErrorSpy = vi.spyOn(
+				service as unknown as { logRequestError: (...args: unknown[]) => void },
+				"logRequestError",
+			);
+
+			const axiosError = {
+				isAxiosError: true,
+				response: { status: 404, statusText: "Not Found" },
+				config: { method: "patch", url: "/job-roles/1" },
+				code: "ERR_BAD_RESPONSE",
+				message: "Request failed with status code 404",
+			};
+
+			vi.mocked(apiClient.patch).mockRejectedValue(axiosError);
+
+			await expect(
+				service.updateJobRole(1, { roleName: "Test" }, token),
+			).rejects.toBe(axiosError);
+			expect(logRequestErrorSpy).toHaveBeenCalledWith(
+				"Failed to update job role",
+				axiosError,
+				expect.objectContaining({
+					endpoint: "/job-roles/1",
+					jobRoleId: 1,
 				}),
 			);
 		});

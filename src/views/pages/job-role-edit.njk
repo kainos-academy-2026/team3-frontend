@@ -1,0 +1,93 @@
+{% extends "layouts/main.njk" %}
+
+{% block title %}Kainos Careers | Edit {{ jobRole.roleName }}{% endblock %}
+
+{% block content %}
+  <section class="roles-section role-edit-section" aria-labelledby="edit-job-role-heading">
+    <a class="role-details__back" href="/job-roles/{{ jobRole.id }}">Back to job role</a>
+
+    <h1 id="edit-job-role-heading">Edit Job Role</h1>
+
+    {% if error %}
+      <p class="form-error" role="alert">{{ error }}</p>
+    {% endif %}
+
+    <form class="role-edit-form" method="POST" action="/job-roles/{{ jobRole.id }}/edit" novalidate>
+      <div class="form-group">
+        <label class="form-label" for="roleName">Role Name</label>
+        <input
+          class="form-input"
+          id="roleName"
+          name="roleName"
+          type="text"
+          value="{{ formValues.roleName if formValues.roleName else jobRole.roleName }}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="location">Location</label>
+        <input
+          class="form-input"
+          id="location"
+          name="location"
+          type="text"
+          value="{{ formValues.location if formValues.location else jobRole.location }}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="closingDate">Closing Date</label>
+        <input
+          class="form-input"
+          id="closingDate"
+          name="closingDate"
+          type="date"
+          value="{{ formValues.closingDate if formValues.closingDate else jobRole.closingDate }}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="status">Status</label>
+        <select class="form-input" id="status" name="status">
+          <option value="Open" {% if (formValues.status if formValues else jobRole.status) === "Open" %}selected{% endif %}>Open</option>
+          <option value="Closed" {% if (formValues.status if formValues else jobRole.status) === "Closed" %}selected{% endif %}>Closed</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="numberOfOpenPositions">Number of Open Positions</label>
+        <input
+          class="form-input"
+          id="numberOfOpenPositions"
+          name="numberOfOpenPositions"
+          type="number"
+          min="1"
+          value="{{ formValues.numberOfOpenPositions if formValues.numberOfOpenPositions else jobRole.numberOfOpenPositions }}"
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="description">Description</label>
+        <textarea class="form-input" id="description" name="description" rows="5">{{ formValues.description if formValues.description else jobRole.description }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="responsibilities">Responsibilities</label>
+        <textarea class="form-input" id="responsibilities" name="responsibilities" rows="5">{{ formValues.responsibilities if formValues.responsibilities else jobRole.responsibilities }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="sharepointUrl">SharePoint URL</label>
+        <input
+          class="form-input"
+          id="sharepointUrl"
+          name="sharepointUrl"
+          type="url"
+          value="{{ formValues.sharepointUrl if formValues.sharepointUrl else jobRole.sharepointUrl }}"
+        />
+      </div>
+
+      <button class="button" type="submit">Save changes</button>
+    </form>
+  </section>
+{% endblock %}

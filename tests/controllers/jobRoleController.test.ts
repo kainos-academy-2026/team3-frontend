@@ -119,6 +119,8 @@ describe("JobRoleController", () => {
 			jobRole: mockJobRoleInformation,
 			canApply: true,
 			applicationSubmitted: false,
+			canEdit: false,
+			editSuccess: false,
 		});
 	});
 
@@ -145,6 +147,8 @@ describe("JobRoleController", () => {
 			jobRole: { ...mockJobRoleInformation, status: JobRoleStatus.Closed },
 			canApply: false,
 			applicationSubmitted: false,
+			canEdit: false,
+			editSuccess: false,
 		});
 	});
 
@@ -168,6 +172,8 @@ describe("JobRoleController", () => {
 			jobRole: mockJobRoleInformation,
 			canApply: true,
 			applicationSubmitted: true,
+			canEdit: false,
+			editSuccess: false,
 		});
 	});
 
@@ -194,6 +200,8 @@ describe("JobRoleController", () => {
 			jobRole: { ...mockJobRoleInformation, numberOfOpenPositions: 0 },
 			canApply: false,
 			applicationSubmitted: false,
+			canEdit: false,
+			editSuccess: false,
 		});
 	});
 
@@ -339,5 +347,303 @@ describe("JobRoleController", () => {
 
 		expect(res.status).toHaveBeenCalledWith(500);
 		expect(res.send).toHaveBeenCalledWith("Unable to generate report");
+	});
+
+	it("should pass canEdit=true and editSuccess=false when user is ADMIN and no editSuccess query param", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token, userRole: "ADMIN" },
+			query: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", expect.objectContaining({
+			canEdit: true,
+			editSuccess: false,
+		}));
+	});
+
+	it("should pass canEdit=false when user is not ADMIN", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token, userRole: "USER" },
+			query: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", expect.objectContaining({
+			canEdit: false,
+			editSuccess: false,
+		}));
+	});
+
+	it("should pass editSuccess=true when editSuccess query param is true", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token, userRole: "ADMIN" },
+			query: { editSuccess: "true" },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getJobRoleById(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-information.njk", expect.objectContaining({
+			editSuccess: true,
+		}));
+	});
+
+	describe("getEditJobRolePage", () => {
+		it("should render the edit page on happy path", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(mockService.getJobRoleById).toHaveBeenCalledWith(1, token);
+			expect(res.render).toHaveBeenCalledWith("pages/job-role-edit.njk", {
+				jobRole: mockJobRoleInformation,
+			});
+		});
+
+		it("should return 400 for invalid id", async () => {
+			const mockService = {} as unknown as JobRoleService;
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "abc" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
+		});
+
+		it("should redirect to login when token is missing", async () => {
+			const mockService = {} as unknown as JobRoleService;
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: {},
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(res.redirect).toHaveBeenCalledWith("/login");
+		});
+
+		it("should return 404 when job role is not found", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 404 },
+				}),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.send).toHaveBeenCalledWith("Job role not found");
+		});
+
+		it("should return 500 for unexpected errors", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockRejectedValue(new Error("unexpected")),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.getEditJobRolePage(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith("Internal Server Error");
+		});
+	});
+
+	describe("submitEditJobRole", () => {
+		it("should redirect to detail page with editSuccess on happy path", async () => {
+			const mockService = {
+				updateJobRole: vi.fn().mockResolvedValue(mockJobRoleInformation),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+				body: { roleName: "Updated Engineer" },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(mockService.updateJobRole).toHaveBeenCalledWith(
+				1,
+				expect.objectContaining({ roleName: "Updated Engineer" }),
+				token,
+			);
+			expect(res.redirect).toHaveBeenCalledWith("/job-roles/1?editSuccess=true");
+		});
+
+		it("should return 400 for invalid id", async () => {
+			const mockService = {} as unknown as JobRoleService;
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "abc" },
+				session: { jwtToken: token },
+				body: { roleName: "Test" },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
+		});
+
+		it("should re-render edit page with error on body validation failure", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+				body: {},
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.render).toHaveBeenCalledWith(
+				"pages/job-role-edit.njk",
+				expect.objectContaining({
+					error: expect.any(String),
+				}),
+			);
+		});
+
+		it("should redirect to login when token is missing", async () => {
+			const mockService = {} as unknown as JobRoleService;
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: {},
+				body: { roleName: "Test" },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(res.redirect).toHaveBeenCalledWith("/login");
+		});
+
+		it("should return 404 when backend returns 404", async () => {
+			const mockService = {
+				updateJobRole: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 404 },
+				}),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+				body: { roleName: "Test" },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(404);
+			expect(res.send).toHaveBeenCalledWith("Job role not found");
+		});
+
+		it("should return 400 when backend returns 400", async () => {
+			const mockService = {
+				updateJobRole: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 400 },
+				}),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+				body: { roleName: "Test" },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+			expect(res.send).toHaveBeenCalledWith("Invalid update data");
+		});
+
+		it("should return 500 for generic errors", async () => {
+			const mockService = {
+				updateJobRole: vi.fn().mockRejectedValue(new Error("unexpected")),
+			} as unknown as JobRoleService;
+
+			const controller = new JobRoleController(mockService);
+			const req = {
+				params: { id: "1" },
+				session: { jwtToken: token },
+				body: { roleName: "Test" },
+			} as unknown as Request;
+			const res = mockRes();
+
+			await controller.submitEditJobRole(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(500);
+			expect(res.send).toHaveBeenCalledWith("Could not update job role. Please try again.");
+		});
 	});
 });

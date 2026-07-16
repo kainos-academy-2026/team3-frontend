@@ -39,7 +39,18 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 		req.session.jwtToken = mockJwtToken;
 		next();
 	},
-	requireAdmin: (_req: unknown, _res: unknown, next: () => void) => next(),
+	requireAdmin: (
+		req: { session: { jwtToken?: string } },
+		res: { redirect: (path: string) => unknown; status: (code: number) => { render: (view: string, data?: unknown) => unknown } },
+		next: () => void,
+	) => {
+		if (!mockIsAuthenticated) {
+			res.redirect("/login");
+			return;
+		}
+		req.session.jwtToken = mockJwtToken;
+		next();
+	},
 }));
 
 describe("Application routes", () => {

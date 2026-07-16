@@ -48,4 +48,12 @@ export interface JobRoleInformationViewModel {
 	jobRole: JobRoleInformation;
 	canApply: boolean;
 	applicationSubmitted: boolean;
+	canEdit?: boolean;
+	editSuccess?: boolean;
+}
+
+export interface EditJobRoleViewModel {
+	jobRole: JobRoleInformation;
+	error?: string;
+	formValues?: Record<string, string>;
 }

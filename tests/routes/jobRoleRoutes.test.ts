@@ -8,6 +8,7 @@ import {
 import * as jobRoleServiceModule from "../../src/services/jobRoleService.ts";
 
 let mockIsAuthenticated = true;
+let mockIsAdmin = true;
 const { mockJwtToken } = vi.hoisted(() => {
 	const jwtPayload = Buffer.from(JSON.stringify({ id: 1 }), "utf8").toString(
 		"base64url",
@@ -44,12 +45,19 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 		next();
 	},
 	requireAdmin: (
-		req: { session: { jwtToken?: string; userRole?: string } },
-		_res: unknown,
+		req: { session: { jwtToken?: string } },
+		res: { redirect: (path: string) => unknown; status: (code: number) => { render: (view: string, data?: unknown) => unknown } },
 		next: () => void,
 	) => {
-		req.session.jwtToken = "mock-token";
-		req.session.userRole = "ADMIN";
+		if (!mockIsAuthenticated) {
+			res.redirect("/login");
+			return;
+		}
+		if (!mockIsAdmin) {
+			res.status(403).render("pages/home.njk", { error: "Forbidden" });
+			return;
+		}
+		req.session.jwtToken = mockJwtToken;
 		next();
 	},
 }));
@@ -72,6 +80,7 @@ describe("GET /job-roles routes", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
 		mockIsAuthenticated = true;
+		mockIsAdmin = true;
 	});
 
 	it("should return 200 and render job roles on happy path", async () => {
@@ -174,5 +183,77 @@ describe("GET /job-roles routes", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers["content-type"]).toContain("text/csv");
 		expect(response.text).toContain("id,roleName");
+	});
+});
+
+describe("Edit job role routes", () => {
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		mockIsAuthenticated = true;
+		mockIsAdmin = true;
+	});
+
+	it("GET /job-roles/1/edit without auth should redirect to /login", async () => {
+		mockIsAuthenticated = false;
+
+		const response = await request(app).get("/job-roles/1/edit");
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/login");
+	});
+
+	it("GET /job-roles/1/edit with admin auth should reach the controller", async () => {
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getJobRoleById",
+		).mockResolvedValue(mockJobRoleInformation);
+
+		const response = await request(app).get("/job-roles/1/edit");
+
+		expect(response.status).toBe(200);
+		expect(response.type).toMatch(/html/);
+	});
+
+	it("GET /job-roles/1/edit as non-admin should return 403", async () => {
+		mockIsAdmin = false;
+
+		const response = await request(app).get("/job-roles/1/edit");
+
+		expect(response.status).toBe(403);
+	});
+
+	it("POST /job-roles/1/edit without auth should redirect to /login", async () => {
+		mockIsAuthenticated = false;
+
+		const response = await request(app)
+			.post("/job-roles/1/edit")
+			.send({ roleName: "Updated" });
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/login");
+	});
+
+	it("POST /job-roles/1/edit with admin auth should reach the controller", async () => {
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"updateJobRole",
+		).mockResolvedValue(mockJobRoleInformation);
+
+		const response = await request(app)
+			.post("/job-roles/1/edit")
+			.send({ roleName: "Updated Engineer" });
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/job-roles/1?editSuccess=true");
+	});
+
+	it("POST /job-roles/1/edit as non-admin should return 403", async () => {
+		mockIsAdmin = false;
+
+		const response = await request(app)
+			.post("/job-roles/1/edit")
+			.send({ roleName: "Updated" });
+
+		expect(response.status).toBe(403);
 	});
 });
