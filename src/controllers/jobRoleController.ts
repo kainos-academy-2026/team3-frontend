@@ -305,10 +305,6 @@ export class JobRoleController {
 
 	async getEditJobRolePage(req: Request, res: Response): Promise<void> {
 		const jobRoleId = Number(req.params.id);
-		if (!Number.isInteger(jobRoleId) || jobRoleId <= 0) {
-			res.status(400).send("Invalid job role ID");
-			return;
-		}
 
 		const token = req.session.jwtToken;
 		if (!token) {
@@ -326,6 +322,10 @@ export class JobRoleController {
 		} catch (error) {
 			if (axios.isAxiosError(error)) {
 				const status = error.response?.status;
+				if (status === 400) {
+					res.status(400).send("Invalid job role ID");
+					return;
+				}
 				if (status === 404) {
 					res.status(404).send("Job role not found");
 					return;
@@ -342,17 +342,19 @@ export class JobRoleController {
 			return;
 		}
 
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+		const authenticatedToken: string = token;
+
 		const parseResult = UpdateJobRoleRequestSchema.safeParse(req.body);
 		if (!parseResult.success) {
-			const token = req.session.jwtToken;
-			if (!token) {
-				res.redirect("/login");
-				return;
-			}
 			try {
 				const jobRole = await this.jobRoleService.getJobRoleById(
 					jobRoleId,
-					token,
+					authenticatedToken,
 				);
 				const viewModel: EditJobRoleViewModel = {
 					jobRole,
@@ -366,17 +368,11 @@ export class JobRoleController {
 			return;
 		}
 
-		const token = req.session.jwtToken;
-		if (!token) {
-			res.redirect("/login");
-			return;
-		}
-
 		try {
 			await this.jobRoleService.updateJobRole(
 				jobRoleId,
 				parseResult.data,
-				token,
+				authenticatedToken,
 			);
 			res.redirect(`/job-roles/${jobRoleId}?editSuccess=true`);
 		} catch (error) {

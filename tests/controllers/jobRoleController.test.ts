@@ -472,8 +472,13 @@ describe("JobRoleController", () => {
 			});
 		});
 
-		it("should return 400 for invalid id", async () => {
-			const mockService = {} as unknown as JobRoleService;
+		it("should return 400 when backend rejects an invalid id", async () => {
+			const mockService = {
+				getJobRoleById: vi.fn().mockRejectedValue({
+					isAxiosError: true,
+					response: { status: 400 },
+				}),
+			} as unknown as JobRoleService;
 			const controller = new JobRoleController(mockService);
 			const req = {
 				params: { id: "abc" },
@@ -483,6 +488,7 @@ describe("JobRoleController", () => {
 
 			await controller.getEditJobRolePage(req, res);
 
+			expect(mockService.getJobRoleById).toHaveBeenCalledWith(NaN, token);
 			expect(res.status).toHaveBeenCalledWith(400);
 			expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
 		});
