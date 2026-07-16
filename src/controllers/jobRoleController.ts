@@ -3,74 +3,28 @@ import type { Request, Response } from "express";
 import {
 	type CreateJobRolePayload,
 	type JobRoleInformationViewModel,
-	type JobRoleMetadataResponse,
 	JobRoleStatus,
 } from "../models/jobRole.js";
+import {
+	type CreateJobRoleFieldErrors,
+	type CreateJobRoleFormValues,
+	type CreateJobRolePageModel,
+	defaultCreateJobRoleFormValues,
+} from "../models/jobRoleForm.js";
 import type { JobRoleService } from "../services/jobRoleService.js";
 import {
 	type CreateJobRoleData,
 	CreateJobRoleSchema,
 } from "../validation/jobRoleSchemas.js";
 
-type CreateJobRoleFieldErrors = Partial<
-	Record<keyof CreateJobRolePayload, string>
->;
-
-type CreateJobRoleFormValues = {
-	roleName: string;
-	location: string;
-	capabilityId: string;
-	bandId: string;
-	closingDate: string;
-	description: string;
-	responsibilities: string;
-	sharepointUrl: string;
-	numberOfOpenPositions: string;
-};
-
-type CreateJobRolePageModel = {
-	capabilities: JobRoleMetadataResponse["capabilities"];
-	bands: JobRoleMetadataResponse["bands"];
-	formValues: CreateJobRoleFormValues;
-	fieldErrors: CreateJobRoleFieldErrors;
-	error: string | null;
-};
-
-const defaultCreateJobRoleFormValues = (): CreateJobRoleFormValues => ({
-	roleName: "",
-	location: "",
-	capabilityId: "",
-	bandId: "",
-	closingDate: "",
-	description: "",
-	responsibilities: "",
-	sharepointUrl: "",
-	numberOfOpenPositions: "",
-});
-
-const toFormValue = (value: unknown): string => {
-	if (typeof value === "string") {
-		return value;
-	}
-	if (typeof value === "number") {
-		return String(value);
-	}
-	return "";
-};
-
 const toCreateJobRoleFormValues = (body: unknown): CreateJobRoleFormValues => {
-	const values = (body ?? {}) as Record<string, unknown>;
+	if (!body || typeof body !== "object") {
+		return { ...defaultCreateJobRoleFormValues };
+	}
 
 	return {
-		roleName: toFormValue(values.roleName),
-		location: toFormValue(values.location),
-		capabilityId: toFormValue(values.capabilityId),
-		bandId: toFormValue(values.bandId),
-		closingDate: toFormValue(values.closingDate),
-		description: toFormValue(values.description),
-		responsibilities: toFormValue(values.responsibilities),
-		sharepointUrl: toFormValue(values.sharepointUrl),
-		numberOfOpenPositions: toFormValue(values.numberOfOpenPositions),
+		...defaultCreateJobRoleFormValues,
+		...(body as CreateJobRoleFormValues),
 	};
 };
 
@@ -193,7 +147,7 @@ export class JobRoleController {
 		return {
 			capabilities: metadata.capabilities,
 			bands: metadata.bands,
-			formValues: defaultCreateJobRoleFormValues(),
+			formValues: { ...defaultCreateJobRoleFormValues },
 			fieldErrors: {},
 			error: null,
 			...overrides,
@@ -215,7 +169,7 @@ export class JobRoleController {
 			res.status(500).render("pages/job-role-form.njk", {
 				capabilities: [],
 				bands: [],
-				formValues: defaultCreateJobRoleFormValues(),
+				formValues: { ...defaultCreateJobRoleFormValues },
 				fieldErrors: {},
 				error: "Unable to load create role form right now.",
 			});
