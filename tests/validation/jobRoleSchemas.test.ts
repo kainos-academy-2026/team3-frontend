@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	CreateJobRoleSchema,
+	JobRolePaginationQuerySchema,
 	UpdateJobRoleRequestSchema,
 } from "../../src/validation/jobRoleSchemas.ts";
 
@@ -181,5 +182,53 @@ describe("CreateJobRoleSchema", () => {
 				"Number of open positions must be greater than 0.",
 			);
 		}
+	});
+});
+
+describe("JobRolePaginationQuerySchema", () => {
+	it("applies defaults when query is missing", () => {
+		const result = JobRolePaginationQuerySchema.safeParse({});
+
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data).toEqual({ limit: 10, page: 1 });
+		}
+	});
+
+	it("accepts valid explicit query", () => {
+		const result = JobRolePaginationQuerySchema.safeParse({
+			limit: "10",
+			page: "2",
+		});
+
+		expect(result.success).toBe(true);
+		if (result.success) {
+			expect(result.data).toEqual({ limit: 10, page: 2 });
+		}
+	});
+
+	it("rejects invalid limit values", () => {
+		expect(
+			JobRolePaginationQuerySchema.safeParse({ limit: "0", page: "1" }).success,
+		).toBe(false);
+		expect(
+			JobRolePaginationQuerySchema.safeParse({ limit: "31", page: "1" })
+				.success,
+		).toBe(false);
+		expect(
+			JobRolePaginationQuerySchema.safeParse({ limit: "1.5", page: "1" })
+				.success,
+		).toBe(false);
+	});
+
+	it("rejects invalid page values", () => {
+		expect(
+			JobRolePaginationQuerySchema.safeParse({ limit: "10", page: "0" })
+				.success,
+		).toBe(false);
+		expect(
+			JobRolePaginationQuerySchema.safeParse({ limit: "10", page: "2.3" })
+				.success,
+		).toBe(false);
 	});
 });

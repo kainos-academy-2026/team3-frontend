@@ -10,17 +10,33 @@ vi.mock("../../src/config/apiClient.ts", () => ({
 	},
 }));
 
-const mockJobRoles = [
-	{
-		id: 1,
-		roleName: "Software Engineer",
-		location: "Belfast",
-		capability: { capabilityId: 1, capabilityName: "Engineering" },
-		band: { bandId: 1, bandName: "Associate" },
-		closingDate: "2026-12-31",
-		status: "Open",
+const mockPaginatedJobRoles = {
+	data: [
+		{
+			id: 1,
+			roleName: "Software Engineer",
+			location: "Belfast",
+			capability: { capabilityId: 1, capabilityName: "Engineering" },
+			band: { bandId: 1, bandName: "Associate" },
+			closingDate: "2026-12-31",
+			status: "Open",
+		},
+	],
+	pagination: {
+		totalItems: 15,
+		totalPages: 2,
+		currentPage: 1,
+		pageSize: 10,
+		hasNext: true,
+		hasPrevious: false,
 	},
-];
+	links: {
+		first: "/api/job-roles?limit=10&page=1",
+		next: "/api/job-roles?limit=10&page=2",
+		previous: null,
+		last: "/api/job-roles?limit=10&page=2",
+	},
+};
 
 describe("JobRoleService", () => {
 	beforeEach(() => {
@@ -30,15 +46,16 @@ describe("JobRoleService", () => {
 	const token = "mock-token";
 
 	it("should return job roles on happy path", async () => {
-		vi.mocked(apiClient.get).mockResolvedValue({ data: mockJobRoles });
+		vi.mocked(apiClient.get).mockResolvedValue({ data: mockPaginatedJobRoles });
 
 		const service = new JobRoleService();
-		const result = await service.getAllJobRoles(token);
+		const result = await service.getAllJobRoles(token, 10, 1);
 
 		expect(apiClient.get).toHaveBeenCalledWith("/job-roles", {
 			headers: { Authorization: `Bearer ${token}` },
+			params: { limit: 10, page: 1 },
 		});
-		expect(result).toEqual(mockJobRoles);
+		expect(result).toEqual(mockPaginatedJobRoles);
 	});
 
 	it("should throw an error when axios fails", async () => {
@@ -47,11 +64,12 @@ describe("JobRoleService", () => {
 
 		const service = new JobRoleService();
 
-		await expect(service.getAllJobRoles(token)).rejects.toThrow(
+		await expect(service.getAllJobRoles(token, 10, 2)).rejects.toThrow(
 			"Network error",
 		);
 		expect(apiClient.get).toHaveBeenCalledWith("/job-roles", {
 			headers: { Authorization: `Bearer ${token}` },
+			params: { limit: 10, page: 2 },
 		});
 	});
 
@@ -78,11 +96,13 @@ describe("JobRoleService", () => {
 
 		const service = new JobRoleService();
 
-		await expect(service.getAllJobRoles(token)).rejects.toBe(axiosError);
+		await expect(service.getAllJobRoles(token, 10, 3)).rejects.toBe(axiosError);
 		expect(consoleErrorSpy).toHaveBeenCalledWith(
 			"Failed to fetch job roles",
 			expect.objectContaining({
 				endpoint: "/job-roles",
+				limit: 10,
+				page: 3,
 				status: 503,
 				statusText: "Service Unavailable",
 				method: "GET",
@@ -129,6 +149,26 @@ describe("JobRoleService", () => {
 		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/1", {
 			headers: { Authorization: `Bearer ${token}` },
 		});
+	});
+
+	it("should call get by id without auth header when token is missing", async () => {
+		const mockJobRole = {
+			id: 1,
+			roleName: "Software Engineer",
+			location: "Belfast",
+			capability: { capabilityId: 1, capabilityName: "Engineering" },
+			band: { bandId: 1, bandName: "Associate" },
+			closingDate: "2026-12-31",
+			status: "Open",
+		};
+
+		vi.mocked(apiClient.get).mockResolvedValue({ data: mockJobRole });
+
+		const service = new JobRoleService();
+		const result = await service.getJobRoleById(1, undefined);
+
+		expect(apiClient.get).toHaveBeenCalledWith("/job-roles/1", {});
+		expect(result).toEqual(mockJobRole);
 	});
 
 	it("should log unknown error payload when getJobRoleById fails with non-Error", async () => {

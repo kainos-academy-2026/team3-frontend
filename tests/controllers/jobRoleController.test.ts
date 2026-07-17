@@ -15,9 +15,28 @@ const mockJobRoles = [
 		location: "Belfast",
 		capability: { capabilityId: 1, capabilityName: "Engineering" },
 		band: { bandId: 1, bandName: "Associate" },
+		closingDate: "2026-12-31",
 		status: "Open",
 	},
 ];
+
+const mockPaginatedListResponse = {
+	data: mockJobRoles,
+	pagination: {
+		totalItems: 11,
+		totalPages: 2,
+		currentPage: 1,
+		pageSize: 10,
+		hasNext: true,
+		hasPrevious: false,
+	},
+	links: {
+		first: "/api/job-roles?limit=10&page=1",
+		next: "/api/job-roles?limit=10&page=2",
+		previous: null,
+		last: "/api/job-roles?limit=10&page=2",
+	},
+};
 
 const mockRes = () => {
 	const res = {} as Response;
@@ -66,39 +85,96 @@ describe("JobRoleController", () => {
 
 	it("should render job roles on happy path", async () => {
 		const mockService = {
-			getAllJobRoles: vi.fn().mockResolvedValue(mockJobRoles),
-		} as unknown as JobRoleService;
-
-		const controller = new JobRoleController(mockService);
-		const req = { session: { jwtToken: token } } as unknown as Request;
-		const res = mockRes();
-
-		await controller.getAllJobRoles(req, res);
-
-		expect(mockService.getAllJobRoles).toHaveBeenCalledWith(token);
-		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
-			jobRoles: mockJobRoles,
-			created: false,
-		});
-	});
-
-	it("should pass created=true when query param is present on list route", async () => {
-		const mockService = {
-			getAllJobRoles: vi.fn().mockResolvedValue(mockJobRoles),
+			getAllJobRoles: vi.fn().mockResolvedValue(mockPaginatedListResponse),
 		} as unknown as JobRoleService;
 
 		const controller = new JobRoleController(mockService);
 		const req = {
 			session: { jwtToken: token },
-			query: { created: "true" },
+			query: {},
 		} as unknown as Request;
 		const res = mockRes();
 
 		await controller.getAllJobRoles(req, res);
 
+		expect(mockService.getAllJobRoles).toHaveBeenCalledWith(token, 10, 1);
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
+			jobRoles: mockJobRoles,
+			created: false,
+			pagination: mockPaginatedListResponse.pagination,
+			links: {
+				first: "/job-roles?limit=10&page=1",
+				next: "/job-roles?limit=10&page=2",
+				previous: null,
+				last: "/job-roles?limit=10&page=2",
+			},
+		});
+	});
+
+	it("should parse explicit query and pass created=true when query param is present", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn().mockResolvedValue(mockPaginatedListResponse),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			session: { jwtToken: token },
+			query: { created: "true", limit: "10", page: "2" },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getAllJobRoles(req, res);
+
+		expect(mockService.getAllJobRoles).toHaveBeenCalledWith(token, 10, 2);
+
 		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
 			jobRoles: mockJobRoles,
 			created: true,
+			pagination: mockPaginatedListResponse.pagination,
+			links: {
+				first: "/job-roles?limit=10&page=1",
+				next: "/job-roles?limit=10&page=2",
+				previous: null,
+				last: "/job-roles?limit=10&page=2",
+			},
+		});
+	});
+
+	it("should return 400 and render validation error when pagination query is invalid", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn(),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			session: { jwtToken: token },
+			query: { limit: "31", page: "1" },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getAllJobRoles(req, res);
+
+		expect(mockService.getAllJobRoles).not.toHaveBeenCalled();
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
+			jobRoles: [],
+			created: false,
+			pagination: {
+				totalItems: 0,
+				totalPages: 0,
+				currentPage: 1,
+				pageSize: 10,
+				hasNext: false,
+				hasPrevious: false,
+			},
+			links: {
+				first: null,
+				next: null,
+				previous: null,
+				last: null,
+			},
+			errorTitle: "Invalid pagination parameters",
+			errorMessage: "Limit must not exceed 30.",
 		});
 	});
 
@@ -108,7 +184,10 @@ describe("JobRoleController", () => {
 		} as unknown as JobRoleService;
 
 		const controller = new JobRoleController(mockService);
-		const req = { session: { jwtToken: token } } as unknown as Request;
+		const req = {
+			session: { jwtToken: token },
+			query: {},
+		} as unknown as Request;
 		const res = mockRes();
 
 		await controller.getAllJobRoles(req, res);
@@ -117,25 +196,123 @@ describe("JobRoleController", () => {
 		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
 			jobRoles: [],
 			created: false,
+			pagination: {
+				totalItems: 0,
+				totalPages: 0,
+				currentPage: 1,
+				pageSize: 10,
+				hasNext: false,
+				hasPrevious: false,
+			},
+			links: {
+				first: null,
+				next: null,
+				previous: null,
+				last: null,
+			},
 			errorTitle: "Unable to load job roles",
 			errorMessage:
 				"We could not fetch job roles right now. Please try again shortly.",
 		});
 	});
 
-	it("should redirect to login when token is missing for list route", async () => {
+	it("should map backend 400 to a user-safe pagination error", async () => {
 		const mockService = {
-			getAllJobRoles: vi.fn(),
+			getAllJobRoles: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 400 },
+			}),
 		} as unknown as JobRoleService;
 
 		const controller = new JobRoleController(mockService);
-		const req = { session: {} } as unknown as Request;
+		const req = {
+			session: { jwtToken: token },
+			query: { limit: "10", page: "1" },
+		} as unknown as Request;
 		const res = mockRes();
 
 		await controller.getAllJobRoles(req, res);
 
-		expect(res.redirect).toHaveBeenCalledWith("/login");
-		expect(mockService.getAllJobRoles).not.toHaveBeenCalled();
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-list.njk",
+			expect.objectContaining({
+				errorTitle: "Invalid pagination parameters",
+				errorMessage:
+					"Invalid page or limit values. Please update your query and try again.",
+			}),
+		);
+	});
+
+	it("should render empty out-of-range results with pagination context", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn().mockResolvedValue({
+				data: [],
+				pagination: {
+					totalItems: 15,
+					totalPages: 2,
+					currentPage: 5,
+					pageSize: 10,
+					hasNext: false,
+					hasPrevious: true,
+				},
+				links: {
+					first: "/api/job-roles?limit=10&page=1",
+					next: null,
+					previous: "/api/job-roles?limit=10&page=4",
+					last: "/api/job-roles?limit=10&page=2",
+				},
+			}),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			session: { jwtToken: token },
+			query: { limit: "10", page: "5" },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.getAllJobRoles(req, res);
+
+		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
+			jobRoles: [],
+			created: false,
+			pagination: {
+				totalItems: 15,
+				totalPages: 2,
+				currentPage: 5,
+				pageSize: 10,
+				hasNext: false,
+				hasPrevious: true,
+			},
+			links: {
+				first: "/job-roles?limit=10&page=1",
+				next: null,
+				previous: "/job-roles?limit=10&page=4",
+				last: "/job-roles?limit=10&page=2",
+			},
+		});
+	});
+
+	it("should render list when token is missing for list route", async () => {
+		const mockService = {
+			getAllJobRoles: vi.fn().mockResolvedValue(mockPaginatedListResponse),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = { session: {}, query: {} } as unknown as Request;
+		const res = mockRes();
+
+		await controller.getAllJobRoles(req, res);
+
+		expect(mockService.getAllJobRoles).toHaveBeenCalledWith(undefined, 10, 1);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-list.njk",
+			expect.objectContaining({
+				jobRoles: mockJobRoles,
+				created: false,
+			}),
+		);
 	});
 
 	it("should render job role information on happy path", async () => {
@@ -274,10 +451,10 @@ describe("JobRoleController", () => {
 		expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
 	});
 
-	it("should redirect to login when token is missing for detail route", async () => {
+	it("should render detail page when token is missing for detail route", async () => {
 		const mockService = {
 			getAllJobRoles: vi.fn(),
-			getJobRoleById: vi.fn(),
+			getJobRoleById: vi.fn().mockResolvedValue(mockJobRoleInformation),
 		} as unknown as JobRoleService;
 
 		const controller = new JobRoleController(mockService);
@@ -290,8 +467,13 @@ describe("JobRoleController", () => {
 
 		await controller.getJobRoleById(req, res);
 
-		expect(res.redirect).toHaveBeenCalledWith("/login");
-		expect(mockService.getJobRoleById).not.toHaveBeenCalled();
+		expect(mockService.getJobRoleById).toHaveBeenCalledWith(1, undefined);
+		expect(res.render).toHaveBeenCalledWith(
+			"pages/job-role-information.njk",
+			expect.objectContaining({
+				jobRole: mockJobRoleInformation,
+			}),
+		);
 	});
 
 	it("should return generic 500 for unhandled detail errors", async () => {

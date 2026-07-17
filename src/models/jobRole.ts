@@ -119,6 +119,28 @@ export interface AdminApplicationsPageViewModel {
 	applicationAction: AdminApplicationActionStatus | null;
 }
 
+export interface JobRolePaginationMetadata {
+	totalItems: number;
+	totalPages: number;
+	currentPage: number;
+	pageSize: number;
+	hasNext: boolean;
+	hasPrevious: boolean;
+}
+
+export interface JobRolePaginationLinks {
+	first: string | null;
+	next: string | null;
+	previous: string | null;
+	last: string | null;
+}
+
+export interface PaginatedJobRoleListResponse {
+	data: JobRole[];
+	pagination: JobRolePaginationMetadata;
+	links: JobRolePaginationLinks;
+}
+
 export interface JobRoleInformationViewModel {
 	jobRole: JobRoleInformation;
 	canApply: boolean;
