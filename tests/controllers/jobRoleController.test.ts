@@ -339,7 +339,9 @@ describe("JobRoleController", () => {
 
 		await controller.deleteJobRole(req, res);
 
-		expect(res.redirect).toHaveBeenCalledWith("/job-roles?deleteError=not-found");
+		expect(res.redirect).toHaveBeenCalledWith(
+			"/job-roles?deleteError=not-found",
+		);
 	});
 
 	it("should redirect to detail conflict message when backend returns 409 on delete", async () => {

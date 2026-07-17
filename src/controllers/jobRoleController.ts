@@ -80,7 +80,9 @@ export class JobRoleController {
 			const jobRoles = await this.jobRoleService.getAllJobRoles(token);
 			const created = req.query?.created === "true";
 			const roleDeleted = req.query?.roleDeleted === "true";
-			const deleteError = req.query?.deleteError ? (req.query.deleteError as string) : null;
+			const deleteError = req.query?.deleteError
+				? (req.query.deleteError as string)
+				: null;
 			res.render("pages/job-role-list.njk", {
 				jobRoles,
 				created,
@@ -91,7 +93,9 @@ export class JobRoleController {
 			console.error("Failed to get job roles:", error);
 			const created = req.query?.created === "true";
 			const roleDeleted = req.query?.roleDeleted === "true";
-			const deleteError = req.query?.deleteError ? (req.query.deleteError as string) : null;
+			const deleteError = req.query?.deleteError
+				? (req.query.deleteError as string)
+				: null;
 			res.status(500).render("pages/job-role-list.njk", {
 				jobRoles: [],
 				created,
@@ -126,16 +130,19 @@ export class JobRoleController {
 			const isAdmin = req.session.userRole === "ADMIN";
 			const canEdit = isAdmin;
 			const editSuccess = req.query.editSuccess === "true";
-			const deleteError = req.query?.deleteError ? (req.query.deleteError as string) : null;
+			const deleteError = req.query?.deleteError
+				? (req.query.deleteError as string)
+				: null;
 			const viewModel: JobRoleInformationViewModel = {
 				jobRole,
-				canApply: jobRole.status === JobRoleStatus.Open &&
+				canApply:
+					jobRole.status === JobRoleStatus.Open &&
 					jobRole.numberOfOpenPositions > 0,
 				applicationSubmitted: req.query.applicationSubmitted === "true",
 				canEdit,
 				editSuccess,
 				isAdmin,
-				deleteError
+				deleteError,
 			};
 
 			res.render("pages/job-role-information.njk", viewModel);
