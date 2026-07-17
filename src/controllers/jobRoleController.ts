@@ -79,16 +79,28 @@ export class JobRoleController {
 		try {
 			const jobRoles = await this.jobRoleService.getAllJobRoles(token);
 			const created = req.query?.created === "true";
+			const roleDeleted = req.query?.roleDeleted === "true";
+			const deleteError = req.query?.deleteError
+				? (req.query.deleteError as string)
+				: null;
 			res.render("pages/job-role-list.njk", {
 				jobRoles,
 				created,
+				roleDeleted,
+				deleteError,
 			});
 		} catch (error) {
 			console.error("Failed to get job roles:", error);
 			const created = req.query?.created === "true";
+			const roleDeleted = req.query?.roleDeleted === "true";
+			const deleteError = req.query?.deleteError
+				? (req.query.deleteError as string)
+				: null;
 			res.status(500).render("pages/job-role-list.njk", {
 				jobRoles: [],
 				created,
+				roleDeleted,
+				deleteError,
 				errorTitle: "Unable to load job roles",
 				errorMessage:
 					"We could not fetch job roles right now. Please try again shortly.",
@@ -115,8 +127,12 @@ export class JobRoleController {
 				jobRoleId,
 				token,
 			);
-			const canEdit = req.session.userRole === "ADMIN";
+			const isAdmin = req.session.userRole === "ADMIN";
+			const canEdit = isAdmin;
 			const editSuccess = req.query.editSuccess === "true";
+			const deleteError = req.query?.deleteError
+				? (req.query.deleteError as string)
+				: null;
 			const viewModel: JobRoleInformationViewModel = {
 				jobRole,
 				canApply:
@@ -125,6 +141,8 @@ export class JobRoleController {
 				applicationSubmitted: req.query.applicationSubmitted === "true",
 				canEdit,
 				editSuccess,
+				isAdmin,
+				deleteError,
 			};
 
 			res.render("pages/job-role-information.njk", viewModel);
@@ -388,6 +406,38 @@ export class JobRoleController {
 				}
 			}
 			res.status(500).send("Could not update job role. Please try again.");
+		}
+	}
+
+	async deleteJobRole(req: Request, res: Response): Promise<void> {
+		const jobRoleId = Number(req.params.id);
+		if (!Number.isInteger(jobRoleId) || jobRoleId <= 0) {
+			res.status(400).send("Invalid job role ID");
+			return;
+		}
+
+		const token = req.session.jwtToken;
+		if (!token) {
+			res.redirect("/login");
+			return;
+		}
+
+		try {
+			await this.jobRoleService.deleteJobRole(jobRoleId, token);
+			res.redirect("/job-roles?roleDeleted=true");
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				const status = error.response?.status;
+				if (status === 404) {
+					res.redirect("/job-roles?deleteError=not-found");
+					return;
+				}
+				if (status === 409) {
+					res.redirect(`/job-roles/${jobRoleId}?deleteError=has-applications`);
+					return;
+				}
+			}
+			res.redirect("/job-roles?deleteError=unknown");
 		}
 	}
 }

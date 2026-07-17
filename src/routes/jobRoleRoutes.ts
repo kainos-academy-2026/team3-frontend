@@ -27,6 +27,9 @@ router.get("/job-roles/:id/edit", requireAdmin, (req, res) =>
 router.post("/job-roles/:id/edit", requireAdmin, (req, res) =>
 	jobRoleController.submitEditJobRole(req, res),
 );
+router.post("/job-roles/:id/delete", requireAdmin, (req, res) =>
+	jobRoleController.deleteJobRole(req, res),
+);
 router.get("/job-roles/new", requireAuth, requireAdmin, (req, res) =>
 	jobRoleController.getCreateJobRolePage(req, res),
 );
