@@ -139,6 +139,8 @@ describe("JobRoleController", () => {
 				previous: null,
 				last: "/job-roles?limit=10&page=2",
 			},
+			roleDeleted: false,
+			deleteError: null,
 		});
 	});
 
@@ -297,6 +299,8 @@ describe("JobRoleController", () => {
 				previous: "/job-roles?limit=10&page=4",
 				last: "/job-roles?limit=10&page=2",
 			},
+			roleDeleted: false,
+			deleteError: null,
 		});
 	});
 
