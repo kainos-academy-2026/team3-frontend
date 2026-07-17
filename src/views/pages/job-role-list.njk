@@ -59,11 +59,6 @@
                 </dl>
               </article>
             </a>
-            {% if isAdmin %}
-              <form class="role-card-delete" action="/job-roles/{{ role.id }}/delete" method="post" onsubmit="return confirm('Delete this role permanently? This action cannot be undone.');">
-                <button type="submit" class="btn-danger btn-small">Delete role</button>
-              </form>
-            {% endif %}
           </div>
         {% endfor %}
       </div>

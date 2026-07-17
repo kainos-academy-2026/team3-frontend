@@ -175,7 +175,7 @@ describe("GET /job-roles routes", () => {
 		expect(listSpy).toHaveBeenCalledOnce();
 	});
 
-	it("should show delete action on list page for admins", async () => {
+	it("should not show delete action on list page for admins", async () => {
 		mockIsAdmin = true;
 		vi.spyOn(
 			jobRoleServiceModule.JobRoleService.prototype,
@@ -211,7 +211,7 @@ describe("GET /job-roles routes", () => {
 		const response = await request(app).get("/job-roles");
 
 		expect(response.status).toBe(200);
-		expect(response.text).toContain("Delete role");
+		expect(response.text).not.toContain("Delete role");
 	});
 
 	it("should hide delete action on list page for non-admins", async () => {
