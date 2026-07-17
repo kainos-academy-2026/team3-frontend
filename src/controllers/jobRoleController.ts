@@ -16,8 +16,45 @@ import type { JobRoleService } from "../services/jobRoleService.js";
 import {
 	type CreateJobRoleData,
 	CreateJobRoleSchema,
+	JobRolePaginationQuerySchema,
 	UpdateJobRoleRequestSchema,
 } from "../validation/jobRoleSchemas.js";
+
+const defaultPagination = {
+	totalItems: 0,
+	totalPages: 0,
+	currentPage: 1,
+	pageSize: 10,
+	hasNext: false,
+	hasPrevious: false,
+};
+
+const defaultPaginationLinks = {
+	first: null,
+	next: null,
+	previous: null,
+	last: null,
+};
+
+const toFrontendPaginationLink = (link: string | null): string | null => {
+	if (!link) {
+		return null;
+	}
+
+	return link.replace(/^\/api\/job-roles/, "/job-roles");
+};
+
+const toFrontendPaginationLinks = (links: {
+	first: string | null;
+	next: string | null;
+	previous: string | null;
+	last: string | null;
+}) => ({
+	first: toFrontendPaginationLink(links.first),
+	next: toFrontendPaginationLink(links.next),
+	previous: toFrontendPaginationLink(links.previous),
+	last: toFrontendPaginationLink(links.last),
+});
 
 const toCreateJobRoleFormValues = (body: unknown): CreateJobRoleFormValues => {
 	if (!body || typeof body !== "object") {
@@ -71,34 +108,65 @@ export class JobRoleController {
 
 	async getAllJobRoles(req: Request, res: Response): Promise<void> {
 		const token = req.session.jwtToken;
-		if (!token) {
-			res.redirect("/login");
+		const created = req.query?.created === "true";
+		const roleDeleted = req.query?.roleDeleted === "true";
+		const deleteError = req.query?.deleteError
+			? (req.query.deleteError as string)
+			: null;
+
+		const queryValidation = JobRolePaginationQuerySchema.safeParse(req.query);
+		if (!queryValidation.success) {
+			res.status(400).render("pages/job-role-list.njk", {
+				jobRoles: [],
+				created,
+				pagination: defaultPagination,
+				links: defaultPaginationLinks,
+				errorTitle: "Invalid pagination parameters",
+				errorMessage: queryValidation.error.issues[0]?.message,
+				roleDeleted,
+				deleteError,
+			});
 			return;
 		}
 
+		const { limit, page } = queryValidation.data;
+
 		try {
-			const jobRoles = await this.jobRoleService.getAllJobRoles(token);
-			const created = req.query?.created === "true";
-			const roleDeleted = req.query?.roleDeleted === "true";
-			const deleteError = req.query?.deleteError
-				? (req.query.deleteError as string)
-				: null;
+			const paginatedResponse = await this.jobRoleService.getAllJobRoles(
+				token,
+				limit,
+				page,
+			);
 			res.render("pages/job-role-list.njk", {
-				jobRoles,
+				jobRoles: paginatedResponse.data,
 				created,
+				pagination: paginatedResponse.pagination,
+				links: toFrontendPaginationLinks(paginatedResponse.links),
 				roleDeleted,
 				deleteError,
 			});
 		} catch (error) {
+			if (axios.isAxiosError(error) && error.response?.status === 400) {
+				res.status(400).render("pages/job-role-list.njk", {
+					jobRoles: [],
+					created,
+					pagination: defaultPagination,
+					links: defaultPaginationLinks,
+					errorTitle: "Invalid pagination parameters",
+					errorMessage:
+						"Invalid page or limit values. Please update your query and try again.",
+					roleDeleted,
+					deleteError,
+				});
+				return;
+			}
+
 			console.error("Failed to get job roles:", error);
-			const created = req.query?.created === "true";
-			const roleDeleted = req.query?.roleDeleted === "true";
-			const deleteError = req.query?.deleteError
-				? (req.query.deleteError as string)
-				: null;
 			res.status(500).render("pages/job-role-list.njk", {
 				jobRoles: [],
 				created,
+				pagination: defaultPagination,
+				links: defaultPaginationLinks,
 				roleDeleted,
 				deleteError,
 				errorTitle: "Unable to load job roles",
@@ -110,10 +178,6 @@ export class JobRoleController {
 
 	async getJobRoleById(req: Request, res: Response): Promise<void> {
 		const token = req.session.jwtToken;
-		if (!token) {
-			res.redirect("/login");
-			return;
-		}
 
 		const jobRoleId = Number(req.params.id);
 

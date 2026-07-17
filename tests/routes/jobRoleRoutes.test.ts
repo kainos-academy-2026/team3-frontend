@@ -98,17 +98,33 @@ describe("GET /job-roles routes", () => {
 		vi.spyOn(
 			jobRoleServiceModule.JobRoleService.prototype,
 			"getAllJobRoles",
-		).mockResolvedValue([
-			{
-				id: 1,
-				roleName: "Software Engineer",
-				location: "Belfast",
-				capability: { capabilityId: 1, capabilityName: "Engineering" },
-				band: { bandId: 1, bandName: "Associate" },
-				closingDate: "2026-12-31",
-				status: JobRoleStatus.Open,
+		).mockResolvedValue({
+			data: [
+				{
+					id: 1,
+					roleName: "Software Engineer",
+					location: "Belfast",
+					capability: { capabilityId: 1, capabilityName: "Engineering" },
+					band: { bandId: 1, bandName: "Associate" },
+					closingDate: "2026-12-31",
+					status: JobRoleStatus.Open,
+				},
+			],
+			pagination: {
+				totalItems: 1,
+				totalPages: 1,
+				currentPage: 1,
+				pageSize: 10,
+				hasNext: false,
+				hasPrevious: false,
 			},
-		]);
+			links: {
+				first: "/api/job-roles?limit=10&page=1",
+				next: null,
+				previous: null,
+				last: "/api/job-roles?limit=10&page=1",
+			},
+		});
 
 		const response = await request(app).get("/job-roles");
 
@@ -117,27 +133,85 @@ describe("GET /job-roles routes", () => {
 		expect(response.text).toContain("Software Engineer");
 	});
 
-	it("should show delete action on list page for admins", async () => {
+	it("should not require auth for GET /job-roles?limit=10&page=1", async () => {
+		mockIsAuthenticated = false;
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getAllJobRoles",
+		).mockResolvedValue({
+			data: [],
+			pagination: {
+				totalItems: 0,
+				totalPages: 0,
+				currentPage: 1,
+				pageSize: 10,
+				hasNext: false,
+				hasPrevious: false,
+			},
+			links: {
+				first: null,
+				next: null,
+				previous: null,
+				last: null,
+			},
+		});
+
+		const response = await request(app).get("/job-roles?limit=10&page=1");
+
+		expect(response.status).toBe(200);
+	});
+
+	it("should delegate to controller for authenticated GET /job-roles?limit=10&page=1", async () => {
+		const listSpy = vi
+			.spyOn(JobRoleController.prototype, "getAllJobRoles")
+			.mockImplementation(async (_req, res) => {
+				res.status(200).send("list ok");
+			});
+
+		const response = await request(app).get("/job-roles?limit=10&page=1");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain("list ok");
+		expect(listSpy).toHaveBeenCalledOnce();
+	});
+
+	it("should not show delete action on list page for admins", async () => {
 		mockIsAdmin = true;
 		vi.spyOn(
 			jobRoleServiceModule.JobRoleService.prototype,
 			"getAllJobRoles",
-		).mockResolvedValue([
-			{
-				id: 1,
-				roleName: "Software Engineer",
-				location: "Belfast",
-				capability: { capabilityId: 1, capabilityName: "Engineering" },
-				band: { bandId: 1, bandName: "Associate" },
-				closingDate: "2026-12-31",
-				status: JobRoleStatus.Open,
+		).mockResolvedValue({
+			data: [
+				{
+					id: 1,
+					roleName: "Software Engineer",
+					location: "Belfast",
+					capability: { capabilityId: 1, capabilityName: "Engineering" },
+					band: { bandId: 1, bandName: "Associate" },
+					closingDate: "2026-12-31",
+					status: JobRoleStatus.Open,
+				},
+			],
+			pagination: {
+				totalItems: 1,
+				totalPages: 1,
+				currentPage: 1,
+				pageSize: 10,
+				hasNext: false,
+				hasPrevious: false,
 			},
-		]);
+			links: {
+				first: "/api/job-roles?limit=10&page=1",
+				next: null,
+				previous: null,
+				last: "/api/job-roles?limit=10&page=1",
+			},
+		});
 
 		const response = await request(app).get("/job-roles");
 
 		expect(response.status).toBe(200);
-		expect(response.text).toContain("Delete role");
+		expect(response.text).not.toContain("Delete role");
 	});
 
 	it("should hide delete action on list page for non-admins", async () => {
@@ -145,17 +219,33 @@ describe("GET /job-roles routes", () => {
 		vi.spyOn(
 			jobRoleServiceModule.JobRoleService.prototype,
 			"getAllJobRoles",
-		).mockResolvedValue([
-			{
-				id: 1,
-				roleName: "Software Engineer",
-				location: "Belfast",
-				capability: { capabilityId: 1, capabilityName: "Engineering" },
-				band: { bandId: 1, bandName: "Associate" },
-				closingDate: "2026-12-31",
-				status: JobRoleStatus.Open,
+		).mockResolvedValue({
+			data: [
+				{
+					id: 1,
+					roleName: "Software Engineer",
+					location: "Belfast",
+					capability: { capabilityId: 1, capabilityName: "Engineering" },
+					band: { bandId: 1, bandName: "Associate" },
+					closingDate: "2026-12-31",
+					status: JobRoleStatus.Open,
+				},
+			],
+			pagination: {
+				totalItems: 1,
+				totalPages: 1,
+				currentPage: 1,
+				pageSize: 10,
+				hasNext: false,
+				hasPrevious: false,
 			},
-		]);
+			links: {
+				first: "/api/job-roles?limit=10&page=1",
+				next: null,
+				previous: null,
+				last: "/api/job-roles?limit=10&page=1",
+			},
+		});
 
 		const response = await request(app).get("/job-roles");
 
@@ -178,6 +268,14 @@ describe("GET /job-roles routes", () => {
 		);
 	});
 
+	it("should return rendered validation error for invalid query values", async () => {
+		const response = await request(app).get("/job-roles?limit=31&page=1");
+
+		expect(response.status).toBe(400);
+		expect(response.text).toContain("Invalid pagination parameters");
+		expect(response.text).toContain("Limit must not exceed 30.");
+	});
+
 	it("should return 200 and render html for GET /job-roles/:id", async () => {
 		vi.spyOn(
 			jobRoleServiceModule.JobRoleService.prototype,
@@ -192,6 +290,19 @@ describe("GET /job-roles routes", () => {
 		expect(response.text).toContain("Builds backend services");
 	});
 
+	it("should allow unauthenticated access to GET /job-roles/:id", async () => {
+		mockIsAuthenticated = false;
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getJobRoleById",
+		).mockResolvedValue(mockJobRoleInformation);
+
+		const response = await request(app).get("/job-roles/1");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain("Software Engineer");
+	});
+
 	it("should show delete action on detail page for admins", async () => {
 		mockIsAdmin = true;
 		vi.spyOn(
@@ -202,6 +313,7 @@ describe("GET /job-roles routes", () => {
 		const response = await request(app).get("/job-roles/1");
 
 		expect(response.status).toBe(200);
+		expect(response.text).toContain("Software Engineer");
 		expect(response.text).toContain("Delete role");
 	});
 

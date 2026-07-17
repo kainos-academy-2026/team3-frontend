@@ -2,9 +2,9 @@ import axios from "axios";
 import apiClient from "../config/apiClient.js";
 import type {
 	CreateJobRolePayload,
-	JobRole,
 	JobRoleInformation,
 	JobRoleMetadataResponse,
+	PaginatedJobRoleListResponse,
 	UploadCvResponse,
 } from "../models/jobRole.js";
 import type { UpdateJobRoleRequestData } from "../validation/jobRoleSchemas.js";
@@ -42,27 +42,52 @@ export class JobRoleService {
 		});
 	}
 
-	async getAllJobRoles(token: string): Promise<JobRole[]> {
+	async getAllJobRoles(
+		token: string | undefined,
+		limit: number,
+		page: number,
+	): Promise<PaginatedJobRoleListResponse> {
 		try {
-			const response = await apiClient.get<JobRole[]>("/job-roles", {
-				headers: { Authorization: `Bearer ${token}` },
-			});
+			const requestConfig: {
+				headers?: { Authorization: string };
+				params: { limit: number; page: number };
+			} = {
+				params: { limit, page },
+			};
+
+			if (token) {
+				requestConfig.headers = { Authorization: `Bearer ${token}` };
+			}
+
+			const response = await apiClient.get<PaginatedJobRoleListResponse>(
+				"/job-roles",
+				requestConfig,
+			);
 			return response.data;
 		} catch (error) {
 			this.logRequestError("Failed to fetch job roles", error, {
 				endpoint: "/job-roles",
+				limit,
+				page,
 			});
 			throw error;
 		}
 	}
 
-	async getJobRoleById(id: number, token: string): Promise<JobRoleInformation> {
+	async getJobRoleById(
+		id: number,
+		token: string | undefined,
+	): Promise<JobRoleInformation> {
 		try {
+			const requestConfig: { headers?: { Authorization: string } } = {};
+
+			if (token) {
+				requestConfig.headers = { Authorization: `Bearer ${token}` };
+			}
+
 			const response = await apiClient.get<JobRoleInformation>(
 				`/job-roles/${id}`,
-				{
-					headers: { Authorization: `Bearer ${token}` },
-				},
+				requestConfig,
 			);
 			return response.data;
 		} catch (error) {

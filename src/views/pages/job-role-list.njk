@@ -59,11 +59,6 @@
                 </dl>
               </article>
             </a>
-            {% if isAdmin %}
-              <form class="role-card-delete" action="/job-roles/{{ role.id }}/delete" method="post" onsubmit="return confirm('Delete this role permanently? This action cannot be undone.');">
-                <button type="submit" class="btn-danger btn-small">Delete role</button>
-              </form>
-            {% endif %}
           </div>
         {% endfor %}
       </div>
@@ -74,9 +69,42 @@
       {% endif %}
     {% else %}
       <div class="empty-state">
-        <h2>No open job roles found.</h2>
-        <p>Please check back soon for new Kainos opportunities.</p>
+        <h2>No job roles found for this page.</h2>
+        <p>Try another page using the pagination controls, or check back soon for new opportunities.</p>
       </div>
+    {% endif %}
+
+    {% if pagination %}
+      <nav class="pagination-nav" aria-label="Job role pagination">
+        <p class="pagination-nav__summary">
+          Page {{ pagination.currentPage }} of {{ pagination.totalPages if pagination.totalPages > 0 else 1 }}
+        </p>
+        <div class="pagination-nav__links">
+          {% if links and links.first %}
+            <a class="pagination-nav__link" href="{{ links.first }}">First</a>
+          {% else %}
+            <span class="pagination-nav__link pagination-nav__link--disabled" aria-disabled="true">First</span>
+          {% endif %}
+
+          {% if links and links.previous %}
+            <a class="pagination-nav__link" href="{{ links.previous }}">Previous</a>
+          {% else %}
+            <span class="pagination-nav__link pagination-nav__link--disabled" aria-disabled="true">Previous</span>
+          {% endif %}
+
+          {% if links and links.next %}
+            <a class="pagination-nav__link" href="{{ links.next }}">Next</a>
+          {% else %}
+            <span class="pagination-nav__link pagination-nav__link--disabled" aria-disabled="true">Next</span>
+          {% endif %}
+
+          {% if links and links.last %}
+            <a class="pagination-nav__link" href="{{ links.last }}">Last</a>
+          {% else %}
+            <span class="pagination-nav__link pagination-nav__link--disabled" aria-disabled="true">Last</span>
+          {% endif %}
+        </div>
+      </nav>
     {% endif %}
   </section>
 {% endblock %}
