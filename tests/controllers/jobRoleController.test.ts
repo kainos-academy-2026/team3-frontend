@@ -79,6 +79,8 @@ describe("JobRoleController", () => {
 		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
 			jobRoles: mockJobRoles,
 			created: false,
+			roleDeleted: false,
+			deleteError: null,
 		});
 	});
 
@@ -99,6 +101,8 @@ describe("JobRoleController", () => {
 		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
 			jobRoles: mockJobRoles,
 			created: true,
+			roleDeleted: false,
+			deleteError: null,
 		});
 	});
 
@@ -117,6 +121,8 @@ describe("JobRoleController", () => {
 		expect(res.render).toHaveBeenCalledWith("pages/job-role-list.njk", {
 			jobRoles: [],
 			created: false,
+			roleDeleted: false,
+			deleteError: null,
 			errorTitle: "Unable to load job roles",
 			errorMessage:
 				"We could not fetch job roles right now. Please try again shortly.",
@@ -163,6 +169,7 @@ describe("JobRoleController", () => {
 				applicationSubmitted: false,
 				canEdit: false,
 				editSuccess: false,
+				deleteError: null,
 			}),
 		);
 	});
@@ -192,7 +199,9 @@ describe("JobRoleController", () => {
 				jobRole: { ...mockJobRoleInformation, status: JobRoleStatus.Closed },
 				canApply: false,
 				applicationSubmitted: false,
+				canEdit: false,
 				editSuccess: false,
+				deleteError: null,
 			}),
 		);
 	});
@@ -221,6 +230,7 @@ describe("JobRoleController", () => {
 				applicationSubmitted: true,
 				canEdit: false,
 				editSuccess: false,
+				deleteError: null,
 			}),
 		);
 	});
@@ -250,7 +260,107 @@ describe("JobRoleController", () => {
 				jobRole: { ...mockJobRoleInformation, numberOfOpenPositions: 0 },
 				canApply: false,
 				applicationSubmitted: false,
+				canEdit: false,
+				editSuccess: false,
+				deleteError: null,
 			}),
+		);
+	});
+
+	it("should redirect to list with success query when delete succeeds", async () => {
+		const mockService = {
+			deleteJobRole: vi.fn().mockResolvedValue(undefined),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.deleteJobRole(req, res);
+
+		expect(mockService.deleteJobRole).toHaveBeenCalledWith(1, token);
+		expect(res.redirect).toHaveBeenCalledWith("/job-roles?roleDeleted=true");
+	});
+
+	it("should return 400 when delete id is invalid", async () => {
+		const mockService = {
+			deleteJobRole: vi.fn(),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "abc" },
+			session: { jwtToken: token },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.deleteJobRole(req, res);
+
+		expect(res.status).toHaveBeenCalledWith(400);
+		expect(res.send).toHaveBeenCalledWith("Invalid job role ID");
+		expect(mockService.deleteJobRole).not.toHaveBeenCalled();
+	});
+
+	it("should redirect to login when token is missing for delete", async () => {
+		const mockService = {
+			deleteJobRole: vi.fn(),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: {},
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.deleteJobRole(req, res);
+
+		expect(res.redirect).toHaveBeenCalledWith("/login");
+		expect(mockService.deleteJobRole).not.toHaveBeenCalled();
+	});
+
+	it("should redirect to not-found error when backend returns 404 on delete", async () => {
+		const mockService = {
+			deleteJobRole: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 404 },
+			}),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.deleteJobRole(req, res);
+
+		expect(res.redirect).toHaveBeenCalledWith("/job-roles?deleteError=not-found");
+	});
+
+	it("should redirect to detail conflict message when backend returns 409 on delete", async () => {
+		const mockService = {
+			deleteJobRole: vi.fn().mockRejectedValue({
+				isAxiosError: true,
+				response: { status: 409 },
+			}),
+		} as unknown as JobRoleService;
+
+		const controller = new JobRoleController(mockService);
+		const req = {
+			params: { id: "1" },
+			session: { jwtToken: token },
+		} as unknown as Request;
+		const res = mockRes();
+
+		await controller.deleteJobRole(req, res);
+
+		expect(res.redirect).toHaveBeenCalledWith(
+			"/job-roles/1?deleteError=has-applications",
 		);
 	});
 

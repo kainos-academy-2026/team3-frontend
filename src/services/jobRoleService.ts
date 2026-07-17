@@ -146,6 +146,20 @@ export class JobRoleService {
 		}
 	}
 
+	async deleteJobRole(id: number, token: string): Promise<void> {
+		try {
+			await apiClient.delete(`/job-roles/${id}`, {
+				headers: { Authorization: `Bearer ${token}` },
+			});
+		} catch (error) {
+			this.logRequestError("Failed to delete job role", error, {
+				endpoint: `/job-roles/${id}`,
+				jobRoleId: id,
+			});
+			throw error;
+		}
+	}
+
 	async getJobRoleMetadata(token: string): Promise<JobRoleMetadataResponse> {
 		try {
 			const response = await apiClient.get<JobRoleMetadataResponse>(

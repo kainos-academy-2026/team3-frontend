@@ -123,9 +123,10 @@ export interface JobRoleInformationViewModel {
 	jobRole: JobRoleInformation;
 	canApply: boolean;
 	applicationSubmitted: boolean;
-	isAdmin?: boolean;
-	canEdit?: boolean;
-	editSuccess?: boolean;
+	canEdit: boolean;
+	editSuccess: boolean;
+	isAdmin: boolean;
+	deleteError?: string | null;
 }
 
 export interface EditJobRoleViewModel {

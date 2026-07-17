@@ -28,7 +28,11 @@ vi.mock("express-session", () => ({
 			_res: unknown,
 			next: () => void,
 		) => {
-			req.session = { ...(req.session ?? {}), jwtToken: mockJwtToken };
+			req.session = {
+				...(req.session ?? {}),
+				jwtToken: mockJwtToken,
+				userRole: mockIsAdmin ? "ADMIN" : "APPLICANT",
+			};
 			next();
 		},
 }));
@@ -50,8 +54,9 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 		req: { session: { userRole?: string; jwtToken?: string } },
 		res: {
 			status: (code: number) => {
-				render: (view: string, model: unknown) => void;
+				send: (text: string) => void;
 			};
+			redirect: (path: string) => void;
 		},
 		next: () => void,
 	) => {
@@ -60,7 +65,7 @@ vi.mock("../../src/middleware/authMiddleware.js", () => ({
 			return;
 		}
 		if (!mockIsAdmin) {
-			res.status(403).render("pages/home.njk", { error: "Forbidden" });
+			res.status(403).send("Forbidden");
 			return;
 		}
 		req.session.jwtToken = mockJwtToken;
@@ -112,6 +117,52 @@ describe("GET /job-roles routes", () => {
 		expect(response.text).toContain("Software Engineer");
 	});
 
+	it("should show delete action on list page for admins", async () => {
+		mockIsAdmin = true;
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getAllJobRoles",
+		).mockResolvedValue([
+			{
+				id: 1,
+				roleName: "Software Engineer",
+				location: "Belfast",
+				capability: { capabilityId: 1, capabilityName: "Engineering" },
+				band: { bandId: 1, bandName: "Associate" },
+				closingDate: "2026-12-31",
+				status: JobRoleStatus.Open,
+			},
+		]);
+
+		const response = await request(app).get("/job-roles");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain("Delete role");
+	});
+
+	it("should hide delete action on list page for non-admins", async () => {
+		mockIsAdmin = false;
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getAllJobRoles",
+		).mockResolvedValue([
+			{
+				id: 1,
+				roleName: "Software Engineer",
+				location: "Belfast",
+				capability: { capabilityId: 1, capabilityName: "Engineering" },
+				band: { bandId: 1, bandName: "Associate" },
+				closingDate: "2026-12-31",
+				status: JobRoleStatus.Open,
+			},
+		]);
+
+		const response = await request(app).get("/job-roles");
+
+		expect(response.status).toBe(200);
+		expect(response.text).not.toContain("Delete role");
+	});
+
 	it("should return 500 when the service throws an error for GET /job-roles", async () => {
 		vi.spyOn(
 			jobRoleServiceModule.JobRoleService.prototype,
@@ -139,6 +190,32 @@ describe("GET /job-roles routes", () => {
 		expect(response.type).toMatch(/html/);
 		expect(response.text).toContain("Software Engineer");
 		expect(response.text).toContain("Builds backend services");
+	});
+
+	it("should show delete action on detail page for admins", async () => {
+		mockIsAdmin = true;
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getJobRoleById",
+		).mockResolvedValue(mockJobRoleInformation);
+
+		const response = await request(app).get("/job-roles/1");
+
+		expect(response.status).toBe(200);
+		expect(response.text).toContain("Delete role");
+	});
+
+	it("should hide delete action on detail page for non-admins", async () => {
+		mockIsAdmin = false;
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getJobRoleById",
+		).mockResolvedValue(mockJobRoleInformation);
+
+		const response = await request(app).get("/job-roles/1");
+
+		expect(response.status).toBe(200);
+		expect(response.text).not.toContain("Delete role");
 	});
 
 	it("should return 400 for invalid id in GET /job-roles/:id", async () => {
@@ -380,6 +457,108 @@ describe("GET /job-roles routes", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers["content-type"]).toContain("text/csv");
 		expect(response.text).toContain("id,roleName");
+	});
+
+	it("should redirect to login for POST /job-roles/:id/delete when unauthenticated", async () => {
+		mockIsAuthenticated = false;
+
+		const response = await request(app).post("/job-roles/1/delete");
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/login");
+	});
+
+	it("should return 403 for POST /job-roles/:id/delete when not admin", async () => {
+		mockIsAdmin = false;
+
+		const response = await request(app).post("/job-roles/1/delete");
+
+		expect(response.status).toBe(403);
+		expect(response.text).toContain("Forbidden");
+	});
+
+	it("should delegate delete to controller for POST /job-roles/:id/delete when admin", async () => {
+		const deleteSpy = vi
+			.spyOn(jobRoleServiceModule.JobRoleService.prototype, "deleteJobRole")
+			.mockResolvedValue(undefined);
+
+		const response = await request(app).post("/job-roles/1/delete");
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/job-roles?roleDeleted=true");
+		expect(deleteSpy).toHaveBeenCalledWith(1, mockJwtToken);
+	});
+});
+
+describe("Edit job role routes", () => {
+	beforeEach(() => {
+		vi.restoreAllMocks();
+		mockIsAuthenticated = true;
+		mockIsAdmin = true;
+	});
+
+	it("GET /job-roles/1/edit without auth should redirect to /login", async () => {
+		mockIsAuthenticated = false;
+
+		const response = await request(app).get("/job-roles/1/edit");
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/login");
+	});
+
+	it("GET /job-roles/1/edit with admin auth should reach the controller", async () => {
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"getJobRoleById",
+		).mockResolvedValue(mockJobRoleInformation);
+
+		const response = await request(app).get("/job-roles/1/edit");
+
+		expect(response.status).toBe(200);
+		expect(response.type).toMatch(/html/);
+	});
+
+	it("GET /job-roles/1/edit as non-admin should return 403", async () => {
+		mockIsAdmin = false;
+
+		const response = await request(app).get("/job-roles/1/edit");
+
+		expect(response.status).toBe(403);
+	});
+
+	it("POST /job-roles/1/edit without auth should redirect to /login", async () => {
+		mockIsAuthenticated = false;
+
+		const response = await request(app)
+			.post("/job-roles/1/edit")
+			.send({ roleName: "Updated" });
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/login");
+	});
+
+	it("POST /job-roles/1/edit with admin auth should reach the controller", async () => {
+		vi.spyOn(
+			jobRoleServiceModule.JobRoleService.prototype,
+			"updateJobRole",
+		).mockResolvedValue(mockJobRoleInformation);
+
+		const response = await request(app)
+			.post("/job-roles/1/edit")
+			.send({ roleName: "Updated Engineer" });
+
+		expect(response.status).toBe(302);
+		expect(response.headers.location).toBe("/job-roles/1?editSuccess=true");
+	});
+
+	it("POST /job-roles/1/edit as non-admin should return 403", async () => {
+		mockIsAdmin = false;
+
+		const response = await request(app)
+			.post("/job-roles/1/edit")
+			.send({ roleName: "Updated" });
+
+		expect(response.status).toBe(403);
 	});
 });
 

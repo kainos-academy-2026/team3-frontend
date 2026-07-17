@@ -6,70 +6,84 @@
   <section class="roles-section role-details-section" aria-labelledby="job-role-heading">
     <a class="role-details__back" href="/job-roles">Back to all job roles</a>
 
-    <article class="role-card role-details-card" aria-label="{{ jobRole.roleName }} role details">
-      <div class="role-card__header">
-        <p class="role-card__capability">{{ jobRole.capability.capabilityName }}</p>
-        <h1 id="job-role-heading">{{ jobRole.roleName }}</h1>
-      </div>
+    <div class="role-details__card-wrapper">
+      <article class="role-card role-details-card" aria-label="{{ jobRole.roleName }} role details">
+        <div class="role-card__header">
+          <p class="role-card__capability">{{ jobRole.capability.capabilityName }}</p>
+          <h1 id="job-role-heading">{{ jobRole.roleName }}</h1>
+        </div>
 
-      {% if applicationSubmitted %}
-        <p class="form-success">Application submitted successfully. Your status is now in progress.</p>
+        {% if applicationSubmitted %}
+          <p class="form-success">Application submitted successfully. Your status is now in progress.</p>
+        {% endif %}
+
+        {% if editSuccess %}
+          <p class="form-success">Job role updated successfully.</p>
+        {% endif %}
+
+        {% if deleteError == "has-applications" %}
+          <p class="form-error" role="alert">This role cannot be deleted because it already has applications.</p>
+        {% elif deleteError %}
+          <p class="form-error" role="alert">Unable to delete this role. Please try again.</p>
+        {% endif %}
+
+        <dl class="role-card__details role-details__grid">
+          <div>
+            <dt>Location</dt>
+            <dd>{{ jobRole.location }}</dd>
+          </div>
+          <div>
+            <dt>Band</dt>
+            <dd>{{ jobRole.band.bandName }}</dd>
+          </div>
+          <div>
+            <dt>Closing date</dt>
+            <dd>{{ jobRole.closingDate }}</dd>
+          </div>
+          <div>
+            <dt>Status</dt>
+            <dd>{{ jobRole.status }}</dd>
+          </div>
+          <div>
+            <dt>Number of Open Positions</dt>
+            <dd>{{ jobRole.numberOfOpenPositions }}</dd>
+          </div>
+          <div class="role-details__full">
+            <dt>Description</dt>
+            <dd>{{ jobRole.description }}</dd>
+          </div>
+          <div class="role-details__full">
+            <dt>Responsibilities</dt>
+            <dd>{{ jobRole.responsibilities }}</dd>
+          </div>
+          <div class="role-details__full">
+            <dt>SharePoint URL</dt>
+            <dd>
+              <a class="role-details__link" href="{{ jobRole.sharepointUrl }}" target="_blank" rel="noopener noreferrer">
+                {{ jobRole.sharepointUrl }}
+              </a>
+            </dd>
+          </div>
+        </dl>
+
+        {% if canApply %}
+          <a class="button" href="/job-roles/{{ jobRole.id }}/apply">Apply for this role</a>
+        {% endif %}
+      </article>
+
+      {% if canEdit or isAdmin %}
+        <div class="role-details__admin-bar">
+          {% if canEdit %}
+            <a class="button" href="/job-roles/{{ jobRole.id }}/edit">Edit job role</a>
+          {% endif %}
+          {% if isAdmin %}
+            <a class="button" href="/job-roles/{{ jobRole.id }}/applications">Manage applications</a>
+            <form class="role-delete-form" action="/job-roles/{{ jobRole.id }}/delete" method="post" onsubmit="return confirm('Delete this role permanently? This action cannot be undone.')">
+              <button type="submit" class="btn-danger">Delete role</button>
+            </form>
+          {% endif %}
+        </div>
       {% endif %}
-
-      {% if editSuccess %}
-        <p class="form-success">Job role updated successfully.</p>
-      {% endif %}
-
-      <dl class="role-card__details role-details__grid">
-        <div>
-          <dt>Location</dt>
-          <dd>{{ jobRole.location }}</dd>
-        </div>
-        <div>
-          <dt>Band</dt>
-          <dd>{{ jobRole.band.bandName }}</dd>
-        </div>
-        <div>
-          <dt>Closing date</dt>
-          <dd>{{ jobRole.closingDate }}</dd>
-        </div>
-        <div>
-          <dt>Status</dt>
-          <dd>{{ jobRole.status }}</dd>
-        </div>
-        <div>
-          <dt>Number of Open Positions</dt>
-          <dd>{{ jobRole.numberOfOpenPositions }}</dd>
-        </div>
-        <div class="role-details__full">
-          <dt>Description</dt>
-          <dd>{{ jobRole.description }}</dd>
-        </div>
-        <div class="role-details__full">
-          <dt>Responsibilities</dt>
-          <dd>{{ jobRole.responsibilities }}</dd>
-        </div>
-        <div class="role-details__full">
-          <dt>SharePoint URL</dt>
-          <dd>
-            <a class="role-details__link" href="{{ jobRole.sharepointUrl }}" target="_blank" rel="noopener noreferrer">
-              {{ jobRole.sharepointUrl }}
-            </a>
-          </dd>
-        </div>
-      </dl>
-
-      {% if canApply %}
-        <a class="button" href="/job-roles/{{ jobRole.id }}/apply">Apply for this role</a>
-      {% endif %}
-      
-      {% if canEdit %}
-          <a class="button button--secondary" href="/job-roles/{{ jobRole.id }}/edit">Edit job role</a>
-       {% endif %}
-
-      {% if isAdmin %}
-        <a class="button button--secondary" href="/job-roles/{{ jobRole.id }}/applications">Manage applications</a>
-      {% endif %}
-    </article>
+    </div>
   </section>
 {% endblock %}
