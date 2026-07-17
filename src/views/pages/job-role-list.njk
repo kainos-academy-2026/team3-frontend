@@ -11,6 +11,16 @@
       {% endif %}
     </div>
 
+    {% if roleDeleted %}
+      <p class="form-success" role="status">Role deleted successfully.</p>
+    {% endif %}
+
+    {% if deleteError == "has-applications" %}
+      <p class="form-error" role="alert">This role cannot be deleted because it already has applications.</p>
+    {% elif deleteError %}
+      <p class="form-error" role="alert">Unable to delete this role. Please try again.</p>
+    {% endif %}
+
     {% if created %}
       <div class="roles-section__success-banner" role="status" aria-live="polite">
         Job role created successfully.
@@ -25,29 +35,36 @@
     {% elif jobRoles and jobRoles.length > 0 %}
       <div class="roles-grid">
         {% for role in jobRoles %}
-          <a href="/job-roles/{{ role.id }}" aria-label="View {{ role.roleName }} role details">
-            <article class="role-card" aria-label="{{ role.roleName }} role">
-              <div class="role-card__header">
-                <p class="role-card__capability">{{ role.capability.capabilityName }}</p>
-                <h2>{{ role.roleName }}</h2>
-              </div>
+          <div class="role-card-wrapper">
+            <a href="/job-roles/{{ role.id }}" aria-label="View {{ role.roleName }} role details">
+              <article class="role-card" aria-label="{{ role.roleName }} role">
+                <div class="role-card__header">
+                  <p class="role-card__capability">{{ role.capability.capabilityName }}</p>
+                  <h2>{{ role.roleName }}</h2>
+                </div>
 
-              <dl class="role-card__details">
-                <div>
-                  <dt>Location</dt>
-                  <dd>{{ role.location }}</dd>
-                </div>
-                <div>
-                  <dt>Band</dt>
-                  <dd>{{ role.band.bandName }}</dd>
-                </div>
-                <div>
-                  <dt>Closing date</dt>
-                  <dd>{{ role.closingDate }}</dd>
-                </div>
-              </dl>
-            </article>
-          </a>
+                <dl class="role-card__details">
+                  <div>
+                    <dt>Location</dt>
+                    <dd>{{ role.location }}</dd>
+                  </div>
+                  <div>
+                    <dt>Band</dt>
+                    <dd>{{ role.band.bandName }}</dd>
+                  </div>
+                  <div>
+                    <dt>Closing date</dt>
+                    <dd>{{ role.closingDate }}</dd>
+                  </div>
+                </dl>
+              </article>
+            </a>
+            {% if isAdmin %}
+              <form class="role-card-delete" action="/job-roles/{{ role.id }}/delete" method="post" onsubmit="return confirm('Delete this role permanently? This action cannot be undone.');">
+                <button type="submit" class="btn-danger btn-small">Delete role</button>
+              </form>
+            {% endif %}
+          </div>
         {% endfor %}
       </div>
       {% if isAdmin %}
