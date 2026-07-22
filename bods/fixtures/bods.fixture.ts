@@ -1,3 +1,4 @@
+import process from "node:process";
 import {
 	After,
 	AfterAll,
@@ -16,7 +17,6 @@ import {
 	type Page,
 	request,
 } from "@playwright/test";
-import process from "process";
 import type { CreateUserInput } from "../data/users.ts";
 import type { CreateUserPage } from "../pages/CreateUserPage.ts";
 
