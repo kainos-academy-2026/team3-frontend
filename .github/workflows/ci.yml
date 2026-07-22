@@ -30,5 +30,6 @@ jobs:
       - name: Lint
         run: npm run lint:ci
 
-      - name: Test
+      # BDD tests depend on the separate backend repository and are run outside this CI workflow.
+      - name: Unit tests only
         run: npm test
