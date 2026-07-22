@@ -15,7 +15,9 @@
 		"format": "biome format --write .",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write",
-		"lint:ci": "biome ci ."
+		"lint:ci": "biome ci .",
+		"test:bdd": "cucumber-js --require tests/bods/fixtures/**/*.cjs --require tests/bods/steps/**/*.cjs tests/bods/features/**/*.feature",
+		"test:bdd:smoke": "cucumber-js --require tests/bods/fixtures/**/*.cjs --require tests/bods/steps/**/*.cjs --tags @smoke tests/bods/features/**/*.feature"
 	},
 	"vitest": {
 		"environment": "node"
@@ -42,7 +44,12 @@
 	"devDependencies": {
 		"@cucumber/cucumber": "^12.2.0",
 		"@biomejs/biome": "^2.5.2",
+<<<<<<< HEAD
 		"@playwright/test": "^1.56.1",
+=======
+		"@cucumber/cucumber": "^13.2.0",
+		"@playwright/test": "^1.61.1",
+>>>>>>> e0050b7 (BOD Fully Working)
 		"@types/axios": "^0.9.36",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
