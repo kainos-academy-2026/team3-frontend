@@ -3,6 +3,8 @@ import type { CreateUserInput } from "../data/users.ts";
 
 export class CreateUserPage {
 	readonly page: Page;
+	readonly signInLink: Locator;
+	readonly createAccountLink: Locator;
 	readonly emailInput: Locator;
 	readonly passwordInput: Locator;
 	readonly confirmPasswordInput: Locator;
@@ -11,6 +13,10 @@ export class CreateUserPage {
 
 	constructor(page: Page) {
 		this.page = page;
+		this.signInLink = page.getByRole("link", { name: "Sign in" });
+		this.createAccountLink = page.getByRole("link", {
+			name: "Create an account",
+		});
 		this.emailInput = page.getByLabel("Email");
 		this.passwordInput = page.getByLabel("Password", { exact: true });
 		this.confirmPasswordInput = page.getByLabel("Confirm Password");
@@ -20,8 +26,13 @@ export class CreateUserPage {
 		});
 	}
 
-	async goto(baseUrl: string): Promise<void> {
-		await this.page.goto(`${baseUrl}/register`);
+	async gotoHome(baseUrl: string): Promise<void> {
+		await this.page.goto(`${baseUrl}/`);
+	}
+
+	async navigateToRegistrationFromHome(): Promise<void> {
+		await this.signInLink.click();
+		await this.createAccountLink.click();
 	}
 
 	async fillRegistrationForm(user: CreateUserInput): Promise<void> {

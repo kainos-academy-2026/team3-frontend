@@ -6,6 +6,6 @@ Feature: Create user account
 
 	@smoke
 	Scenario: New visitor successfully creates an account
-		Given a visitor is on the registration page
+		Given a visitor is on the home page and navigates to the registration page
 		When they submit valid registration details
 		Then their account is created and they are shown the registration success page

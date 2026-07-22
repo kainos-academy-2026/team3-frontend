@@ -4,14 +4,19 @@ import { buildUser } from "../data/users.ts";
 import { type BddWorld } from "../fixtures/bods.fixture.ts";
 import { CreateUserPage } from "../pages/CreateUserPage.ts";
 
-Given("a visitor is on the registration page", async function (this: BddWorld) {
+Given(
+	"a visitor is on the home page and navigates to the registration page",
+	async function (this: BddWorld) {
 	if (!this.page) {
 		throw new Error("Browser page was not initialised.");
 	}
 
 	this.createUserPage = new CreateUserPage(this.page);
-	await this.createUserPage.goto(this.baseUrl);
-});
+	await this.createUserPage.gotoHome(this.baseUrl);
+	await this.createUserPage.navigateToRegistrationFromHome();
+	await expect(this.page).toHaveURL(`${this.baseUrl}/register`);
+},
+);
 
 When(
 	"they submit valid registration details",
