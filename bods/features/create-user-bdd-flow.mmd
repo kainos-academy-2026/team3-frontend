@@ -1,0 +1,35 @@
+flowchart TD
+    classDef box fill:#fff176,stroke:#f57f17,stroke-width:1.5px,color:#3e2723;
+    classDef decision fill:#80deea,stroke:#00838f,stroke-width:1.5px,color:#004d40;
+    classDef error fill:#ff8a80,stroke:#d32f2f,stroke-width:1.5px,color:#4a0e0e;
+    classDef terminator fill:#b9f6ca,stroke:#2e7d32,stroke-width:1.8px,color:#1b5e20;
+
+    A([Test Run Starts]) --> B[BeforeAll: launch Chromium browser]
+    B --> C[Before hook: create browser context, page, API request context]
+    C --> D[Given: build CreateUserPage and navigate Home -> Register]
+
+    D --> D1{page exists?}
+    D1 -- No --> E1[Throw: Browser page was not initialised]
+    D1 -- Yes --> D2[Assert URL is /register]
+
+    D2 --> F[When: build user data and fill registration form]
+    F --> F1{createUserPage exists?}
+    F1 -- No --> E2[Throw: Create user page is not available]
+    F1 -- Yes --> F2[Submit registration form]
+
+    F2 --> G[Then: verify successful account creation]
+    G --> G1{page and createUserPage exist?}
+    G1 -- No --> E3[Throw: Scenario state is incomplete]
+    G1 -- Yes --> G2[Assert URL is /register/success]
+    G2 --> G3[Assert success heading is visible]
+
+    G3 --> H[After hook: close page/context/request context and reset world state]
+    H --> I([AfterAll: close browser])
+    E1 --> H
+    E2 --> H
+    E3 --> H
+
+    class A,I terminator;
+    class D1,F1,G1 decision;
+    class E1,E2,E3 error;
+    class B,C,D,D2,F,F2,G,G2,G3,H box;
