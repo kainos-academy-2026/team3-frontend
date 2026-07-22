@@ -3,22 +3,22 @@ import {
 	AfterAll,
 	Before,
 	BeforeAll,
-	World,
 	type IWorldOptions,
 	setDefaultTimeout,
 	setWorldConstructor,
+	World,
 } from "@cucumber/cucumber";
 import {
 	type APIRequestContext,
 	type Browser,
 	type BrowserContext,
-	type Page,
 	chromium,
+	type Page,
 	request,
 } from "@playwright/test";
-import type { CreateUserInput } from "../data/users.ts";
-import { CreateUserPage } from "../pages/CreateUserPage.ts";
 import process from "process";
+import type { CreateUserInput } from "../data/users.ts";
+import type { CreateUserPage } from "../pages/CreateUserPage.ts";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:3000";
 
@@ -49,9 +49,9 @@ setWorldConstructor(BddWorld);
 
 BeforeAll(async () => {
 	browser = await chromium.launch({
-  headless: process.env.BDD_HEADLESS !== "false",
-  slowMo: Number(process.env.BDD_SLOW_MO ?? 0),
-});
+		headless: process.env.BDD_HEADLESS !== "false",
+		slowMo: Number(process.env.BDD_SLOW_MO ?? 0),
+	});
 });
 
 Before(async function (this: BddWorld) {
