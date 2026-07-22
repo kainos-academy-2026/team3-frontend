@@ -18,6 +18,7 @@ import {
 } from "@playwright/test";
 import type { CreateUserInput } from "../data/users.ts";
 import { CreateUserPage } from "../pages/CreateUserPage.ts";
+import process from "process";
 
 const DEFAULT_BASE_URL = "http://127.0.0.1:3000";
 
@@ -47,7 +48,10 @@ export class BddWorld extends World {
 setWorldConstructor(BddWorld);
 
 BeforeAll(async () => {
-	browser = await chromium.launch({ headless: true });
+	browser = await chromium.launch({
+  headless: process.env.BDD_HEADLESS !== "false",
+  slowMo: Number(process.env.BDD_SLOW_MO ?? 0),
+});
 });
 
 Before(async function (this: BddWorld) {
