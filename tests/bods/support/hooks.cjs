@@ -1,6 +1,12 @@
-const { Before, After, BeforeAll, AfterAll, setWorldConstructor } = require('@cucumber/cucumber');
-const { chromium } = require('@playwright/test');
-const { CustomWorld } = require('./world.cjs');
+const {
+	Before,
+	After,
+	BeforeAll,
+	AfterAll,
+	setWorldConstructor,
+} = require("@cucumber/cucumber");
+const { chromium } = require("@playwright/test");
+const { CustomWorld } = require("./world.cjs");
 
 let globalBrowser;
 
@@ -8,7 +14,7 @@ setWorldConstructor(CustomWorld);
 
 BeforeAll(async () => {
 	globalBrowser = await chromium.launch({
-		headless: process.env.HEADED !== 'true',
+		headless: process.env.HEADED !== "true",
 	});
 });
 

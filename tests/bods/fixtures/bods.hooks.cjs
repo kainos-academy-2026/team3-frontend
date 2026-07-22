@@ -1,16 +1,22 @@
-const { Before, After, BeforeAll, AfterAll, setWorldConstructor } = require('@cucumber/cucumber');
-const { chromium } = require('@playwright/test');
-const { CustomWorld } = require('./bods.world.cjs');
+const {
+	Before,
+	After,
+	BeforeAll,
+	AfterAll,
+	setWorldConstructor,
+} = require("@cucumber/cucumber");
+const { chromium } = require("@playwright/test");
+const { CustomWorld } = require("./bods.world.cjs");
 
 let browser;
 
 setWorldConstructor(CustomWorld);
 
 BeforeAll(async () => {
-    browser = await chromium.launch({
-  headless: process.env.BDD_HEADLESS !== "false",
-  slowMo: Number(process.env.BDD_SLOW_MO ?? 0),
-});
+	browser = await chromium.launch({
+		headless: process.env.BDD_HEADLESS !== "false",
+		slowMo: Number(process.env.BDD_SLOW_MO ?? 0),
+	});
 });
 
 Before(async function () {

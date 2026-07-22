@@ -1,3 +1,3 @@
-const { CustomWorld } = require('../support/world.cjs');
+const { CustomWorld } = require("../support/world.cjs");
 
 module.exports = { CustomWorld };

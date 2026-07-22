@@ -1,900 +1,894 @@
 [
-  {
-    "description": "  To maintain accurate job posting information\n  As an admin\n  I want to edit existing job role details",
-    "elements": [
-      {
-        "description": "",
-        "id": "admin-edits-job-roles;admin-successfully-edits-job-role-fields",
-        "keyword": "Scenario",
-        "line": 8,
-        "name": "Admin successfully edits job role fields",
-        "steps": [
-          {
-            "result": {
-              "status": "passed",
-              "duration": 33105542
-            },
-            "keyword": "Before",
-            "hidden": true
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 11168616292
-            },
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 9,
-            "name": "I am authenticated as an admin",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:10"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 527785625
-            },
-            "arguments": [],
-            "keyword": "When ",
-            "line": 10,
-            "name": "I navigate to the edit page for job role with ID 1",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:70"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 55176041
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 11,
-            "name": "I update all fields with valid data",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:93"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 551384791
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 12,
-            "name": "I click the submit button",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:132"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 1570207
-            },
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 13,
-            "name": "I should be redirected to the job role detail page",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:164"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 7322792
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 14,
-            "name": "I should see a success banner",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:171"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 3423166
-            },
-            "keyword": "After",
-            "hidden": true
-          }
-        ],
-        "tags": [
-          {
-            "name": "@ui",
-            "line": 1
-          },
-          {
-            "name": "@admin",
-            "line": 1
-          },
-          {
-            "name": "@edit-job-role",
-            "line": 1
-          },
-          {
-            "name": "@smoke",
-            "line": 7
-          }
-        ],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "admin-edits-job-roles;admin-edits-only-some-fields",
-        "keyword": "Scenario",
-        "line": 16,
-        "name": "Admin edits only some fields",
-        "steps": [
-          {
-            "result": {
-              "status": "passed",
-              "duration": 47839250
-            },
-            "keyword": "Before",
-            "hidden": true
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 11133639750
-            },
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 17,
-            "name": "I am authenticated as an admin",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:10"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 524990291
-            },
-            "arguments": [],
-            "keyword": "When ",
-            "line": 18,
-            "name": "I navigate to the edit page for job role with ID 1",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:70"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 20088416
-            },
-            "arguments": [
-              {
-                "rows": [
-                  {
-                    "cells": [
-                      "roleName",
-                      "Updated Engineer"
-                    ]
-                  },
-                  {
-                    "cells": [
-                      "location",
-                      "Belfast"
-                    ]
-                  }
-                ]
-              }
-            ],
-            "keyword": "And ",
-            "line": 19,
-            "name": "I update only the role name and location:",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:118"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 554273540
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 22,
-            "name": "I click the submit button",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:132"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 463583
-            },
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 23,
-            "name": "I should be redirected to the job role detail page",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:164"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 6426749
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 24,
-            "name": "the detail page shows the updated role name \"Updated Engineer\"",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:176"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 1746083
-            },
-            "keyword": "After",
-            "hidden": true
-          }
-        ],
-        "tags": [
-          {
-            "name": "@ui",
-            "line": 1
-          },
-          {
-            "name": "@admin",
-            "line": 1
-          },
-          {
-            "name": "@edit-job-role",
-            "line": 1
-          }
-        ],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "admin-edits-job-roles;admin-sees-validation-errors-for-invalid-data",
-        "keyword": "Scenario Outline",
-        "line": 36,
-        "name": "Admin sees validation errors for invalid data",
-        "steps": [
-          {
-            "result": {
-              "status": "passed",
-              "duration": 47967208
-            },
-            "keyword": "Before",
-            "hidden": true
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 11143929416
-            },
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 27,
-            "name": "I am authenticated as an admin",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:10"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 536931583
-            },
-            "arguments": [],
-            "keyword": "When ",
-            "line": 28,
-            "name": "I navigate to the edit page for job role with ID 1",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:70"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 13004665
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 29,
-            "name": "I enter \"\" in the roleName field",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:136"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 534681457
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 30,
-            "name": "I click the submit button",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:132"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 207666
-            },
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 31,
-            "name": "I should remain on the edit job role page",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:181"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 5308749
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 32,
-            "name": "I should see an error message \"Role name is required.\"",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:186"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 2155958
-            },
-            "keyword": "After",
-            "hidden": true
-          }
-        ],
-        "tags": [
-          {
-            "name": "@ui",
-            "line": 1
-          },
-          {
-            "name": "@admin",
-            "line": 1
-          },
-          {
-            "name": "@edit-job-role",
-            "line": 1
-          }
-        ],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "admin-edits-job-roles;admin-sees-validation-errors-for-invalid-data",
-        "keyword": "Scenario Outline",
-        "line": 37,
-        "name": "Admin sees validation errors for invalid data",
-        "steps": [
-          {
-            "result": {
-              "status": "passed",
-              "duration": 44199291
-            },
-            "keyword": "Before",
-            "hidden": true
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 11135250833
-            },
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 27,
-            "name": "I am authenticated as an admin",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:10"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 547882958
-            },
-            "arguments": [],
-            "keyword": "When ",
-            "line": 28,
-            "name": "I navigate to the edit page for job role with ID 1",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:70"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 18364499
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 29,
-            "name": "I enter \"not-a-url\" in the sharepointUrl field",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:136"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 535551957
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 30,
-            "name": "I click the submit button",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:132"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 306625
-            },
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 31,
-            "name": "I should remain on the edit job role page",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:181"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 5752707
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 32,
-            "name": "I should see an error message \"SharePoint URL must be a valid URL.\"",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:186"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 2046291
-            },
-            "keyword": "After",
-            "hidden": true
-          }
-        ],
-        "tags": [
-          {
-            "name": "@ui",
-            "line": 1
-          },
-          {
-            "name": "@admin",
-            "line": 1
-          },
-          {
-            "name": "@edit-job-role",
-            "line": 1
-          }
-        ],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "admin-edits-job-roles;admin-sees-validation-errors-for-invalid-data",
-        "keyword": "Scenario Outline",
-        "line": 38,
-        "name": "Admin sees validation errors for invalid data",
-        "steps": [
-          {
-            "result": {
-              "status": "passed",
-              "duration": 31897417
-            },
-            "keyword": "Before",
-            "hidden": true
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 11134946042
-            },
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 27,
-            "name": "I am authenticated as an admin",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:10"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 528474167
-            },
-            "arguments": [],
-            "keyword": "When ",
-            "line": 28,
-            "name": "I navigate to the edit page for job role with ID 1",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:70"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 16256083
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 29,
-            "name": "I enter \"0\" in the numberOfOpenPositions field",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:136"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 537841666
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 30,
-            "name": "I click the submit button",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:132"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 187208
-            },
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 31,
-            "name": "I should remain on the edit job role page",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:181"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 5299208
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 32,
-            "name": "I should see an error message \"Number of open positions must be a positive integer.\"",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:186"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 2016625
-            },
-            "keyword": "After",
-            "hidden": true
-          }
-        ],
-        "tags": [
-          {
-            "name": "@ui",
-            "line": 1
-          },
-          {
-            "name": "@admin",
-            "line": 1
-          },
-          {
-            "name": "@edit-job-role",
-            "line": 1
-          }
-        ],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "admin-edits-job-roles;admin-sees-validation-errors-for-invalid-data",
-        "keyword": "Scenario Outline",
-        "line": 39,
-        "name": "Admin sees validation errors for invalid data",
-        "steps": [
-          {
-            "result": {
-              "status": "passed",
-              "duration": 32257083
-            },
-            "keyword": "Before",
-            "hidden": true
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 11137325208
-            },
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 27,
-            "name": "I am authenticated as an admin",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:10"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 536792000
-            },
-            "arguments": [],
-            "keyword": "When ",
-            "line": 28,
-            "name": "I navigate to the edit page for job role with ID 1",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:70"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 14878209
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 29,
-            "name": "I enter \"-5\" in the numberOfOpenPositions field",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:136"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 536922624
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 30,
-            "name": "I click the submit button",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:132"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 171957
-            },
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 31,
-            "name": "I should remain on the edit job role page",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:181"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 5485209
-            },
-            "arguments": [],
-            "keyword": "And ",
-            "line": 32,
-            "name": "I should see an error message \"Number of open positions must be a positive integer.\"",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:186"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 1963875
-            },
-            "keyword": "After",
-            "hidden": true
-          }
-        ],
-        "tags": [
-          {
-            "name": "@ui",
-            "line": 1
-          },
-          {
-            "name": "@admin",
-            "line": 1
-          },
-          {
-            "name": "@edit-job-role",
-            "line": 1
-          }
-        ],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "admin-edits-job-roles;non-admin-user-cannot-access-the-edit-page",
-        "keyword": "Scenario",
-        "line": 41,
-        "name": "Non-admin user cannot access the edit page",
-        "steps": [
-          {
-            "result": {
-              "status": "passed",
-              "duration": 31787458
-            },
-            "keyword": "Before",
-            "hidden": true
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 1128027625
-            },
-            "arguments": [],
-            "keyword": "Given ",
-            "line": 42,
-            "name": "I am authenticated as a regular user",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:51"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 11046499
-            },
-            "arguments": [],
-            "keyword": "When ",
-            "line": 43,
-            "name": "I try to access the edit page for job role with ID 1 directly",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:144"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 314582
-            },
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 44,
-            "name": "I should receive a 403 Forbidden response",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:191"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 2397457
-            },
-            "keyword": "After",
-            "hidden": true
-          }
-        ],
-        "tags": [
-          {
-            "name": "@ui",
-            "line": 1
-          },
-          {
-            "name": "@admin",
-            "line": 1
-          },
-          {
-            "name": "@edit-job-role",
-            "line": 1
-          }
-        ],
-        "type": "scenario"
-      },
-      {
-        "description": "",
-        "id": "admin-edits-job-roles;user-is-redirected-to-login-when-not-authenticated",
-        "keyword": "Scenario",
-        "line": 46,
-        "name": "User is redirected to login when not authenticated",
-        "steps": [
-          {
-            "result": {
-              "status": "passed",
-              "duration": 37563792
-            },
-            "keyword": "Before",
-            "hidden": true
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 6824999
-            },
-            "arguments": [],
-            "keyword": "When ",
-            "line": 47,
-            "name": "I try to access the edit page for job role with ID 1 directly without authentication",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:157"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 501461374
-            },
-            "arguments": [],
-            "keyword": "Then ",
-            "line": 48,
-            "name": "I should be redirected to the login page",
-            "match": {
-              "location": "tests/bods/steps/edit-job-role.steps.cjs:195"
-            }
-          },
-          {
-            "result": {
-              "status": "passed",
-              "duration": 2579791
-            },
-            "keyword": "After",
-            "hidden": true
-          }
-        ],
-        "tags": [
-          {
-            "name": "@ui",
-            "line": 1
-          },
-          {
-            "name": "@admin",
-            "line": 1
-          },
-          {
-            "name": "@edit-job-role",
-            "line": 1
-          }
-        ],
-        "type": "scenario"
-      }
-    ],
-    "id": "admin-edits-job-roles",
-    "line": 2,
-    "keyword": "Feature",
-    "name": "Admin edits job roles",
-    "tags": [
-      {
-        "name": "@ui",
-        "line": 1
-      },
-      {
-        "name": "@admin",
-        "line": 1
-      },
-      {
-        "name": "@edit-job-role",
-        "line": 1
-      }
-    ],
-    "uri": "tests/bods/features/edit-job-role.feature"
-  }
+	{
+		"description": "  To maintain accurate job posting information\n  As an admin\n  I want to edit existing job role details",
+		"elements": [
+			{
+				"description": "",
+				"id": "admin-edits-job-roles;admin-successfully-edits-job-role-fields",
+				"keyword": "Scenario",
+				"line": 8,
+				"name": "Admin successfully edits job role fields",
+				"steps": [
+					{
+						"result": {
+							"status": "passed",
+							"duration": 33105542
+						},
+						"keyword": "Before",
+						"hidden": true
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 11168616292
+						},
+						"arguments": [],
+						"keyword": "Given ",
+						"line": 9,
+						"name": "I am authenticated as an admin",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:10"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 527785625
+						},
+						"arguments": [],
+						"keyword": "When ",
+						"line": 10,
+						"name": "I navigate to the edit page for job role with ID 1",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:70"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 55176041
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 11,
+						"name": "I update all fields with valid data",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:93"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 551384791
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 12,
+						"name": "I click the submit button",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:132"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 1570207
+						},
+						"arguments": [],
+						"keyword": "Then ",
+						"line": 13,
+						"name": "I should be redirected to the job role detail page",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:164"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 7322792
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 14,
+						"name": "I should see a success banner",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:171"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 3423166
+						},
+						"keyword": "After",
+						"hidden": true
+					}
+				],
+				"tags": [
+					{
+						"name": "@ui",
+						"line": 1
+					},
+					{
+						"name": "@admin",
+						"line": 1
+					},
+					{
+						"name": "@edit-job-role",
+						"line": 1
+					},
+					{
+						"name": "@smoke",
+						"line": 7
+					}
+				],
+				"type": "scenario"
+			},
+			{
+				"description": "",
+				"id": "admin-edits-job-roles;admin-edits-only-some-fields",
+				"keyword": "Scenario",
+				"line": 16,
+				"name": "Admin edits only some fields",
+				"steps": [
+					{
+						"result": {
+							"status": "passed",
+							"duration": 47839250
+						},
+						"keyword": "Before",
+						"hidden": true
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 11133639750
+						},
+						"arguments": [],
+						"keyword": "Given ",
+						"line": 17,
+						"name": "I am authenticated as an admin",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:10"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 524990291
+						},
+						"arguments": [],
+						"keyword": "When ",
+						"line": 18,
+						"name": "I navigate to the edit page for job role with ID 1",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:70"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 20088416
+						},
+						"arguments": [
+							{
+								"rows": [
+									{
+										"cells": ["roleName", "Updated Engineer"]
+									},
+									{
+										"cells": ["location", "Belfast"]
+									}
+								]
+							}
+						],
+						"keyword": "And ",
+						"line": 19,
+						"name": "I update only the role name and location:",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:118"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 554273540
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 22,
+						"name": "I click the submit button",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:132"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 463583
+						},
+						"arguments": [],
+						"keyword": "Then ",
+						"line": 23,
+						"name": "I should be redirected to the job role detail page",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:164"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 6426749
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 24,
+						"name": "the detail page shows the updated role name \"Updated Engineer\"",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:176"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 1746083
+						},
+						"keyword": "After",
+						"hidden": true
+					}
+				],
+				"tags": [
+					{
+						"name": "@ui",
+						"line": 1
+					},
+					{
+						"name": "@admin",
+						"line": 1
+					},
+					{
+						"name": "@edit-job-role",
+						"line": 1
+					}
+				],
+				"type": "scenario"
+			},
+			{
+				"description": "",
+				"id": "admin-edits-job-roles;admin-sees-validation-errors-for-invalid-data",
+				"keyword": "Scenario Outline",
+				"line": 36,
+				"name": "Admin sees validation errors for invalid data",
+				"steps": [
+					{
+						"result": {
+							"status": "passed",
+							"duration": 47967208
+						},
+						"keyword": "Before",
+						"hidden": true
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 11143929416
+						},
+						"arguments": [],
+						"keyword": "Given ",
+						"line": 27,
+						"name": "I am authenticated as an admin",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:10"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 536931583
+						},
+						"arguments": [],
+						"keyword": "When ",
+						"line": 28,
+						"name": "I navigate to the edit page for job role with ID 1",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:70"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 13004665
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 29,
+						"name": "I enter \"\" in the roleName field",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:136"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 534681457
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 30,
+						"name": "I click the submit button",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:132"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 207666
+						},
+						"arguments": [],
+						"keyword": "Then ",
+						"line": 31,
+						"name": "I should remain on the edit job role page",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:181"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 5308749
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 32,
+						"name": "I should see an error message \"Role name is required.\"",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:186"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 2155958
+						},
+						"keyword": "After",
+						"hidden": true
+					}
+				],
+				"tags": [
+					{
+						"name": "@ui",
+						"line": 1
+					},
+					{
+						"name": "@admin",
+						"line": 1
+					},
+					{
+						"name": "@edit-job-role",
+						"line": 1
+					}
+				],
+				"type": "scenario"
+			},
+			{
+				"description": "",
+				"id": "admin-edits-job-roles;admin-sees-validation-errors-for-invalid-data",
+				"keyword": "Scenario Outline",
+				"line": 37,
+				"name": "Admin sees validation errors for invalid data",
+				"steps": [
+					{
+						"result": {
+							"status": "passed",
+							"duration": 44199291
+						},
+						"keyword": "Before",
+						"hidden": true
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 11135250833
+						},
+						"arguments": [],
+						"keyword": "Given ",
+						"line": 27,
+						"name": "I am authenticated as an admin",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:10"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 547882958
+						},
+						"arguments": [],
+						"keyword": "When ",
+						"line": 28,
+						"name": "I navigate to the edit page for job role with ID 1",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:70"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 18364499
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 29,
+						"name": "I enter \"not-a-url\" in the sharepointUrl field",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:136"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 535551957
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 30,
+						"name": "I click the submit button",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:132"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 306625
+						},
+						"arguments": [],
+						"keyword": "Then ",
+						"line": 31,
+						"name": "I should remain on the edit job role page",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:181"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 5752707
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 32,
+						"name": "I should see an error message \"SharePoint URL must be a valid URL.\"",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:186"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 2046291
+						},
+						"keyword": "After",
+						"hidden": true
+					}
+				],
+				"tags": [
+					{
+						"name": "@ui",
+						"line": 1
+					},
+					{
+						"name": "@admin",
+						"line": 1
+					},
+					{
+						"name": "@edit-job-role",
+						"line": 1
+					}
+				],
+				"type": "scenario"
+			},
+			{
+				"description": "",
+				"id": "admin-edits-job-roles;admin-sees-validation-errors-for-invalid-data",
+				"keyword": "Scenario Outline",
+				"line": 38,
+				"name": "Admin sees validation errors for invalid data",
+				"steps": [
+					{
+						"result": {
+							"status": "passed",
+							"duration": 31897417
+						},
+						"keyword": "Before",
+						"hidden": true
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 11134946042
+						},
+						"arguments": [],
+						"keyword": "Given ",
+						"line": 27,
+						"name": "I am authenticated as an admin",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:10"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 528474167
+						},
+						"arguments": [],
+						"keyword": "When ",
+						"line": 28,
+						"name": "I navigate to the edit page for job role with ID 1",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:70"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 16256083
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 29,
+						"name": "I enter \"0\" in the numberOfOpenPositions field",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:136"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 537841666
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 30,
+						"name": "I click the submit button",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:132"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 187208
+						},
+						"arguments": [],
+						"keyword": "Then ",
+						"line": 31,
+						"name": "I should remain on the edit job role page",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:181"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 5299208
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 32,
+						"name": "I should see an error message \"Number of open positions must be a positive integer.\"",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:186"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 2016625
+						},
+						"keyword": "After",
+						"hidden": true
+					}
+				],
+				"tags": [
+					{
+						"name": "@ui",
+						"line": 1
+					},
+					{
+						"name": "@admin",
+						"line": 1
+					},
+					{
+						"name": "@edit-job-role",
+						"line": 1
+					}
+				],
+				"type": "scenario"
+			},
+			{
+				"description": "",
+				"id": "admin-edits-job-roles;admin-sees-validation-errors-for-invalid-data",
+				"keyword": "Scenario Outline",
+				"line": 39,
+				"name": "Admin sees validation errors for invalid data",
+				"steps": [
+					{
+						"result": {
+							"status": "passed",
+							"duration": 32257083
+						},
+						"keyword": "Before",
+						"hidden": true
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 11137325208
+						},
+						"arguments": [],
+						"keyword": "Given ",
+						"line": 27,
+						"name": "I am authenticated as an admin",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:10"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 536792000
+						},
+						"arguments": [],
+						"keyword": "When ",
+						"line": 28,
+						"name": "I navigate to the edit page for job role with ID 1",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:70"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 14878209
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 29,
+						"name": "I enter \"-5\" in the numberOfOpenPositions field",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:136"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 536922624
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 30,
+						"name": "I click the submit button",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:132"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 171957
+						},
+						"arguments": [],
+						"keyword": "Then ",
+						"line": 31,
+						"name": "I should remain on the edit job role page",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:181"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 5485209
+						},
+						"arguments": [],
+						"keyword": "And ",
+						"line": 32,
+						"name": "I should see an error message \"Number of open positions must be a positive integer.\"",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:186"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 1963875
+						},
+						"keyword": "After",
+						"hidden": true
+					}
+				],
+				"tags": [
+					{
+						"name": "@ui",
+						"line": 1
+					},
+					{
+						"name": "@admin",
+						"line": 1
+					},
+					{
+						"name": "@edit-job-role",
+						"line": 1
+					}
+				],
+				"type": "scenario"
+			},
+			{
+				"description": "",
+				"id": "admin-edits-job-roles;non-admin-user-cannot-access-the-edit-page",
+				"keyword": "Scenario",
+				"line": 41,
+				"name": "Non-admin user cannot access the edit page",
+				"steps": [
+					{
+						"result": {
+							"status": "passed",
+							"duration": 31787458
+						},
+						"keyword": "Before",
+						"hidden": true
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 1128027625
+						},
+						"arguments": [],
+						"keyword": "Given ",
+						"line": 42,
+						"name": "I am authenticated as a regular user",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:51"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 11046499
+						},
+						"arguments": [],
+						"keyword": "When ",
+						"line": 43,
+						"name": "I try to access the edit page for job role with ID 1 directly",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:144"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 314582
+						},
+						"arguments": [],
+						"keyword": "Then ",
+						"line": 44,
+						"name": "I should receive a 403 Forbidden response",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:191"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 2397457
+						},
+						"keyword": "After",
+						"hidden": true
+					}
+				],
+				"tags": [
+					{
+						"name": "@ui",
+						"line": 1
+					},
+					{
+						"name": "@admin",
+						"line": 1
+					},
+					{
+						"name": "@edit-job-role",
+						"line": 1
+					}
+				],
+				"type": "scenario"
+			},
+			{
+				"description": "",
+				"id": "admin-edits-job-roles;user-is-redirected-to-login-when-not-authenticated",
+				"keyword": "Scenario",
+				"line": 46,
+				"name": "User is redirected to login when not authenticated",
+				"steps": [
+					{
+						"result": {
+							"status": "passed",
+							"duration": 37563792
+						},
+						"keyword": "Before",
+						"hidden": true
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 6824999
+						},
+						"arguments": [],
+						"keyword": "When ",
+						"line": 47,
+						"name": "I try to access the edit page for job role with ID 1 directly without authentication",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:157"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 501461374
+						},
+						"arguments": [],
+						"keyword": "Then ",
+						"line": 48,
+						"name": "I should be redirected to the login page",
+						"match": {
+							"location": "tests/bods/steps/edit-job-role.steps.cjs:195"
+						}
+					},
+					{
+						"result": {
+							"status": "passed",
+							"duration": 2579791
+						},
+						"keyword": "After",
+						"hidden": true
+					}
+				],
+				"tags": [
+					{
+						"name": "@ui",
+						"line": 1
+					},
+					{
+						"name": "@admin",
+						"line": 1
+					},
+					{
+						"name": "@edit-job-role",
+						"line": 1
+					}
+				],
+				"type": "scenario"
+			}
+		],
+		"id": "admin-edits-job-roles",
+		"line": 2,
+		"keyword": "Feature",
+		"name": "Admin edits job roles",
+		"tags": [
+			{
+				"name": "@ui",
+				"line": 1
+			},
+			{
+				"name": "@admin",
+				"line": 1
+			},
+			{
+				"name": "@edit-job-role",
+				"line": 1
+			}
+		],
+		"uri": "tests/bods/features/edit-job-role.feature"
+	}
 ]
