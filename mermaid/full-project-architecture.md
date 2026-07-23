@@ -58,7 +58,7 @@ flowchart LR
 
   %% Testing and quality
   subgraph TESTING[Testing Section]
-    T1[tests/bods Cucumber and Playwright]
+    T1[bods Cucumber and Playwright]
     T2[tests/controllers routes services validation]
     T3[tests/app and session tests]
     TR[reports/cucumber-report.json and html]

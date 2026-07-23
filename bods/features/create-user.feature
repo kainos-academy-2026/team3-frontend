@@ -1,4 +1,4 @@
-@ui @bdd @auth
+@ui @bdd @create-user
 Feature: Create user account
 	To access job role features
 	As a new visitor

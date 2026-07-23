@@ -3,13 +3,13 @@
 ```mermaid
 flowchart LR
   subgraph Inputs
-    FEAT[Feature files\ntests/bods/features]
+    FEAT[Feature files\nbods/features]
     DATA[Test data\nscenario tables]
   end
 
   subgraph Execution
-    STEP[Step definitions\ntests/bods/steps]
-    WORLD[World and hooks\ntests/bods/support]
+    STEP[Step definitions\nbods/steps]
+    WORLD[World and hooks\nbods/support]
     PW[Playwright browser context]
   end
 

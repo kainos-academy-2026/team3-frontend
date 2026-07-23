@@ -7,6 +7,18 @@ import { CreateJobRolePage } from "../pages/CreateJobRolePage.ts";
 import { JobRoleListPage } from "../pages/JobRoleListPage.ts";
 import { SignInPage } from "../pages/SignInPage.ts";
 
+const DEFAULT_ADMIN_EMAIL = "admin@example.com";
+const DEFAULT_ADMIN_PASSWORD = "AdminPassword123";
+const DEFAULT_USER_EMAIL = "test@example.com";
+const DEFAULT_USER_PASSWORD = "TestPassword123";
+
+function resolveCredential(
+	primaryKey: string,
+	fallbackKey: string,
+): string | undefined {
+	return process.env[primaryKey] ?? process.env[fallbackKey];
+}
+
 function ensurePage(world: BddWorld) {
 	if (!world.page) {
 		throw new Error("Browser page was not initialised.");
@@ -36,7 +48,7 @@ async function loginForCleanup(
 
 	if (!response.ok()) {
 		throw new Error(
-			`Backend admin login failed with status ${response.status()}. Check TEST_ADMIN_EMAIL and TEST_ADMIN_PASSWORD.`,
+			`Backend admin login failed with status ${response.status()}. Check TEST_ADMIN_EMAIL/TEST_ADMIN_PASSWORD (or ADMIN_EMAIL/ADMIN_PASSWORD).`,
 		);
 	}
 
@@ -92,13 +104,12 @@ async function resolveCreatedRoleId(world: BddWorld): Promise<number | null> {
 }
 
 Given("I am logged in as an admin", async function (this: BddWorld) {
-	const email = process.env.TEST_ADMIN_EMAIL;
-	const password = process.env.TEST_ADMIN_PASSWORD;
-	if (!email || !password) {
-		throw new Error(
-			"Missing TEST_ADMIN_EMAIL or TEST_ADMIN_PASSWORD environment variables.",
-		);
-	}
+	const email =
+		resolveCredential("TEST_ADMIN_EMAIL", "ADMIN_EMAIL") ??
+		DEFAULT_ADMIN_EMAIL;
+	const password =
+		resolveCredential("TEST_ADMIN_PASSWORD", "ADMIN_PASSWORD") ??
+		DEFAULT_ADMIN_PASSWORD;
 
 	await loginForCleanup(this, email, password);
 	this.adminEmail = email;
@@ -110,13 +121,11 @@ Given("I am logged in as an admin", async function (this: BddWorld) {
 });
 
 Given("I am logged in as a regular user", async function (this: BddWorld) {
-	const email = process.env.TEST_USER_EMAIL;
-	const password = process.env.TEST_USER_PASSWORD;
-	if (!email || !password) {
-		throw new Error(
-			"Missing TEST_USER_EMAIL or TEST_USER_PASSWORD environment variables.",
-		);
-	}
+	const email =
+		resolveCredential("TEST_USER_EMAIL", "USER_EMAIL") ?? DEFAULT_USER_EMAIL;
+	const password =
+		resolveCredential("TEST_USER_PASSWORD", "USER_PASSWORD") ??
+		DEFAULT_USER_PASSWORD;
 
 	const signInPage = new SignInPage(ensurePage(this));
 	await signInPage.goto(this.baseUrl);
@@ -191,7 +200,9 @@ Then(
 Then(
 	"I should remain on the create role form",
 	async function (this: BddWorld) {
-		await expect(ensurePage(this)).toHaveURL(/\/job-roles\/new(?:\?|$)/);
+		const page = ensurePage(this);
+		await expect(page.getByRole("heading", { name: "Create a new role" })).toBeVisible();
+		await expect(page).toHaveURL(/\/job-roles(?:\/new)?(?:\?|$)/);
 	},
 );
 
@@ -209,4 +220,10 @@ Then("I should see {string}", async function (this: BddWorld, text: string) {
 
 Then("I should be on the login page", async function (this: BddWorld) {
 	await expect(ensurePage(this)).toHaveURL(/\/login(?:\?|$)/);
+});
+
+Then("I should be on the home page", async function (this: BddWorld) {
+	await expect(
+		ensurePage(this).getByRole("heading", { name: "Find your next role" }),
+	).toBeVisible();
 });

@@ -29,7 +29,7 @@ Feature: Create Job Role
 		Scenario: Non-admin user cannot access the create role form
 			Given I am logged in as a regular user
 			When I navigate directly to the create role form
-			Then I should see "You do not have permission to access this page."
+			Then I should be on the home page
 
 		Scenario: Unauthenticated user is redirected to the login page
 			Given I am not logged in

@@ -41,6 +41,8 @@ export class BddWorld extends World {
 	adminPassword: string | null;
 	createdRoleId: number | null;
 	createdRoleInput: CreateRoleInput | null;
+	currentJobRoleId: number | null;
+	lastStatus: number | null;
 
 	constructor(options: IWorldOptions) {
 		super(options);
@@ -56,6 +58,8 @@ export class BddWorld extends World {
 		this.adminPassword = null;
 		this.createdRoleId = null;
 		this.createdRoleInput = null;
+		this.currentJobRoleId = null;
+		this.lastStatus = null;
 	}
 }
 
@@ -81,6 +85,8 @@ Before(async function (this: BddWorld) {
 	this.adminPassword = null;
 	this.createdRoleId = null;
 	this.createdRoleInput = null;
+	this.currentJobRoleId = null;
+	this.lastStatus = null;
 });
 
 After(async function (this: BddWorld) {
@@ -106,6 +112,8 @@ After(async function (this: BddWorld) {
 	this.adminPassword = null;
 	this.createdRoleId = null;
 	this.createdRoleInput = null;
+	this.currentJobRoleId = null;
+	this.lastStatus = null;
 });
 
 AfterAll(async () => {
