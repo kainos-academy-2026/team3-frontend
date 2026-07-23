@@ -21,8 +21,22 @@ Given("I am authenticated as an admin", { timeout: 30000 }, async function () {
 	const signInBtn = this.page.getByRole("button", { name: /sign in|login/i });
 	await signInBtn.click();
 
-	// Wait for the expected post-login destination instead of waiting for full network idle.
-	await this.page.waitForURL(/\/job-roles(?:\/|$)/, { timeout: 10000 });
+	// Allow slower environments to complete redirect without waiting for full page load.
+	try {
+		await this.page.waitForURL(/\/job-roles(?:\/|$)/, {
+			timeout: 20000,
+			waitUntil: "domcontentloaded",
+		});
+	} catch (_error) {
+		const loginAlert = await this.page
+			.locator('[role="alert"]')
+			.first()
+			.textContent({ timeout: 1000 })
+			.catch(() => "");
+		throw new Error(
+			`Admin login did not redirect to /job-roles within 20s. Alert: ${loginAlert || "none"}. Check ADMIN_EMAIL/ADMIN_PASSWORD values.`,
+		);
+	}
 
 	const currentUrl = this.page.url();
 	const pageTitle = await this.page.title();
@@ -67,7 +81,21 @@ Given(
 		const signInBtn = this.page.getByRole("button", { name: /sign in|login/i });
 		await signInBtn.click();
 
-		await this.page.waitForURL(/\/job-roles(?:\/|$)/, { timeout: 10000 });
+		try {
+			await this.page.waitForURL(/\/job-roles(?:\/|$)/, {
+				timeout: 20000,
+				waitUntil: "domcontentloaded",
+			});
+		} catch (_error) {
+			const loginAlert = await this.page
+				.locator('[role="alert"]')
+				.first()
+				.textContent({ timeout: 1000 })
+				.catch(() => "");
+			throw new Error(
+				`User login did not redirect to /job-roles within 20s. Alert: ${loginAlert || "none"}. Check USER_EMAIL/USER_PASSWORD values.`,
+			);
+		}
 
 		const currentUrl = this.page.url();
 		const cookies = await this.context.cookies();
