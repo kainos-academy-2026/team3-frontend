@@ -10,6 +10,7 @@
 		"start": "node dist/index.js",
 		"test": "vitest run",
 		"test:bdd": "TS_NODE_PROJECT=tsconfig.bdd.json cucumber-js --loader ts-node/esm --import bods/fixtures/bods.fixture.ts --import bods/steps/**/*.ts bods/features/**/*.feature",
+		"test:bdd:smoke": "TS_NODE_PROJECT=tsconfig.bdd.json cucumber-js --loader ts-node/esm --import bods/fixtures/bods.fixture.ts --import bods/steps/**/*.ts --tags @smoke bods/features/**/*.feature",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",
 		"format": "biome format --write .",
