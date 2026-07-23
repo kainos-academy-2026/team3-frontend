@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import process from "node:process";
 import {
 	After,
@@ -53,6 +55,7 @@ export class BddWorld extends World {
 		this.requestContext = null;
 		this.createUserPage = null;
 		this.lastRegisteredUser = null;
+		this.currentJobRoleId = null;
 		this.adminJwt = null;
 		this.adminEmail = null;
 		this.adminPassword = null;
@@ -60,6 +63,51 @@ export class BddWorld extends World {
 		this.createdRoleInput = null;
 		this.currentJobRoleId = null;
 		this.lastStatus = null;
+	}
+
+	async signInWithSession(email: string, password: string): Promise<void> {
+		const authRequest = await request.newContext({
+			baseURL: this.baseUrl,
+		});
+
+		try {
+			const response = await authRequest.post("/login", {
+				form: { email, password },
+			});
+
+			const finalUrl = response.url();
+			if (!response.ok() || !finalUrl.endsWith("/job-roles")) {
+				const responseText = await response.text();
+				if (responseText.includes("Invalid email or password.")) {
+					throw new Error(
+						`Session sign in failed for ${email}: invalid email or password.`,
+					);
+				}
+
+				if (responseText.includes("Unable to sign in right now.")) {
+					throw new Error(
+						`Session sign in failed for ${email}: application reported it could not sign in right now.`,
+					);
+				}
+
+				throw new Error(
+					`Session sign in for ${email} did not reach /job-roles. Final URL was ${finalUrl} and status was ${response.status()}.`,
+				);
+			}
+
+			const storageState = await authRequest.storageState();
+
+			await this.page?.close();
+			await this.context?.close();
+
+			this.context = await browser.newContext({
+				baseURL: this.baseUrl,
+				storageState,
+			});
+			this.page = await this.context.newPage();
+		} finally {
+			await authRequest.dispose();
+		}
 	}
 }
 
