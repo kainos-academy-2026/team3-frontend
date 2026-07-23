@@ -105,8 +105,7 @@ async function resolveCreatedRoleId(world: BddWorld): Promise<number | null> {
 
 Given("I am logged in as an admin", async function (this: BddWorld) {
 	const email =
-		resolveCredential("TEST_ADMIN_EMAIL", "ADMIN_EMAIL") ??
-		DEFAULT_ADMIN_EMAIL;
+		resolveCredential("TEST_ADMIN_EMAIL", "ADMIN_EMAIL") ?? DEFAULT_ADMIN_EMAIL;
 	const password =
 		resolveCredential("TEST_ADMIN_PASSWORD", "ADMIN_PASSWORD") ??
 		DEFAULT_ADMIN_PASSWORD;
@@ -201,7 +200,9 @@ Then(
 	"I should remain on the create role form",
 	async function (this: BddWorld) {
 		const page = ensurePage(this);
-		await expect(page.getByRole("heading", { name: "Create a new role" })).toBeVisible();
+		await expect(
+			page.getByRole("heading", { name: "Create a new role" }),
+		).toBeVisible();
 		await expect(page).toHaveURL(/\/job-roles(?:\/new)?(?:\?|$)/);
 	},
 );
