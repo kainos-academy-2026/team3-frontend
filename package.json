@@ -9,13 +9,14 @@
 		"build": "tsc",
 		"start": "node dist/index.js",
 		"test": "vitest run",
-		"test:bdd": "TS_NODE_PROJECT=tsconfig.bdd.json cucumber-js --loader ts-node/esm --import bods/fixtures/bods.fixture.ts --import bods/steps/**/*.ts bods/features/**/*.feature",
 		"test:ui": "vitest --ui",
 		"test:coverage": "vitest run --coverage",
 		"format": "biome format --write .",
 		"lint": "biome check .",
 		"lint:fix": "biome check --write",
-		"lint:ci": "biome ci ."
+		"lint:ci": "biome ci .",
+		"test:bdd": "cucumber-js --require tests/bods/fixtures/**/*.cjs --require tests/bods/steps/**/*.cjs tests/bods/features/**/*.feature",
+		"test:bdd:smoke": "cucumber-js --require tests/bods/fixtures/**/*.cjs --require tests/bods/steps/**/*.cjs --tags @smoke tests/bods/features/**/*.feature"
 	},
 	"vitest": {
 		"environment": "node"
@@ -40,9 +41,9 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"@cucumber/cucumber": "^12.2.0",
 		"@biomejs/biome": "^2.5.2",
-		"@playwright/test": "^1.56.1",
+		"@cucumber/cucumber": "^13.2.0",
+		"@playwright/test": "^1.61.1",
 		"@types/axios": "^0.9.36",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
