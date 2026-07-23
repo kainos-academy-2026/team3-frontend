@@ -94,7 +94,9 @@ export class DeleteJobRolePage {
 				const jobRoleId = Number(match[1]);
 				await this.gotoAdminApplicationsPage(jobRoleId);
 
-				if ((await this.page.locator(".admin-applications__item").count()) > 0) {
+				if (
+					(await this.page.locator(".admin-applications__item").count()) > 0
+				) {
 					return jobRoleId;
 				}
 			}

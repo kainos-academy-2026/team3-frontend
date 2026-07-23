@@ -37,7 +37,6 @@ export function buildJobRoleData(
 	};
 }
 
-
 const getRequiredEnv = (name: string, fallback?: string): string => {
 	const value = process.env[name]?.trim() || fallback;
 
@@ -54,10 +53,7 @@ const getRequiredEnv = (name: string, fallback?: string): string => {
 const getRequiredCredential = (name: string, fallback?: string): string => {
 	const value = getRequiredEnv(name, fallback);
 
-	if (
-		value.startsWith("real-") ||
-		value.includes("your-")
-	) {
+	if (value.startsWith("real-") || value.includes("your-")) {
 		throw new Error(
 			`BDD environment variable ${name} is using a placeholder value (${value}). Replace it with a real credential for this environment.`,
 		);

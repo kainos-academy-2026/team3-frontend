@@ -63,7 +63,6 @@ export class BddWorld extends World {
 		this.createdRoleInput = null;
 		this.currentJobRoleId = null;
 		this.lastStatus = null;
-
 	}
 
 	async signInWithSession(email: string, password: string): Promise<void> {
