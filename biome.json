@@ -7,7 +7,11 @@
 	},
 	"files": {
 		"ignoreUnknown": true,
-		"includes": ["**", "!bods/features/**/*.svg"]
+		"includes": [
+			"**",
+			"!bods/features/**/*.svg",
+			"!reports/cucumber-report.html"
+		]
 	},
 	"formatter": {
 		"enabled": true,

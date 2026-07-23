@@ -14,11 +14,11 @@
         </div>
 
         {% if applicationSubmitted %}
-          <p class="form-success">Application submitted successfully. Your status is now in progress.</p>
+          <p class="form-success" role="alert">Application submitted successfully. Your status is now in progress.</p>
         {% endif %}
 
         {% if editSuccess %}
-          <p class="form-success">Job role updated successfully.</p>
+          <p class="form-success" role="alert">Job role updated successfully.</p>
         {% endif %}
 
         {% if deleteError == "has-applications" %}

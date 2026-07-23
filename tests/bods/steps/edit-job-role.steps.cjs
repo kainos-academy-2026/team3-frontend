@@ -1,10 +1,10 @@
 const { Given, When, Then } = require("@cucumber/cucumber");
 const { expect } = require("@playwright/test");
 
-const DEFAULT_ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@test.local";
-const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "TestPassword123!";
+const DEFAULT_ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@example.com";
+const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "AdminPassword123";
 const DEFAULT_USER_EMAIL = process.env.USER_EMAIL || "test@example.com";
-const DEFAULT_USER_PASSWORD = process.env.USER_PASSWORD || "TestPassword123!";
+const DEFAULT_USER_PASSWORD = process.env.USER_PASSWORD || "TestPassword123";
 
 // Given steps
 Given("I am authenticated as an admin", { timeout: 30000 }, async function () {
