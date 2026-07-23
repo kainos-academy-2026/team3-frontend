@@ -9,6 +9,7 @@
 		"ignoreUnknown": true,
 		"includes": [
 			"**",
+			"!docs/diagrams/**/*.svg",
 			"!bods/features/**/*.svg",
 			"!reports/cucumber-report.html"
 		]

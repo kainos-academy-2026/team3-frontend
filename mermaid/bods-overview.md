@@ -3,9 +3,9 @@
 ```mermaid
 flowchart LR
   subgraph Authoring
-    F[Feature Files\ntests/bods/features]
-    S[Step Definitions\ntests/bods/steps]
-    W[World and Hooks\ntests/bods/support]
+    F[Feature Files\nbods/features]
+    S[Step Definitions\nbods/steps]
+    W[World and Hooks\nbods/support]
   end
 
   subgraph Runtime
